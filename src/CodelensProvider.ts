@@ -1,8 +1,6 @@
 import * as vscode from 'vscode';
 
-
-import { Contract, ethers } from "ethers";
-
+import { ethers } from "ethers";
 
 /**
  * CodelensProvider
@@ -44,12 +42,14 @@ export class CodelensProvider implements vscode.CodeLensProvider {
                             arguments: [currentAddress, line.text],
                         }));
                     } else {
-                        currentAddress = line.text;
-                        this.codeLenses.push(new vscode.CodeLens(range, {
-                            title: 'Contract',
-                            command: 'codelens-sample.codelensAction',
-                            arguments: [line.text],
-                        }));
+                        if (ethers.utils.isAddress(line.text)) {
+                            currentAddress = line.text;
+                            this.codeLenses.push(new vscode.CodeLens(range, {
+                                title: 'Contract',
+                                command: 'codelens-sample.codelensAction',
+                                arguments: [line.text],
+                            }));
+                        }
                     }
                 }
             }
