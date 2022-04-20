@@ -28,6 +28,7 @@ export class CodelensProvider implements vscode.CodeLensProvider {
             const text = document.getText();
             let matches;
             let currentAddress: string | null = null;
+            let currentProviderUrl: string | null = null;
             while ((matches = regex.exec(text)) !== null) {
                 const line = document.lineAt(document.positionAt(matches.index).line);
                 const indexOf = line.text.indexOf(matches[0]);
@@ -41,6 +42,10 @@ export class CodelensProvider implements vscode.CodeLensProvider {
                             command: 'codelens-sample.codelensAction',
                             arguments: [currentAddress, line.text],
                         }));
+                    } else if (line.text.toUpperCase().startsWith('RPC')) {
+                        const [_, url] = line.text.split(' ');
+                        currentProviderUrl = url;
+                        console.log(currentProviderUrl);
                     } else {
                         if (ethers.utils.isAddress(line.text)) {
                             currentAddress = line.text;

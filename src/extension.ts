@@ -1,7 +1,7 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import { Contract, ethers } from 'ethers';
-import { Fragment, FunctionFragment, Interface } from 'ethers/lib/utils';
+import { Fragment } from 'ethers/lib/utils';
 import { ExtensionContext, languages, commands, Disposable, workspace, window } from 'vscode';
 import { CodelensProvider } from './CodelensProvider';
 
