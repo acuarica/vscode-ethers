@@ -2,12 +2,11 @@
 	"Fungible Token ERC20 block": {
 		"prefix": "ft",
 		"body": [
-			"${1:address}",
-			"function name() view returns (string)",
-			"function symbol() view returns (string)",
-			"function decimals() view returns (uint8)",
-			"function totalSupply() view returns (uint256)",
-			"function balanceOf(address account) view returns (uint256)"
+			"name() view returns (string)",
+			"symbol() view returns (string)",
+			"decimals() view returns (uint8)",
+			"totalSupply() view returns (uint256)",
+			"balanceOf(address account) view returns (uint256)"
 		],
 		"description": "ERC20 Fungible Token Contract"
 	},
@@ -15,9 +14,9 @@
 		"prefix": "nft",
 		"body": [
 			"${1:url}",
-			"function name() view returns (string)",
-			"function symbol() view returns (string)",
-			"function decimals() view returns (uint8)"
+			"name() view returns (string)",
+			"symbol() view returns (string)",
+			"decimals() view returns (uint8)"
 		],
 		"description": "ERC721 Non-Fungigle Token Contract"
 	}
