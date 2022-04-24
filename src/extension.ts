@@ -1,9 +1,9 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import { Contract, ethers } from 'ethers';
-import { Fragment } from 'ethers/lib/utils';
 import { ExtensionContext, languages, commands, Disposable, workspace, window, StatusBarAlignment, StatusBarItem, Hover } from 'vscode';
 import { CodelensProvider } from './CodelensProvider';
+import { parseFunction } from './lib';
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
@@ -26,32 +26,20 @@ export function activate({ subscriptions }: ExtensionContext) {
     });
 
     commands.registerCommand("ethers-mode.callMethod", async (contractAddress: string, funcSig: any) => {
-        funcSig = 'function ' + funcSig;
-
         console.log(contractAddress);
         console.log(funcSig);
 
-        const func = Fragment.from(funcSig);
-        // console.log(.functions);
-        // const funcName = func.name;
+        const [func, args] = parseFunction(funcSig);
 
         console.log(func.name);
 
-
-
-
         const provider = new ethers.providers.JsonRpcProvider('https://api.avax-test.network/ext/bc/C/rpc');
         const contract = new Contract(contractAddress, [func], provider);
-        // window.
 
-        const result = await contract.functions[func.name]();
+        const result = await contract.functions[func.name](...args);
 
         window.showInformationMessage(`CodeLens action clicked with args=${result}`);
-
     });
-
-
-
 
     // register a command that is invoked when the status bar
     // item is selected
@@ -103,13 +91,13 @@ export function deactivate() {
 }
 
 function updateStatusBarItem(): void {
-	const n = 1;
-	if (n > 0) {
-		myStatusBarItem.text = `$(server-environment) ${n} line(s) selected`;
-		myStatusBarItem.show();
-	} else {
-		myStatusBarItem.hide();
-	}
+    const n = 1;
+    if (n > 0) {
+        myStatusBarItem.text = `$(server-environment) ${n} line(s) selected`;
+        myStatusBarItem.show();
+    } else {
+        myStatusBarItem.hide();
+    }
 }
 
 // function getNumberOfSelectedLines(editor: vscode.TextEditor | undefined): number {
