@@ -1,3 +1,4 @@
+import { providers } from "ethers";
 import { Fragment, isAddress } from "ethers/lib/utils";
 
 const regexParen = new RegExp("\\((.*?)\\)");
@@ -32,10 +33,7 @@ export function parseFunction(funcSig: string): [Fragment, string[]] {
 					}
 				}
 
-				if ((argValue.startsWith('"') && argValue.endsWith('"')) ||
-					(argValue.startsWith("'") && argValue.endsWith("'"))) {
-					argValue = argValue.substring(1, argValue.length - 1);
-				}
+				argValue = stripQuote(argValue);
 				params.push(argType);
 				values.push(argValue);
 			}
@@ -46,4 +44,26 @@ export function parseFunction(funcSig: string): [Fragment, string[]] {
 
 	const func = Fragment.from(funcSig);
 	return [func, values];
+}
+
+function stripQuote(value: string): string {
+	if ((value.startsWith('"') && value.endsWith('"')) ||
+		(value.startsWith("'") && value.endsWith("'"))) {
+		return value.substring(1, value.length - 1);
+	}
+
+	return value;
+}
+
+export function createProvider(network: string): providers.Provider {
+	if (network.includes(':')) {
+		return new providers.JsonRpcProvider(network);
+	}
+
+	switch (network) {
+		case 'fuji':
+			return new providers.JsonRpcProvider('https://api.avax-test.network/ext/bc/C/rpc');
+		default:
+			return new providers.EtherscanProvider(network);
+	}
 }

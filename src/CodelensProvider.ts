@@ -1,8 +1,27 @@
 import * as vscode from 'vscode';
 
 import { ethers } from "ethers";
-import { CancellationToken, CodeLens, CodeLensProvider, EventEmitter, TextDocument } from 'vscode';
+import { CancellationToken, CodeLens, CodeLensProvider, EventEmitter, Range, TextDocument } from 'vscode';
 import { formatUnits } from 'ethers/lib/utils';
+import { createProvider } from './lib';
+
+/**
+ * 
+ */
+class NetworkCodeLens extends CodeLens {
+    constructor(readonly network: string, range: Range) {
+        super(range);
+    }
+}
+
+/**
+ * 
+ */
+class AddressCodeLens extends CodeLens {
+    constructor(readonly network: string, readonly address: string, range: Range) {
+        super(range);
+    }
+}
 
 /**
  * CodelensProvider
@@ -21,14 +40,14 @@ export class CodelensProvider implements CodeLensProvider {
         });
     }
 
-    public provideCodeLenses(document: TextDocument, token: CancellationToken): CodeLens[] | Thenable<CodeLens[]> {
+    public provideCodeLenses(document: TextDocument, _token: CancellationToken): CodeLens[] | Thenable<CodeLens[]> {
         if (vscode.workspace.getConfiguration("codelens-sample").get("enableCodeLens", true)) {
             const codeLenses: CodeLens[] = [];
             const regex = new RegExp(this.regex);
             const text = document.getText();
             let matches;
             let currentAddress: string | null = null;
-            let currentProviderUrl: string | null = null;
+            let currentNetwork: string | null = null;
             while ((matches = regex.exec(text)) !== null) {
                 const line = document.lineAt(document.positionAt(matches.index).line);
                 const indexOf = line.text.indexOf(matches[0]);
@@ -43,8 +62,18 @@ export class CodelensProvider implements CodeLensProvider {
                             command: ''
                         }));
 
-                        (range as any).text = currentAddress;
-                        codeLenses.push(new CodeLens(range));
+                        if (currentNetwork) {
+                            codeLenses.push(new AddressCodeLens(currentNetwork, currentAddress, range));
+                        } else {
+                            codeLenses.push(new CodeLens(range, {
+                                title: 'No network selected -- use `net <network>`',
+                                command: ''
+                            }));
+                        }
+                    } else if (line.text.trim().startsWith('net')) {
+                        const [_, network] = line.text.split(' ');
+                        currentNetwork = network;
+                        codeLenses.push(new NetworkCodeLens(network, range));
                     } else if (!line.isEmptyOrWhitespace && currentAddress) {
                         const icon = line.text.includes('payable') ? '$(credit-card)'
                             : line.text.includes('view') ? '$(play)'
@@ -52,12 +81,8 @@ export class CodelensProvider implements CodeLensProvider {
                         codeLenses.push(new CodeLens(range, {
                             title: `${icon} Call Smart Contract Method`,
                             command: 'ethers-mode.callMethod',
-                            arguments: [currentAddress, line.text],
+                            arguments: [currentNetwork, currentAddress, line.text],
                         }));
-                    } else if (line.text.toUpperCase().startsWith('RPC')) {
-                        const [_, url] = line.text.split(' ');
-                        currentProviderUrl = url;
-                        console.log(currentProviderUrl);
                     }
                 }
             }
@@ -67,17 +92,24 @@ export class CodelensProvider implements CodeLensProvider {
         return [];
     }
 
-    public async resolveCodeLens(codeLens: vscode.CodeLens, _token: vscode.CancellationToken) {
+    public async resolveCodeLens(codeLens: CodeLens, _token: CancellationToken) {
         if (vscode.workspace.getConfiguration("codelens-sample").get("enableCodeLens", true)) {
-            const provider = new ethers.providers.JsonRpcProvider('https://api.avax-test.network/ext/bc/C/rpc');
-            const addr = (codeLens.range as any).text;
-            const code = await provider.getCode(addr);
-            const value = await provider.getBalance(addr);
-            codeLens.command = {
-                title: (code === '0x' ? '$(account) EOA' : '$(file-code) Contract') + ' -- Balance: ' + formatUnits(value),
-                command: "codelens-sample.codelensAction"
-            };
-
+            if (codeLens instanceof NetworkCodeLens) {
+                const provider = createProvider(codeLens.network);
+                const network = await provider.getNetwork();
+                codeLens.command = {
+                    title: `$(server-environment) Chain ID ${network.chainId}`,
+                    command: '',
+                };
+            } else if (codeLens instanceof AddressCodeLens) {
+                const provider = createProvider(codeLens.network);
+                const code = await provider.getCode(codeLens.address);
+                const value = await provider.getBalance(codeLens.address);
+                codeLens.command = {
+                    title: (code === '0x' ? '$(account) EOA' : '$(file-code) Contract') + ' -- Balance: ' + formatUnits(value),
+                    command: "codelens-sample.codelensAction"
+                };
+            }
             return codeLens;
         }
 
