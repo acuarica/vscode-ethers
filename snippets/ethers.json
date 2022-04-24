@@ -6,7 +6,11 @@
 			"symbol() view returns (string)",
 			"decimals() view returns (uint8)",
 			"totalSupply() view returns (uint256)",
-			"balanceOf(address account) view returns (uint256)"
+			"balanceOf(address _owner) view returns (uint256)",
+			"transfer(address _to, uint256 _value) public returns (bool success)",
+			"transferFrom(address _from, address _to, uint256 _value) public returns (bool success)",
+			"approve(address _spender, uint256 _value) public returns (bool success)",
+			"allowance(address _owner, address _spender) public view returns (uint256 remaining)"
 		],
 		"description": "ERC20 Fungible Token Contract"
 	},
