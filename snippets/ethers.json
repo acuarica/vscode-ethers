@@ -10,17 +10,28 @@
 			"transfer(address _to, uint256 _value) public returns (bool success)",
 			"transferFrom(address _from, address _to, uint256 _value) public returns (bool success)",
 			"approve(address _spender, uint256 _value) public returns (bool success)",
-			"allowance(address _owner, address _spender) public view returns (uint256 remaining)"
+			"allowance(address _owner, address _spender) public view returns (uint256 remaining)",
+			"Transfer(address indexed _from, address indexed _to, uint256 _value)",
+			"Approval(address indexed _owner, address indexed _spender, uint256 _value)"
 		],
 		"description": "ERC20 Fungible Token Contract"
 	},
-	"ERC721 block": {
+	"Extended Fungible Token ERC20 block": {
+		"prefix": "permit",
+		"body": [
+			"permit(address owner, address spender, uint value, uint deadline, uint8 v, bytes32 r, bytes32 s)",
+			"nonces(address owner) view returns (uint)",
+			"DOMAIN_SEPARATOR() view returns (bytes32)"
+		],
+		"description": "EIP-2612: permit - 712-signed approvals"
+	},
+	"Non-Fungible Token ERC721 block": {
 		"prefix": "nft",
 		"body": [
 			"${1:url}",
 			"name() view returns (string)",
 			"symbol() view returns (string)",
-			"decimals() view returns (uint8)"
+			"tokenURI(uint256 _tokenId) view returns (string)"
 		],
 		"description": "ERC721 Non-Fungigle Token Contract"
 	}
