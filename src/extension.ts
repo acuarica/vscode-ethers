@@ -26,16 +26,10 @@ export function activate({ subscriptions }: ExtensionContext) {
     });
 
     commands.registerCommand("ethers-mode.callMethod", async (contractAddress: string, funcSig: any) => {
-        console.log(contractAddress);
-        console.log(funcSig);
-
         const [func, args] = parseFunction(funcSig);
-
-        console.log(func.name);
 
         const provider = new ethers.providers.JsonRpcProvider('https://api.avax-test.network/ext/bc/C/rpc');
         const contract = new Contract(contractAddress, [func], provider);
-
         const result = await contract.functions[func.name](...args);
 
         window.showInformationMessage(`CodeLens action clicked with args=${result}`);
