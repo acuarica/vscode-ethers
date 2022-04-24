@@ -4,21 +4,28 @@ import { parseFunction } from "../src/lib";
 
 describe("parseFunction", () => {
 
-	it("should be able to parse a no-arg function", () => {
+	it("should parse a no-arg function", () => {
 		expect(parseFunction('method() view returns (uint256)'))
 			.to.be.deep.equal([Fragment.fromString('function method() view returns (uint256)'), []]);
 		expect(parseFunction('  method (  ) view returns (uint256)'))
 			.to.be.deep.equal([Fragment.fromString('function method() view returns (uint256)'), []]);
 	});
 
-	it("should be able to parse function with basic types", () => {
+	it("should accept `function` keyword", () => {
+		expect(parseFunction('function method() view returns (uint256)'))
+			.to.be.deep.equal([Fragment.fromString('function method() view returns (uint256)'), []]);
+		expect(parseFunction('  function method (  ) view returns (uint256)'))
+			.to.be.deep.equal([Fragment.fromString('function method() view returns (uint256)'), []]);
+	});
+
+	it("should parse function with basic types", () => {
 		expect(parseFunction('method(uint8 1) view returns (uint256)'))
 			.to.be.deep.equal([Fragment.fromString('function method(uint8) view returns (uint256)'), ['1']]);
 		expect(parseFunction('method(uint8 1, string "hola") view returns (uint256)'))
 			.to.be.deep.equal([Fragment.fromString('function method(uint8, string) view returns (uint256)'), ['1', 'hola']]);
 	});
 
-	it("should be able to parse function inferring types", () => {
+	it("should parse function inferring argument types", () => {
 		expect(parseFunction('method(1) view returns (uint256)'))
 			.to.be.deep.equal([Fragment.fromString('function method(uint8) view returns (uint256)'), ['1']]);
 		expect(parseFunction('method(1, "hola") view returns (uint256)'))

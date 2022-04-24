@@ -3,7 +3,10 @@ import { Fragment, isAddress } from "ethers/lib/utils";
 const regexParen = new RegExp("\\((.*?)\\)");
 
 export function parseFunction(funcSig: string): [Fragment, string[]] {
-	funcSig = 'function ' + funcSig;
+	if (!funcSig.trim().startsWith('function ')) {
+		funcSig = 'function ' + funcSig;
+	}
+
 	const m = regexParen.exec(funcSig);
 
 	const values = [];
