@@ -66,11 +66,11 @@ export class CodelensProvider implements CodeLensProvider {
                             codeLenses.push(new AddressCodeLens(currentNetwork, currentAddress, range));
                         } else {
                             codeLenses.push(new CodeLens(range, {
-                                title: 'No network selected -- use `net <network>`',
+                                title: 'No network selected -- first use `net <network>`',
                                 command: ''
                             }));
                         }
-                    } else if (line.text.trim().startsWith('net')) {
+                    } else if (line.text.trimEnd().startsWith('net ')) {
                         const [_, network] = line.text.split(' ');
                         currentNetwork = network;
                         codeLenses.push(new NetworkCodeLens(network, range));
@@ -95,20 +95,36 @@ export class CodelensProvider implements CodeLensProvider {
     public async resolveCodeLens(codeLens: CodeLens, _token: CancellationToken) {
         if (vscode.workspace.getConfiguration("codelens-sample").get("enableCodeLens", true)) {
             if (codeLens instanceof NetworkCodeLens) {
-                const provider = createProvider(codeLens.network);
-                const network = await provider.getNetwork();
-                codeLens.command = {
-                    title: `$(server-environment) Chain ID ${network.chainId}`,
-                    command: '',
-                };
+                try {
+                    const provider = createProvider(codeLens.network);
+                    const network = await provider.getNetwork();
+                    const blockNumber = await provider.getBlockNumber();
+                    const gasPrice = await provider.getGasPrice();
+                    codeLens.command = {
+                        title: `$(server-environment) Chain ID ${network.chainId} -- Block # ${blockNumber} | Gas Price ${formatUnits(gasPrice)}`,
+                        command: '',
+                    };
+                } catch (_err) {
+                    codeLens.command = {
+                        title: 'No network',
+                        command: '',
+                    };
+                }
             } else if (codeLens instanceof AddressCodeLens) {
-                const provider = createProvider(codeLens.network);
-                const code = await provider.getCode(codeLens.address);
-                const value = await provider.getBalance(codeLens.address);
-                codeLens.command = {
-                    title: (code === '0x' ? '$(account) EOA' : '$(file-code) Contract') + ' -- Balance: ' + formatUnits(value),
-                    command: "codelens-sample.codelensAction"
-                };
+                try {
+                    const provider = createProvider(codeLens.network);
+                    const code = await provider.getCode(codeLens.address);
+                    const value = await provider.getBalance(codeLens.address);
+                    codeLens.command = {
+                        title: (code === '0x' ? '$(account) EOA' : '$(file-code) Contract') + ' -- Balance: ' + formatUnits(value),
+                        command: "codelens-sample.codelensAction"
+                    };
+                } catch (_err) {
+                    codeLens.command = {
+                        title: 'No network',
+                        command: '',
+                    };
+                }
             }
             return codeLens;
         }
