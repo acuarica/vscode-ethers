@@ -3,6 +3,14 @@ import { Fragment, isAddress } from "ethers/lib/utils";
 
 const regexParen = new RegExp("\\((.*?)\\)");
 
+/**
+ * 
+ * @param funcSig 
+ * @returns 
+ * 
+ * For more info,
+ * see https://docs.ethers.io/v5/api/utils/abi/fragments/#human-readable-abi.
+ */
 export function parseFunction(funcSig: string): [Fragment, string[]] {
 	if (!funcSig.trim().startsWith('function ')) {
 		funcSig = 'function ' + funcSig;

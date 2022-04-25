@@ -24,7 +24,9 @@ class AddressCodeLens extends CodeLens {
 }
 
 /**
- * CodelensProvider
+ * CodelensProvider.
+ * 
+ * See https://code.visualstudio.com/api/references/vscode-api#CodeLensProvider
  */
 export class CodelensProvider implements CodeLensProvider {
 
@@ -40,6 +42,15 @@ export class CodelensProvider implements CodeLensProvider {
         });
     }
 
+    /**
+     * 
+     * @param document 
+     * @param _token 
+     * @returns 
+     * 
+     * For more info,
+     * see https://code.visualstudio.com/api/references/vscode-api#CodeLensProvider.provideCodeLenses.
+     */
     public provideCodeLenses(document: TextDocument, _token: CancellationToken): CodeLens[] | Thenable<CodeLens[]> {
         if (vscode.workspace.getConfiguration("codelens-sample").get("enableCodeLens", true)) {
             const codeLenses: CodeLens[] = [];
@@ -92,7 +103,16 @@ export class CodelensProvider implements CodeLensProvider {
         return [];
     }
 
-    public async resolveCodeLens(codeLens: CodeLens, _token: CancellationToken) {
+    /**
+     * 
+     * @param codeLens 
+     * @param _token 
+     * @returns 
+     * 
+     * For more info,
+     * see https://code.visualstudio.com/api/references/vscode-api#CodeLensProvider.resolveCodeLens.
+     */
+    public async resolveCodeLens(codeLens: CodeLens, _token: CancellationToken): Promise<CodeLens | null> {
         if (vscode.workspace.getConfiguration("codelens-sample").get("enableCodeLens", true)) {
             if (codeLens instanceof NetworkCodeLens) {
                 try {
