@@ -1,0 +1,7 @@
+/.vscode/**
+/test/
+/src/
+/out/*.js.map
+/ethers-mode-*.vsix
+/.gitignore
+/tsconfig.json
