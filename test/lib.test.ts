@@ -28,7 +28,7 @@ describe("parseFunction", () => {
 	});
 
 	it("should parse `string` arguments properly", () => {
-		// expect(parseFunction('method(string "hola(mundo)") view returns (uint256)'))
+		// expect(parseFunction('  method   ( string "hola(mundo)") view returns (uint256)'))
 		// 	.to.be.deep.equal([Fragment.fromString('function method(string) view returns (uint256)'), ['hola(mundo)']]);
 		expect(parseFunction('method( string  " hola mundo "  ) view returns (uint256)'))
 			.to.be.deep.equal([Fragment.fromString('function method(string) view returns (uint256)'), [' hola mundo ']]);

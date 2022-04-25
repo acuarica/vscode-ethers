@@ -2,7 +2,11 @@ import { providers } from "ethers";
 import { Fragment, isAddress } from "ethers/lib/utils";
 
 // const FUNC = /^function/;
-// const ID = /^\s+(\w+)/;
+// const ID = /^\s*(\w+)/;
+// const OPEN_PAR = /^\s*(\()/;
+// const CLOSE_PAR = /^\s*(\))/;
+// const COMMA = /^\s*(,)/;
+// const NUMBER = /^\s*(\d+)/;
 
 const regexParen = new RegExp("\\((.*?)\\)");
 
@@ -15,10 +19,35 @@ const regexParen = new RegExp("\\((.*?)\\)");
  * see https://docs.ethers.io/v5/api/utils/abi/fragments/#human-readable-abi.
  */
 export function parseFunction(funcSig: string): [Fragment, string[]] {
-	const m = regexParen.exec(funcSig);
+	// let text = funcSig;
+
+	// function next(regex: RegExp) {
+	// 	const m = text.match(regex);
+	// 	if (m) {
+	// 		text = text.substring(m[0].length);
+	// 		return m[1];
+	// 	}
+
+	// 	return null;
+	// }
+
+	// function parse() {
+	// 	const name = next(ID);
+	// 	next(OPEN_PAR);
+
+	// 	while (!next(CLOSE_PAR)) {
+	// 		next(ID);
+	// 		next(NUMBER);
+	// 		next(COMMA);
+	// 	}
+
+	// 	console.log(name);
+	// }
+
+	// parse();
 
 	const values = [];
-
+	const m = regexParen.exec(funcSig);
 	if (m) {
 		const argsMatch = m[1].trim();
 		if (argsMatch) {
