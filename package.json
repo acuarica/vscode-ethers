@@ -8,7 +8,7 @@
     "license": "MIT",
     "repository": {
         "type": "git",
-        "url": "https://github.com/Microsoft/vscode-extension-samples"
+        "url": "https://github.com/acuarica/vscode-ethers"
     },
     "engines": {
         "vscode": "^1.26.0"
@@ -42,13 +42,13 @@
             {
                 "language": "ethers",
                 "scopeName": "source.ethers",
-                "path": "./syntaxes/ethers.tmLanguage.json"
+                "path": "./ethers.tmLanguage.json"
             }
         ],
         "snippets": [
             {
                 "language": "ethers",
-                "path": "./snippets/ethers.json"
+                "path": "./ethers.snippets.json"
             }
         ],
         "commands": [

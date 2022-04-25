@@ -7,34 +7,13 @@
 	"name": "http",
 	"patterns": [
 		{
-			"begin": "^0x[a-fA-F0-9]{40}",
-			"name": "ethers.contract.address",
-			"end": "^(\\#{3,}.*?)?$",
-			"endCaptures": {
-				"0": {
-					"name": "comment.line.sharp.http"
-				}
-			},
-			"patterns": [
-				{
-					"include": "source.solidity"
-				}
-			]
+			"include": "#metadata"
 		},
 		{
-			"begin": "^\\s*(?=curl)",
-			"name": "http.request.curl",
-			"end": "^\\s*(\\#{3,}.*?)?\\s*$",
-			"endCaptures": {
-				"0": {
-					"name": "comment.line.sharp.http"
-				}
-			},
-			"patterns": [
-				{
-					"include": "source.shell"
-				}
-			]
+			"include": "#comments"
+		},
+		{
+			"include": "#network"
 		},
 		{
 			"begin": "\\s*(?=(\\[|{[^{]))",
@@ -92,12 +71,6 @@
 			]
 		},
 		{
-			"include": "#metadata"
-		},
-		{
-			"include": "#comments"
-		},
-		{
 			"captures": {
 				"1": {
 					"name": "keyword.other.http"
@@ -126,30 +99,42 @@
 			},
 			"match": "^\\s*(\\?|&)([^=\\s]+)=(.*)$",
 			"name": "http.query"
-		},
-		{
-			"captures": {
-				"1": {
-					"name": "entity.name.tag.http"
-				},
-				"2": {
-					"name": "keyword.other.http"
-				},
-				"3": {
-					"name": "string.other.http"
-				}
-			},
-			"match": "^([\\w\\-]+)\\s*(\\:)\\s*([^\/].*?)\\s*$",
-			"name": "http.headers"
-		},
-		{
-			"include": "#request-line"
-		},
-		{
-			"include": "#response-line"
 		}
 	],
 	"repository": {
+		"network": {
+			"name": "ethers.network",
+			"begin": "^(net)\\s+(\\w+)",
+			"while": "^(?!net\\s)",
+			"beginCaptures": {
+				"1": {
+					"name": "keyword.control.ethers.network"
+				},
+				"2": {
+					"name": "markup.bold.ethers.network"
+				}
+			},
+			"patterns": [
+				{
+					"include": "#address"
+				}
+			]
+		},
+		"address": {
+			"name": "ethers.address",
+			"begin": "^(0x[a-fA-F0-9]{40})",
+			"while": "^(?!0x)",
+			"beginCaptures": {
+				"1": {
+					"name": "constant.numeric.ethers.address"
+				}
+			},
+			"patterns": [
+				{
+					"include": "source.solidity"
+				}
+			]
+		},
 		"metadata": {
 			"patterns": [
 				{
@@ -248,11 +233,7 @@
 			"patterns": [
 				{
 					"match": "^\\s*\\#{1,}.*$",
-					"name": "comment.line.sharp.http"
-				},
-				{
-					"match": "^\\s*\\/{2,}.*$",
-					"name": "comment.line.double-slash.http"
+					"name": "comment.line.sharp.ethers"
 				}
 			]
 		},
@@ -274,41 +255,6 @@
 			},
 			"match": "(?i)^(?:(get|post|put|delete|patch|head|options|connect|trace)\\s+)?\\s*(.+?)(?:\\s+(HTTP\\/\\S+))?$",
 			"name": "http.requestline"
-		},
-		"response-line": {
-			"captures": {
-				"1": {
-					"patterns": [
-						{
-							"include": "#protocol"
-						}
-					]
-				},
-				"2": {
-					"name": "constant.numeric.http"
-				},
-				"3": {
-					"name": "string.other.http"
-				}
-			},
-			"match": "(?i)^\\s*(HTTP\\/\\S+)\\s([1-5][0-9][0-9])\\s(.*)$",
-			"name": "http.responseLine"
-		},
-		"protocol": {
-			"patterns": [
-				{
-					"captures": {
-						"1": {
-							"name": "keyword.other.http"
-						},
-						"2": {
-							"name": "constant.numeric.http"
-						}
-					},
-					"name": "http.version",
-					"match": "(HTTP)\/(\\d+.\\d+)"
-				}
-			]
 		}
 	}
 }
