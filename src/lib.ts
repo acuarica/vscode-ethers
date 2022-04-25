@@ -1,6 +1,9 @@
 import { providers } from "ethers";
 import { Fragment, isAddress } from "ethers/lib/utils";
 
+// const FUNC = /^function/;
+// const ID = /^\s+(\w+)/;
+
 const regexParen = new RegExp("\\((.*?)\\)");
 
 /**
@@ -12,10 +15,6 @@ const regexParen = new RegExp("\\((.*?)\\)");
  * see https://docs.ethers.io/v5/api/utils/abi/fragments/#human-readable-abi.
  */
 export function parseFunction(funcSig: string): [Fragment, string[]] {
-	if (!funcSig.trim().startsWith('function ')) {
-		funcSig = 'function ' + funcSig;
-	}
-
 	const m = regexParen.exec(funcSig);
 
 	const values = [];
@@ -26,10 +25,19 @@ export function parseFunction(funcSig: string): [Fragment, string[]] {
 			const args = argsMatch.split(',');
 			const params = [];
 
-			for (const arg of args) {
-				let [argType, argValue] = arg.trim().split(' ');
+			for (let arg of args) {
+				arg = arg.trim();
+				const pos = arg.indexOf(' ');
+				let argType, argValue;
+				if (pos === -1) {
+					argType = arg;
+					argValue = null;
+				} else {
+					argType = arg.substring(0, pos);
+					argValue = arg.substring(pos + 1).trim();
+				}
 
-				if (argValue === undefined) {
+				if (argValue === null) {
 					argValue = argType;
 
 					if (isAddress(argValue)) {
@@ -50,8 +58,12 @@ export function parseFunction(funcSig: string): [Fragment, string[]] {
 		}
 	}
 
-	const func = Fragment.from(funcSig);
-	return [func, values];
+	if (!funcSig.trim().startsWith('function ')) {
+		funcSig = 'function ' + funcSig;
+	}
+
+	const fragment = Fragment.from(funcSig);
+	return [fragment, values];
 }
 
 function stripQuote(value: string): string {
