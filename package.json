@@ -1,7 +1,7 @@
 {
     "name": "ethers-mode",
-    "displayName": "Ethers Client",
-    "description": "Ethers Client for VS Code",
+    "displayName": "Ethers Mode",
+    "description": "Ethers Mode for VS Code",
     "version": "0.0.1",
     "publisher": "acuarica",
     "private": true,
@@ -34,7 +34,7 @@
                     ".ethers",
                     ".web3"
                 ],
-                "firstLine": "^(GET|POST|PUT|DELETE|PATCH|HEAD|OPTIONS|CONNECT|TRACE)\\s+(.*?)HTTP/[0-9\\.]+$",
+                "firstLine": "^net\\s+(\\w*?)$",
                 "configuration": "./language-configuration.json"
             }
         ],
