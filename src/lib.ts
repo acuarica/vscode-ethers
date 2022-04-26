@@ -21,7 +21,7 @@ export function parseFunction(funcSig: string): [Fragment, string[]] {
 			argn = null;
 		} else if (!openQuote && funcSig[i] === ',') {
 			argn!++;
-		} else if (funcSig[i] === '"') {
+		} else if (funcSig[i] === '"' && i > 0 && funcSig[i - 1] !== '\\') {
 			if (!openQuote) {
 				openQuote = i;
 			} else {

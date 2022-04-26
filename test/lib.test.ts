@@ -34,6 +34,8 @@ describe("parseFunction", () => {
 			.to.be.deep.equal([Fragment.fromString('function method(string) view returns (uint256)'), ['hola(mundo, world)']]);
 		expect(parseFunction('method( string  " hola mundo ", string " hola( ,world)"  ) view returns (uint256)'))
 			.to.be.deep.equal([Fragment.fromString('function method(string, string) view returns (uint256)'), [' hola mundo ', ' hola( ,world)']]);
+		expect(parseFunction('method(string  "hola\\"mundo") view returns (uint256)'))
+			.to.be.deep.equal([Fragment.fromString('function method(string) view returns (uint256)'), ['hola\\"mundo']]);
 	});
 
 	it("should parse function inferring argument types", () => {
