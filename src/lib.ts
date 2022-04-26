@@ -1,14 +1,5 @@
 import { providers } from "ethers";
-import { Fragment, isAddress } from "ethers/lib/utils";
-
-// const FUNC = /^function/;
-// const ID = /^\s*(\w+)/;
-// const OPEN_PAR = /^\s*(\()/;
-// const CLOSE_PAR = /^\s*(\))/;
-// const COMMA = /^\s*(,)/;
-// const NUMBER = /^\s*(\d+)/;
-
-const regexParen = new RegExp("\\((.*?)\\)");
+import { Fragment, isAddress, ParamType } from "ethers/lib/utils";
 
 /**
  * 
@@ -19,71 +10,27 @@ const regexParen = new RegExp("\\((.*?)\\)");
  * see https://docs.ethers.io/v5/api/utils/abi/fragments/#human-readable-abi.
  */
 export function parseFunction(funcSig: string): [Fragment, string[]] {
-	// let text = funcSig;
-
-	// function next(regex: RegExp) {
-	// 	const m = text.match(regex);
-	// 	if (m) {
-	// 		text = text.substring(m[0].length);
-	// 		return m[1];
-	// 	}
-
-	// 	return null;
-	// }
-
-	// function parse() {
-	// 	const name = next(ID);
-	// 	next(OPEN_PAR);
-
-	// 	while (!next(CLOSE_PAR)) {
-	// 		next(ID);
-	// 		next(NUMBER);
-	// 		next(COMMA);
-	// 	}
-
-	// 	console.log(name);
-	// }
-
-	// parse();
-
-	const values = [];
-	const m = regexParen.exec(funcSig);
-	if (m) {
-		const argsMatch = m[1].trim();
-		if (argsMatch) {
-			const args = argsMatch.split(',');
-			const params = [];
-
-			for (let arg of args) {
-				arg = arg.trim();
-				const pos = arg.indexOf(' ');
-				let argType, argValue;
-				if (pos === -1) {
-					argType = arg;
-					argValue = null;
-				} else {
-					argType = arg.substring(0, pos);
-					argValue = arg.substring(pos + 1).trim();
-				}
-
-				if (argValue === null) {
-					argValue = argType;
-
-					if (isAddress(argValue)) {
-						argType = 'address';
-					} else if (!Number.isNaN(Number.parseInt(argValue))) {
-						argType = 'uint8';
-					} else {
-						argType = 'string';
-					}
-				}
-
-				argValue = stripQuote(argValue);
-				params.push(argType);
-				values.push(argValue);
+	let openQuote = null;
+	const remaining = funcSig.length;
+	let argn = null;
+	const argv: { [key: string]: string } = {};
+	for (let i = 0; i < remaining; i++) {
+		if (!openQuote && funcSig[i] === '(') {
+			argn = 0;
+		} else if (!openQuote && funcSig[i] === ')') {
+			argn = null;
+		} else if (!openQuote && funcSig[i] === ',') {
+			argn!++;
+		} else if (funcSig[i] === '"') {
+			if (!openQuote) {
+				openQuote = i;
+			} else {
+				argv['$arg' + argn] = funcSig.substring(openQuote + 1, i);
+				const name = `$arg${argn}`;
+				funcSig = `${funcSig.substring(0, openQuote)}${name}${funcSig.substring(i + 1, funcSig.length)}`;
+				i = openQuote + name.length - 1;
+				openQuote = null;
 			}
-
-			funcSig = funcSig.replace(regexParen, `(${params.join(', ')})`);
 		}
 	}
 
@@ -92,16 +39,30 @@ export function parseFunction(funcSig: string): [Fragment, string[]] {
 	}
 
 	const fragment = Fragment.from(funcSig);
-	return [fragment, values];
-}
-
-function stripQuote(value: string): string {
-	if ((value.startsWith('"') && value.endsWith('"')) ||
-		(value.startsWith("'") && value.endsWith("'"))) {
-		return value.substring(1, value.length - 1);
+	const inputs = [];
+	const values = [];
+	for (const input of fragment.inputs) {
+		if (input.name) {
+			inputs.push(ParamType.fromObject({ ...input as any, name: null, _isParamType: false }));
+			values.push(argv[input.name] ?? input.name);
+		} else {
+			let argType;
+			if (isAddress(input.type)) {
+				argType = 'address';
+			} else {
+				const value = Number.parseInt(input.type);
+				if (!Number.isNaN(value)) {
+					argType = 'uint8';
+				} else {
+					argType = 'string';
+				}
+			}
+			inputs.push(ParamType.fromObject({ ...input as any, name: null, type: argType, _isParamType: false }));
+			values.push(argv[input.type] ?? input.type);
+		}
 	}
 
-	return value;
+	return [Fragment.fromObject({ ...fragment, inputs, _isFragment: false }), values];
 }
 
 export function createProvider(network: string): providers.Provider {
