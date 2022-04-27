@@ -29,11 +29,20 @@ describe("Parse", () => {
 			const parse = new Parse();
 
 			expect(parse.address('0x5425890298aed601595a70AB815c96711a31Bc65 as token'))
-				.to.be.equal('0x5425890298aed601595a70AB815c96711a31Bc65');
+				.to.be.deep.equal(['0x5425890298aed601595a70AB815c96711a31Bc65', false]);
 			expect(parse.address('0x0000000000000000000000000000000000000000 as zero'))
-				.to.be.equal('0x0000000000000000000000000000000000000000');
+				.to.be.deep.equal(['0x0000000000000000000000000000000000000000', false]);
 			expect(parse.symbols).to.have.property('token', '0x5425890298aed601595a70AB815c96711a31Bc65');
 			expect(parse.symbols).to.have.property('zero', '0x0000000000000000000000000000000000000000');
+		});
+
+		it("should parse private keys to addresses", () => {
+			const parse = new Parse();
+			expect(parse.address('0xb976778317b23a1385ec2d483eda6904d9319135b89f1d8eee9f6d2593e2665d'))
+				.to.be.deep.equal(['0x0Ac1dF02185025F65202660F8167210A80dD5086', true]);
+			expect(parse.address('0xb976778317b23a1385ec2d483eda6904d9319135b89f1d8eee9f6d2593e2665d as account'))
+				.to.be.deep.equal(['0x0Ac1dF02185025F65202660F8167210A80dD5086', true]);
+			expect(parse.symbols).to.have.property('account', '0x0Ac1dF02185025F65202660F8167210A80dD5086');
 		});
 
 	});

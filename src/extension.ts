@@ -1,6 +1,7 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
-import { Contract } from 'ethers';
+import { Contract, Wallet } from 'ethers';
+import { FunctionFragment } from 'ethers/lib/utils';
 import { ExtensionContext, languages, commands, Disposable, workspace, window, Hover } from 'vscode';
 import { CodelensProvider } from './CodelensProvider';
 import { createProvider, Parse } from './lib';
@@ -22,7 +23,7 @@ export function activate({ subscriptions }: ExtensionContext) {
         workspace.getConfiguration("codelens-sample").update("enableCodeLens", false, true);
     });
 
-    commands.registerCommand("ethers-mode.callMethod", async (network: string, contractAddress: string, funcSig: any, parse: Parse) => {
+    commands.registerCommand("ethers-mode.callMethod", async (network: string, contractAddress: string, funcSig: any, parse: Parse, pk: any) => {
         const [func, args, self] = parse.call(funcSig);
 
         if (self) {
@@ -30,7 +31,15 @@ export function activate({ subscriptions }: ExtensionContext) {
         }
 
         const provider = createProvider(network);
-        const contract = new Contract(contractAddress, [func], provider);
+
+        let contract;
+        if (!(func as FunctionFragment).constant) {
+            const signer = new Wallet(pk, provider);
+            contract = new Contract(contractAddress, [func], signer);
+        } else {
+            contract = new Contract(contractAddress, [func], provider);
+        }
+
         const result = await contract.functions[func.name](...args);
 
         window.showInformationMessage(`CodeLens action clicked with args=${result}`);

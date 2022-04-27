@@ -57,6 +57,7 @@ export class CodelensProvider implements CodeLensProvider {
             let matches;
             let currentAddress: string | null = null;
             let currentNetwork: string | null = null;
+            let pk;
             while ((matches = regex.exec(text)) !== null) {
                 const line = document.lineAt(document.positionAt(matches.index).line);
                 const indexOf = line.text.indexOf(matches[0]);
@@ -66,9 +67,10 @@ export class CodelensProvider implements CodeLensProvider {
                 if (range) {
                     const address = parse.address(line.text);
                     if (address) {
-                        currentAddress = address;
+                        currentAddress = address[0];
+                        pk = address[2];
                         codeLenses.push(new CodeLens(range, {
-                            title: 'Address',
+                            title: 'Address' + (address[1] ? `${address[0]}` : ''),
                             command: ''
                         }));
 
@@ -91,7 +93,7 @@ export class CodelensProvider implements CodeLensProvider {
                         codeLenses.push(new CodeLens(range, {
                             title: `${icon} Call Smart Contract Method`,
                             command: 'ethers-mode.callMethod',
-                            arguments: [currentNetwork, currentAddress, line.text, parse],
+                            arguments: [currentNetwork, currentAddress, line.text, parse, pk],
                         }));
                     }
                 }

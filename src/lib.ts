@@ -3,8 +3,9 @@ import { Fragment, isAddress, ParamType } from "ethers/lib/utils";
 
 const ID = /[A-Za-z_]\w*/;
 const ETH = /(?:0x)?[0-9a-fA-F]{40}/;
+const PK = /0x[0-9a-fA-F]{64}/;
 const ICAP = /XE[0-9]{2}[0-9A-Za-z]{30,31}/;
-const ADDRESS = new RegExp(`^(${ETH.source}|${ICAP.source})(?:\\s+as\\s+(${ID.source}))?$`);
+const ADDRESS = new RegExp(`^(${ETH.source}|${ICAP.source}|${PK.source})(?:\\s+as\\s+(${ID.source}))?$`);
 const CALL = new RegExp(`^(${ID.source})\\.`);
 
 /**
@@ -24,15 +25,23 @@ export class Parse {
 	 * @param line 
 	 * @returns 
 	 */
-	address(line: string): string | null {
+	address(line: string): [string, boolean, string | null] | null {
 		const m = line.match(ADDRESS);
 		if (m) {
+			if (m[1].length === 66) {
+				const address = ethers.utils.computeAddress(m[1]);
+				if (m[2]) {
+					this.symbols[m[2]] = address;
+				}
+				return [address, true, m[1]];
+			}
+
 			try {
 				const address = ethers.utils.getAddress(m[1]);
 				if (m[2]) {
 					this.symbols[m[2]] = address;
 				}
-				return address;
+				return [address, address !== m[1], null];
 			} catch (_err) {
 				return null;
 			}
