@@ -60,7 +60,6 @@ export class Parse {
 	 */
 	call(line: string): [Fragment, string[], string | null] {
 		const m = line.match(CALL);
-		console.log(m);
 		const contractSymbol = (() => {
 			if (m) {
 				line = line.replace(CALL, '');
