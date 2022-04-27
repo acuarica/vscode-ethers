@@ -42,18 +42,18 @@ export class Parse {
 
 	/**
 	 * 
-	 * @param sig 
+	 * @param line 
 	 * @returns 
 	 * 
 	 * For more info,
 	 * see https://docs.ethers.io/v5/api/utils/abi/fragments/#human-readable-abi.
 	 */
-	func(sig: string): [Fragment, string[]] {
-		if (!sig.trim().startsWith('function ')) {
-			sig = 'function ' + sig;
+	call(line: string): [Fragment, string[]] {
+		if (!line.trim().startsWith('function ')) {
+			line = 'function ' + line;
 		}
 
-		const [patchedFuncSig, argv] = patchSig(sig);
+		const [patchedFuncSig, argv] = patchSig(line);
 
 		const fragment = Fragment.from(patchedFuncSig);
 		const inputs = [];

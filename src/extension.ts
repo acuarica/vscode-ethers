@@ -23,7 +23,7 @@ export function activate({ subscriptions }: ExtensionContext) {
     });
 
     commands.registerCommand("ethers-mode.callMethod", async (network: string, contractAddress: string, funcSig: any, parse: Parse) => {
-        const [func, args] = parse.func(funcSig);
+        const [func, args] = parse.call(funcSig);
 
         const provider = createProvider(network);
         const contract = new Contract(contractAddress, [func], provider);
