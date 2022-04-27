@@ -10,10 +10,13 @@
 			"include": "#metadata"
 		},
 		{
-			"include": "#comments"
+			"include": "#network"
 		},
 		{
-			"include": "#network"
+			"include": "#address"
+		},
+		{
+			"include": "#comments"
 		},
 		{
 			"begin": "\\s*(?=(\\[|{[^{]))",
@@ -104,7 +107,7 @@
 	"repository": {
 		"network": {
 			"name": "ethers.network",
-			"begin": "^(net)\\s+(\\w+)",
+			"begin": "^(net)\\s+([\\w:/\\.]+)",
 			"while": "^(?!net\\s)",
 			"beginCaptures": {
 				"1": {
@@ -113,12 +116,7 @@
 				"2": {
 					"name": "markup.bold.ethers.network"
 				}
-			},
-			"patterns": [
-				{
-					"include": "#address"
-				}
-			]
+			}
 		},
 		"address": {
 			"name": "ethers.address",
