@@ -3,7 +3,7 @@
 import { Contract } from 'ethers';
 import { ExtensionContext, languages, commands, Disposable, workspace, window, Hover } from 'vscode';
 import { CodelensProvider } from './CodelensProvider';
-import { createProvider, parseFunction } from './lib';
+import { createProvider, Parse } from './lib';
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
@@ -22,8 +22,8 @@ export function activate({ subscriptions }: ExtensionContext) {
         workspace.getConfiguration("codelens-sample").update("enableCodeLens", false, true);
     });
 
-    commands.registerCommand("ethers-mode.callMethod", async (network: string, contractAddress: string, funcSig: any) => {
-        const [func, args] = parseFunction(funcSig);
+    commands.registerCommand("ethers-mode.callMethod", async (network: string, contractAddress: string, funcSig: any, parse: Parse) => {
+        const [func, args] = parse.func(funcSig);
 
         const provider = createProvider(network);
         const contract = new Contract(contractAddress, [func], provider);

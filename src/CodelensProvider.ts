@@ -1,9 +1,6 @@
-import * as vscode from 'vscode';
-
-import { ethers } from "ethers";
-import { CancellationToken, CodeLens, CodeLensProvider, EventEmitter, Range, TextDocument } from 'vscode';
+import { CancellationToken, CodeLens, CodeLensProvider, Event, EventEmitter, Position, Range, TextDocument, workspace } from 'vscode';
 import { formatUnits } from 'ethers/lib/utils';
-import { createProvider } from './lib';
+import { createProvider, Parse } from './lib';
 
 /**
  * 
@@ -32,12 +29,12 @@ export class CodelensProvider implements CodeLensProvider {
 
     private regex: RegExp;
     private _onDidChangeCodeLenses: EventEmitter<void> = new EventEmitter<void>();
-    public readonly onDidChangeCodeLenses: vscode.Event<void> = this._onDidChangeCodeLenses.event;
+    public readonly onDidChangeCodeLenses: Event<void> = this._onDidChangeCodeLenses.event;
 
     constructor() {
         this.regex = /(.+)/g;
 
-        vscode.workspace.onDidChangeConfiguration((_) => {
+        workspace.onDidChangeConfiguration((_) => {
             this._onDidChangeCodeLenses.fire();
         });
     }
@@ -52,7 +49,8 @@ export class CodelensProvider implements CodeLensProvider {
      * see https://code.visualstudio.com/api/references/vscode-api#CodeLensProvider.provideCodeLenses.
      */
     public provideCodeLenses(document: TextDocument, _token: CancellationToken): CodeLens[] | Thenable<CodeLens[]> {
-        if (vscode.workspace.getConfiguration("codelens-sample").get("enableCodeLens", true)) {
+        if (workspace.getConfiguration("codelens-sample").get("enableCodeLens", true)) {
+            const parse = new Parse();
             const codeLenses: CodeLens[] = [];
             const regex = new RegExp(this.regex);
             const text = document.getText();
@@ -62,12 +60,13 @@ export class CodelensProvider implements CodeLensProvider {
             while ((matches = regex.exec(text)) !== null) {
                 const line = document.lineAt(document.positionAt(matches.index).line);
                 const indexOf = line.text.indexOf(matches[0]);
-                const position = new vscode.Position(line.lineNumber, indexOf);
+                const position = new Position(line.lineNumber, indexOf);
                 const range = document.getWordRangeAtPosition(position, new RegExp(this.regex));
 
                 if (range) {
-                    if (ethers.utils.isAddress(line.text)) {
-                        currentAddress = line.text;
+                    const address = parse.address(line.text);
+                    if (address) {
+                        currentAddress = address;
                         codeLenses.push(new CodeLens(range, {
                             title: 'Address',
                             command: ''
@@ -92,7 +91,7 @@ export class CodelensProvider implements CodeLensProvider {
                         codeLenses.push(new CodeLens(range, {
                             title: `${icon} Call Smart Contract Method`,
                             command: 'ethers-mode.callMethod',
-                            arguments: [currentNetwork, currentAddress, line.text],
+                            arguments: [currentNetwork, currentAddress, line.text, parse],
                         }));
                     }
                 }
@@ -113,7 +112,7 @@ export class CodelensProvider implements CodeLensProvider {
      * see https://code.visualstudio.com/api/references/vscode-api#CodeLensProvider.resolveCodeLens.
      */
     public async resolveCodeLens(codeLens: CodeLens, _token: CancellationToken): Promise<CodeLens | null> {
-        if (vscode.workspace.getConfiguration("codelens-sample").get("enableCodeLens", true)) {
+        if (workspace.getConfiguration("codelens-sample").get("enableCodeLens", true)) {
             if (codeLens instanceof NetworkCodeLens) {
                 try {
                     const provider = createProvider(codeLens.network);
