@@ -101,6 +101,13 @@ describe("Parse", () => {
 				.to.be.deep.equal([Fragment.fromString('function method(address) view returns (uint256)'), ['0x5425890298aed601595a70AB815c96711a31Bc65']]);
 		});
 
+		it("should parse functions signatures symbols", () => {
+			const parse = new Parse();
+
+			expect(parse.call("hola.method(1) view returns (uint256)"))
+				.to.be.deep.equal([Fragment.fromString('function method(uint8) view returns (uint256)'), ['1'], 'hola']);
+		});
+
 	});
 
 });

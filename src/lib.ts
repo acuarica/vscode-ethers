@@ -5,6 +5,7 @@ const ID = /[A-Za-z_]\w*/;
 const ETH = /(?:0x)?[0-9a-fA-F]{40}/;
 const ICAP = /XE[0-9]{2}[0-9A-Za-z]{30,31}/;
 const ADDRESS = new RegExp(`^(${ETH.source}|${ICAP.source})(?:\\s+as\\s+(${ID.source}))?$`);
+const CALL = new RegExp(`^(${ID.source})\\.`);
 
 /**
  * 
@@ -48,7 +49,18 @@ export class Parse {
 	 * For more info,
 	 * see https://docs.ethers.io/v5/api/utils/abi/fragments/#human-readable-abi.
 	 */
-	call(line: string): [Fragment, string[]] {
+	call(line: string): [Fragment, string[], string | null] {
+		const m = line.match(CALL);
+		console.log(m);
+		const contractSymbol = (() => {
+			if (m) {
+				line = line.replace(CALL, '');
+				return m[1];
+			} else {
+				return null;
+			}
+		})();
+
 		if (!line.trim().startsWith('function ')) {
 			line = 'function ' + line;
 		}
@@ -82,7 +94,7 @@ export class Parse {
 			}
 		}
 
-		return [Fragment.fromObject({ ...fragment, inputs, _isFragment: false }), values];
+		return [Fragment.fromObject({ ...fragment, inputs, _isFragment: false }), values, contractSymbol];
 	}
 
 }
