@@ -60,6 +60,26 @@ export function activate({ subscriptions }: ExtensionContext) {
             }
         }
     });
+
+
+    // const collection = languages.createDiagnosticCollection('ethers-mode');
+    // subscriptions.push(window.onDidChangeActiveTextEditor(
+    //     (e: TextEditor | undefined) => {
+    //         if (e !== undefined) {
+    //             const d: Diagnostic = new Diagnostic(
+    //                 new Range(
+    //                     new Position(3, 8), new Position(3, 9),
+    //                 ),
+    //                 'Repeated assignment of loop variables',
+    //                 DiagnosticSeverity.Warning,
+    //             );
+    //             d.source = 'ethers-mode';
+
+    //             collection.set(e.document.uri, [d]);
+    //         }
+    //     }));
+
+
 }
 
 // this method is called when your extension is deactivated
