@@ -19,34 +19,7 @@
 			"include": "#comments"
 		},
 		{
-			"begin": "\\s*(?=(\\[|{[^{]))",
-			"name": "http.request.body.json",
-			"end": "^\\s*(\\#{3,}.*?)?\\s*$",
-			"endCaptures": {
-				"0": {
-					"name": "comment.line.sharp.http"
-				}
-			},
-			"patterns": [
-				{
-					"include": "source.json"
-				}
-			]
-		},
-		{
-			"begin": "^\\s*(?=<\\S)",
-			"name": "http.request.body.xml",
-			"end": "^\\s*(\\#{3,}.*?)?\\s*$",
-			"endCaptures": {
-				"0": {
-					"name": "comment.line.sharp.http"
-				}
-			},
-			"patterns": [
-				{
-					"include": "text.xml"
-				}
-			]
+			"include": "source.solidity"
 		},
 		{
 			"begin": "\\s*(?=(query|mutation))",
@@ -107,9 +80,8 @@
 	"repository": {
 		"network": {
 			"name": "ethers.network",
-			"begin": "^(net)\\s+([\\w:/\\.]+)",
-			"while": "^(?!net\\s)",
-			"beginCaptures": {
+			"match": "^(net)\\s+([\\w:/\\.]+)",
+			"captures": {
 				"1": {
 					"name": "keyword.control.ethers.network"
 				},
@@ -120,18 +92,12 @@
 		},
 		"address": {
 			"name": "ethers.address",
-			"begin": "^(0x[a-fA-F0-9]{40})",
-			"while": "^(?!0x)",
-			"beginCaptures": {
+			"match": "^(0x[a-fA-F0-9]{40})",
+			"captures": {
 				"1": {
 					"name": "constant.numeric.ethers.address"
 				}
-			},
-			"patterns": [
-				{
-					"include": "source.solidity"
-				}
-			]
+			}
 		},
 		"metadata": {
 			"patterns": [
