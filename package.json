@@ -54,17 +54,7 @@
         "commands": [
             {
                 "title": "Call Smart Contract Method",
-                "command": "ethers-mode.callMethod",
-                "category": "Ethers Mode"
-            },
-            {
-                "title": "Enable CodeLens",
-                "command": "codelens-sample.enableCodeLens",
-                "category": "Ethers Mode"
-            },
-            {
-                "title": "Disable Codelens",
-                "command": "codelens-sample.disableCodeLens",
+                "command": "ethers-mode.call",
                 "category": "Ethers Mode"
             }
         ],
