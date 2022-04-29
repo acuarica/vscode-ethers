@@ -1,48 +1,61 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
-import { Contract, Wallet } from 'ethers';
+import { Contract, providers, Wallet } from 'ethers';
 import { FunctionFragment } from 'ethers/lib/utils';
-import { ExtensionContext, languages, commands, Disposable, workspace, window, Hover } from 'vscode';
-import { CodelensProvider } from './CodelensProvider';
-import { createProvider, Parse } from './lib';
+import { ExtensionContext, languages, commands, Disposable, window, Hover } from 'vscode';
+import { EthersModeCodeLensProvider } from './EthersModeCodelensProvider';
+import { CallResolver, createProvider } from './lib';
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
 let disposables: Disposable[] = [];
 
 export function activate({ subscriptions }: ExtensionContext) {
-    const codelensProvider = new CodelensProvider();
+    const codelensProvider = new EthersModeCodeLensProvider();
 
-    languages.registerCodeLensProvider("*", codelensProvider);
+    languages.registerCodeLensProvider("ethers", codelensProvider);
 
-    commands.registerCommand("codelens-sample.enableCodeLens", () => {
-        workspace.getConfiguration("codelens-sample").update("enableCodeLens", true, true);
-    });
+    commands.registerCommand("ethers-mode.call", async () => {
+        const editor = window.activeTextEditor;
+        const document = window.activeTextEditor?.document;
 
-    commands.registerCommand("codelens-sample.disableCodeLens", () => {
-        workspace.getConfiguration("codelens-sample").update("enableCodeLens", false, true);
-    });
-
-    commands.registerCommand("ethers-mode.callMethod", async (network: string, contractAddress: string, funcSig: any, parse: Parse, pk: any) => {
-        const [func, args, self] = parse.call(funcSig);
-
-        if (self) {
-            contractAddress = parse.symbols[self];
+        if (!editor || !document) {
+            return;
         }
+
+        for (const codeLens of codelensProvider.codeLenses) {
+            if (codeLens.range.contains(editor.selection.active) && codeLens.command && codeLens.command.command === 'ethers-mode.codelens-call') {
+                const command = codeLens.command;
+                commands.executeCommand(command.command, ...command.arguments!);
+                return;
+            }
+        }
+    });
+
+    commands.registerCommand("ethers-mode.codelens-call", async (network: string, call: CallResolver, pk: string) => {
+        const { contractRef, func, args } = call.resolve();
 
         const provider = createProvider(network);
 
+        const isConstant = (func as FunctionFragment).constant;
         let contract;
-        if (!(func as FunctionFragment).constant) {
+        if (!isConstant) {
             const signer = new Wallet(pk, provider);
-            contract = new Contract(contractAddress, [func], signer);
+            contract = new Contract(contractRef, [func], signer);
         } else {
-            contract = new Contract(contractAddress, [func], provider);
+            contract = new Contract(contractRef, [func], provider);
         }
 
+        let show;
         const result = await contract.functions[func.name](...args);
+        if (isConstant) {
+            show = result;
+        } else {
+            const receipt = await (result as providers.TransactionResponse).wait();
+            show = receipt.transactionHash;
+        }
 
-        window.showInformationMessage(`CodeLens action clicked with args=${result}`);
+        window.showInformationMessage(`Method call result: ${show}`);
     });
 
     languages.registerHoverProvider('*', {

@@ -1,53 +1,72 @@
-import { ethers, providers } from "ethers";
-import { Fragment, isAddress, ParamType } from "ethers/lib/utils";
-
-const ID = /[A-Za-z_]\w*/;
-const ETH = /(?:0x)?[0-9a-fA-F]{40}/;
-const PK = /0x[0-9a-fA-F]{64}/;
-const ICAP = /XE[0-9]{2}[0-9A-Za-z]{30,31}/;
-const ADDRESS = new RegExp(`^(${ETH.source}|${ICAP.source}|${PK.source})(?:\\s+as\\s+(${ID.source}))?$`);
-const CALL = new RegExp(`^(${ID.source})\\.`);
+import { providers } from "ethers";
+import { Fragment } from "ethers/lib/utils";
+import { Address, Id, parseAddress, parseCall } from "./parse";
 
 /**
  * 
  */
-export class Parse {
+export interface CallResolver {
+
+	/**
+	 * 
+	 */
+	resolve: () => {
+		/**
+		 * 
+		 */
+		contractRef: string;
+
+		/**
+		 * 
+		 */
+		func: Fragment;
+
+		/**
+		 * 
+		 */
+		args: string[];
+	}
+}
+
+/**
+ * 
+ */
+export class EthersMode {
+
+	/**
+	 * 
+	 */
+	public static readonly THIS = 'this';
 
 	/**
 	 * 
 	 */
 	public readonly symbols: { [key: string]: string } = {};
 
+	public currentPrivateKey: string | null = null;
+
 	/**
+	 * Parse an address or private key,
+	 * and optionally allows the user to define an alias for it.
 	 * 
-	 * For more info, see https://docs.ethers.io/v5/api/utils/address/#utils-getAddress.
+	 * If the declaration defines a symbol for this address,
+	 * adds it to the symbol table.
+	 * Finally, adds the `this` current address to the symbol table.
 	 * 
 	 * @param line 
 	 * @returns 
 	 */
-	address(line: string): [string, boolean, string | null] | null {
-		const m = line.match(ADDRESS);
-		if (m) {
-			if (m[1].length === 66) {
-				const address = ethers.utils.computeAddress(m[1]);
-				if (m[2]) {
-					this.symbols[m[2]] = address;
-				}
-				return [address, true, m[1]];
-			}
-
-			try {
-				const address = ethers.utils.getAddress(m[1]);
-				if (m[2]) {
-					this.symbols[m[2]] = address;
-				}
-				return [address, address !== m[1], null];
-			} catch (_err) {
-				return null;
-			}
+	address(line: string): Address | Error | null {
+		const address = parseAddress(line);
+		if (!address || address instanceof Error) {
+			return address;
 		}
 
-		return null;
+		if (address.symbol) {
+			this.symbols[address.symbol] = address.address;
+		}
+		this.symbols[EthersMode.THIS] = address.address;
+		return address;
 	}
 
 	/**
@@ -58,80 +77,40 @@ export class Parse {
 	 * For more info,
 	 * see https://docs.ethers.io/v5/api/utils/abi/fragments/#human-readable-abi.
 	 */
-	call(line: string): [Fragment, string[], string | null] {
-		const m = line.match(CALL);
-		const contractSymbol = (() => {
-			if (m) {
-				line = line.replace(CALL, '');
-				return m[1];
-			} else {
-				return null;
-			}
-		})();
-
-		if (!line.trim().startsWith('function ')) {
-			line = 'function ' + line;
+	call(line: string): CallResolver | Error | null {
+		const call = parseCall(line);
+		if (!call || call instanceof Error) {
+			return call;
 		}
 
-		const [patchedFuncSig, argv] = patchSig(line);
-
-		const fragment = Fragment.from(patchedFuncSig);
-		const inputs = [];
-		const values = [];
-		for (const input of fragment.inputs) {
-			if (input.name) {
-				inputs.push(ParamType.fromObject({ ...input as any, name: null, _isParamType: false }));
-
-				const value = this.symbols[input.name] ?? input.name;
-				values.push(argv[value] ?? value);
+		const values: (string | Id)[] = [];
+		for (const value of call.values) {
+			if (value instanceof Id && value.id === EthersMode.THIS) {
+				values.push(this.symbols[value.id]);
 			} else {
-				const value = this.symbols[input.type] ?? input.type;
-				let argType;
-				if (isAddress(value)) {
-					argType = 'address';
-				} else {
-					const num = Number.parseInt(value);
-					if (!Number.isNaN(num)) {
-						argType = 'uint8';
-					} else {
-						argType = 'string';
-					}
+				values.push(value);
+			}
+		}
+
+		let thisAddress = this.symbols[EthersMode.THIS];
+
+		return {
+			resolve: () => {
+				const { method, contractRef } = call;
+
+				if (contractRef) {
+					thisAddress = this.symbols[contractRef.id];
 				}
-				inputs.push(ParamType.fromObject({ ...input as any, name: null, type: argType, _isParamType: false }));
-				values.push(argv[value] ?? value);
+				const args = values.map(value => value instanceof Id ? this.symbols[value.id] : value);
+
+				return {
+					contractRef: thisAddress,
+					func: method,
+					args,
+				};
 			}
-		}
-
-		return [Fragment.fromObject({ ...fragment, inputs, _isFragment: false }), values, contractSymbol];
+		};
 	}
-
-}
-
-export function patchSig(funcSig: string): [string, Record<string, string>] {
-	let openQuote = null;
-	const remaining = funcSig.length;
-	let argn = null;
-	const argv: { [key: string]: string } = {};
-	for (let i = 0; i < remaining; i++) {
-		if (!openQuote && funcSig[i] === '(') {
-			argn = 0;
-		} else if (!openQuote && funcSig[i] === ')') {
-			argn = null;
-		} else if (!openQuote && funcSig[i] === ',') {
-			argn!++;
-		} else if (funcSig[i] === '"' && i > 0 && funcSig[i - 1] !== '\\') {
-			if (!openQuote) {
-				openQuote = i;
-			} else {
-				argv['$arg' + argn] = funcSig.substring(openQuote + 1, i);
-				const name = `$arg${argn}`;
-				funcSig = `${funcSig.substring(0, openQuote)}${name}${funcSig.substring(i + 1, funcSig.length)}`;
-				i = openQuote + name.length - 1;
-				openQuote = null;
-			}
-		}
-	}
-	return [funcSig, argv];
 }
 
 export function createProvider(network: string): providers.Provider {

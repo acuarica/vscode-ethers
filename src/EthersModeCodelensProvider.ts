@@ -1,6 +1,6 @@
-import { CancellationToken, CodeLens, CodeLensProvider, Event, EventEmitter, Position, Range, TextDocument, workspace } from 'vscode';
+import { CancellationToken, CodeLens, CodeLensProvider, Diagnostic, DiagnosticSeverity, languages, Range, TextDocument, workspace } from 'vscode';
 import { formatUnits } from 'ethers/lib/utils';
-import { createProvider, Parse } from './lib';
+import { createProvider, EthersMode } from './lib';
 
 /**
  * 
@@ -20,24 +20,26 @@ class AddressCodeLens extends CodeLens {
     }
 }
 
+function warn(range: Range, message: string) {
+    const diagnostic = new Diagnostic(
+        range,
+        message,
+        DiagnosticSeverity.Warning
+    );
+    diagnostic.source = 'ethers-mode';
+    return diagnostic;
+}
+
 /**
  * CodelensProvider.
  * 
  * See https://code.visualstudio.com/api/references/vscode-api#CodeLensProvider
  */
-export class CodelensProvider implements CodeLensProvider {
+export class EthersModeCodeLensProvider implements CodeLensProvider {
 
-    private regex: RegExp;
-    private _onDidChangeCodeLenses: EventEmitter<void> = new EventEmitter<void>();
-    public readonly onDidChangeCodeLenses: Event<void> = this._onDidChangeCodeLenses.event;
+    public codeLenses: CodeLens[] = [];
 
-    constructor() {
-        this.regex = /(.+)/g;
-
-        workspace.onDidChangeConfiguration((_) => {
-            this._onDidChangeCodeLenses.fire();
-        });
-    }
+    private readonly _collection = languages.createDiagnosticCollection('ethers-mode');
 
     /**
      * 
@@ -49,59 +51,65 @@ export class CodelensProvider implements CodeLensProvider {
      * see https://code.visualstudio.com/api/references/vscode-api#CodeLensProvider.provideCodeLenses.
      */
     public provideCodeLenses(document: TextDocument, _token: CancellationToken): CodeLens[] | Thenable<CodeLens[]> {
-        if (workspace.getConfiguration("codelens-sample").get("enableCodeLens", true)) {
-            const parse = new Parse();
-            const codeLenses: CodeLens[] = [];
-            const regex = new RegExp(this.regex);
-            const text = document.getText();
-            let matches;
-            let currentAddress: string | null = null;
-            let currentNetwork: string | null = null;
-            let pk;
-            while ((matches = regex.exec(text)) !== null) {
-                const line = document.lineAt(document.positionAt(matches.index).line);
-                const indexOf = line.text.indexOf(matches[0]);
-                const position = new Position(line.lineNumber, indexOf);
-                const range = document.getWordRangeAtPosition(position, new RegExp(this.regex));
+        const diagnostics = [];
 
-                if (range) {
-                    const address = parse.address(line.text);
-                    if (address) {
-                        currentAddress = address[0];
-                        pk = address[2];
+        const mode = new EthersMode();
+        const codeLenses: CodeLens[] = [];
+        let currentAddress: string | null = null;
+        let currentNetwork: string | null = null;
+        let pk;
+        for (let i = 0; i < document.lineCount; i++) {
+            const line = document.lineAt(i);
+            const range = line.range;
+
+            if (!line.isEmptyOrWhitespace && !line.text.trimStart().startsWith('#')) {
+                const address = mode.address(line.text);
+                if (address) {
+                    if (address instanceof Error) {
+                        diagnostics.push(warn(range, address.message));
+                    } else {
+
+                        currentAddress = address.address;
+                        pk = address.privateKey;
                         codeLenses.push(new CodeLens(range, {
-                            title: 'Address' + (address[1] ? `${address[0]}` : ''),
+                            title: 'Address' + (address.isChecksumed ? '' : ` ${address.address}`),
                             command: ''
                         }));
 
                         if (currentNetwork) {
-                            codeLenses.push(new AddressCodeLens(currentNetwork, currentAddress, range));
+                            codeLenses.push(new AddressCodeLens(currentNetwork, address.address, range));
                         } else {
                             codeLenses.push(new CodeLens(range, {
                                 title: 'No network selected -- first use `net <network>`',
                                 command: ''
                             }));
                         }
-                    } else if (line.text.trimEnd().startsWith('net ')) {
-                        const [_, network] = line.text.split(' ');
-                        currentNetwork = network;
-                        codeLenses.push(new NetworkCodeLens(network, range));
-                    } else if (!line.isEmptyOrWhitespace && currentAddress) {
+                    }
+                } else if (line.text.trimEnd().startsWith('net ')) {
+                    const [_, network] = line.text.split(' ');
+                    currentNetwork = network;
+                    codeLenses.push(new NetworkCodeLens(network, range));
+                } else if (!line.isEmptyOrWhitespace && currentAddress) {
+                    const call = mode.call(line.text);
+                    if (call instanceof Error) {
+                        diagnostics.push(warn(range, call.message));
+                    } else {
                         const icon = line.text.includes('payable') ? '$(credit-card)'
                             : line.text.includes('view') ? '$(play)'
                                 : '$(flame)';
                         codeLenses.push(new CodeLens(range, {
-                            title: `${icon} Call Smart Contract Method`,
-                            command: 'ethers-mode.callMethod',
-                            arguments: [currentNetwork, currentAddress, line.text, parse, pk],
+                            title: `${icon} Call Contract Method`,
+                            command: 'ethers-mode.codelens-call',
+                            arguments: [currentNetwork, call, pk],
                         }));
                     }
                 }
             }
-            return codeLenses;
         }
 
-        return [];
+        this._collection.set(document.uri, diagnostics);
+        this.codeLenses = codeLenses;
+        return codeLenses;
     }
 
     /**
@@ -125,9 +133,10 @@ export class CodelensProvider implements CodeLensProvider {
                         title: `$(server-environment) Chain ID ${network.chainId} -- Block # ${blockNumber} | Gas Price ${formatUnits(gasPrice)}`,
                         command: '',
                     };
-                } catch (_err) {
+                } catch (err: any) {
+                    console.debug(err.message);
                     codeLens.command = {
-                        title: 'No network',
+                        title: `No network: ${err.message}`,
                         command: '',
                     };
                 }
@@ -138,7 +147,7 @@ export class CodelensProvider implements CodeLensProvider {
                     const value = await provider.getBalance(codeLens.address);
                     codeLens.command = {
                         title: (code === '0x' ? '$(account) EOA' : '$(file-code) Contract') + ' -- Balance: ' + formatUnits(value),
-                        command: "codelens-sample.codelensAction"
+                        command: '',
                     };
                 } catch (_err) {
                     codeLens.command = {
