@@ -30,6 +30,76 @@ export type ParseResult =
 		value: Error,
 	};
 
+
+/**
+ * 
+ */
+export interface Address {
+
+	/**
+	 * 
+	 */
+	address: string;
+
+	/**
+	 * 
+	 */
+	isChecksumed: boolean;
+
+	/**
+	 * 
+	 */
+	privateKey?: string;
+
+	/**
+	 * 
+	 */
+	symbol?: string;
+
+}
+
+/**
+ * Represents a smart contract call.
+ */
+export interface Call {
+
+	/**
+	 * 
+	 */
+	method: Fragment;
+
+	/**
+	 * 
+	 */
+	values: (string | Id)[];
+
+	/**
+	 * 
+	 */
+	contractRef?: Id;
+}
+
+/**
+ * Represents a reference to a symbol.
+ * An address can have be referenced using the `as` keyword.
+ * For example,
+ * 
+ * ```ethers
+ * net localhost
+ * 
+ * 0x70997970c51812dc3a010c7d01b50e0d17dc79c8 as account
+ * ```
+ */
+export class Id {
+
+	/**
+	 * 
+	 * @param id 
+	 */
+	constructor(public readonly id: string) { }
+
+}
+
 /**
  * 
  * @param line 
@@ -67,53 +137,6 @@ export function parseNet(line: string): string | null {
 	return null;
 }
 
-/**
- * Represents a reference to a symbol.
- * An address can have be referenced using the `as` keyword.
- * For example,
- * 
- * ```ethers
- * net localhost
- * 
- * 0x70997970c51812dc3a010c7d01b50e0d17dc79c8 as account
- * ```
- */
-export class Id {
-
-	/**
-	 * 
-	 * @param id 
-	 */
-	constructor(public readonly id: string) { }
-
-}
-
-/**
- * 
- */
-export interface Address {
-
-	/**
-	 * 
-	 */
-	address: string;
-
-	/**
-	 * 
-	 */
-	isChecksumed: boolean;
-
-	/**
-	 * 
-	 */
-	privateKey?: string;
-
-	/**
-	 * 
-	 */
-	symbol?: string;
-
-}
 
 /**
  * Parse an address or private key,
@@ -150,27 +173,6 @@ export function parseAddress(line: string): Address | Error | null {
 	return null;
 }
 
-/**
- * 
- */
-export interface Call {
-
-	/**
-	 * 
-	 */
-	method: Fragment;
-
-	/**
-	 * 
-	 */
-	// ieslint-disable-next-line @typescript-eslint/ban-types
-	values: (string | Id)[];
-
-	/**
-	 * 
-	 */
-	contractRef?: Id;
-}
 
 /**
  * 
