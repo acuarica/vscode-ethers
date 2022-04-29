@@ -1,6 +1,7 @@
 import { CancellationToken, CodeLens, CodeLensProvider, Diagnostic, DiagnosticSeverity, languages, Range, TextDocument, workspace } from 'vscode';
 import { formatUnits } from 'ethers/lib/utils';
-import { createProvider, EthersMode } from './lib';
+import { CallResolver, createProvider, EthersMode } from './lib';
+import { Id } from './parse';
 
 /**
  * 
@@ -18,16 +19,6 @@ class AddressCodeLens extends CodeLens {
     constructor(readonly network: string, readonly address: string, range: Range) {
         super(range);
     }
-}
-
-function warn(range: Range, message: string) {
-    const diagnostic = new Diagnostic(
-        range,
-        message,
-        DiagnosticSeverity.Warning
-    );
-    diagnostic.source = 'ethers-mode';
-    return diagnostic;
 }
 
 /**
@@ -51,10 +42,20 @@ export class EthersModeCodeLensProvider implements CodeLensProvider {
      * see https://code.visualstudio.com/api/references/vscode-api#CodeLensProvider.provideCodeLenses.
      */
     public provideCodeLenses(document: TextDocument, _token: CancellationToken): CodeLens[] | Thenable<CodeLens[]> {
-        const diagnostics = [];
+        const diagnostics: Diagnostic[] = [];
+        function error(range: Range, message: string) {
+            const diagnostic = new Diagnostic(
+                range,
+                message,
+                DiagnosticSeverity.Error
+            );
+            diagnostic.source = 'ethers-mode';
+            diagnostics.push(diagnostic);
+        }
 
         const mode = new EthersMode();
         const codeLenses: CodeLens[] = [];
+        const callCodeLenses = [];
         let currentAddress: string | null = null;
         let currentNetwork: string | null = null;
         let pk;
@@ -66,7 +67,7 @@ export class EthersModeCodeLensProvider implements CodeLensProvider {
                 const address = mode.address(line.text);
                 if (address) {
                     if (address instanceof Error) {
-                        diagnostics.push(warn(range, address.message));
+                        error(range, address.message);
                     } else {
 
                         currentAddress = address.address;
@@ -92,18 +93,40 @@ export class EthersModeCodeLensProvider implements CodeLensProvider {
                 } else if (!line.isEmptyOrWhitespace && currentAddress) {
                     const call = mode.call(line.text);
                     if (call instanceof Error) {
-                        diagnostics.push(warn(range, call.message));
+                        error(range, call.message);
                     } else {
                         const icon = line.text.includes('payable') ? '$(credit-card)'
                             : line.text.includes('view') ? '$(play)'
                                 : '$(flame)';
-                        codeLenses.push(new CodeLens(range, {
+                        callCodeLenses.push(new CodeLens(range, {
                             title: `${icon} Call Contract Method`,
                             command: 'ethers-mode.codelens-call',
                             arguments: [currentNetwork, call, pk],
                         }));
                     }
                 }
+            }
+        }
+
+        for (const ccl of callCodeLenses) {
+            const call = ccl.command!.arguments![1] as CallResolver;
+            const { contractRef, args } = call.resolve();
+            let pushIt = true;
+            if (!contractRef) {
+                error(ccl.range, `symbol \`${call.call.contractRef?.id}\` not defined`);
+                pushIt = false;
+            }
+
+            for (let i = 0; i < args.length; i++) {
+                const arg = args[i];
+                if (!arg) {
+                    error(ccl.range, `symbol \`${(call.call.values[i] as Id).id}\` not defined`);
+                    pushIt = false;
+                }
+            }
+
+            if (pushIt) {
+                codeLenses.push(ccl);
             }
         }
 

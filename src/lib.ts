@@ -1,11 +1,16 @@
 import { providers } from "ethers";
 import { Fragment } from "ethers/lib/utils";
-import { Address, Id, parseAddress, parseCall } from "./parse";
+import { Address, Call, Id, parseAddress, parseCall } from "./parse";
 
 /**
  * 
  */
 export interface CallResolver {
+
+	/**
+	 * 
+	 */
+	call: Call,
 
 	/**
 	 * 
@@ -63,6 +68,10 @@ export class EthersMode {
 		}
 
 		if (address.symbol) {
+			if (this.symbols[address.symbol]) {
+				return new Error(`identifier \`${address.symbol}\` already defined`);
+			}
+
 			this.symbols[address.symbol] = address.address;
 		}
 		this.symbols[EthersMode.THIS] = address.address;
@@ -95,6 +104,7 @@ export class EthersMode {
 		let thisAddress = this.symbols[EthersMode.THIS];
 
 		return {
+			call,
 			resolve: () => {
 				const { method, contractRef } = call;
 
