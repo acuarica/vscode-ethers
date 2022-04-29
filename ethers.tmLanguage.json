@@ -92,10 +92,16 @@
 		},
 		"address": {
 			"name": "ethers.address",
-			"match": "^(0x[a-fA-F0-9]{40})",
+			"match": "^((?:0x)?[a-fA-F0-9]{40}(?:[a-fA-F0-9]{24})?)(?:\\s+(as)\\s+([A-Za-z_]\\w*))?",
 			"captures": {
 				"1": {
 					"name": "constant.numeric.ethers.address"
+				},
+				"2": {
+					"name": "keyword.operator.ethers.address"
+				},
+				"3": {
+					"name": "entity.other.inherited-class"
 				}
 			}
 		},
