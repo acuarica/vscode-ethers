@@ -11,6 +11,8 @@ import { CallResolver, createProvider } from './lib';
 let disposables: Disposable[] = [];
 
 export function activate({ subscriptions }: ExtensionContext) {
+    // Logger.setLogLevel(Logger.levels.DEBUG);
+
     const codelensProvider = new EthersModeCodeLensProvider();
 
     languages.registerCodeLensProvider("ethers", codelensProvider);
@@ -32,20 +34,21 @@ export function activate({ subscriptions }: ExtensionContext) {
         }
     });
 
-    commands.registerCommand("ethers-mode.codelens-call", async (network: string, call: CallResolver, pk: string) => {
-        const { contractRef, func, args } = call.resolve();
+    commands.registerCommand("ethers-mode.codelens-call", async (network: string, call: CallResolver) => {
+        const { contractRef, func, args, privateKey } = call.resolve();
 
         const provider = createProvider(network);
 
         const isConstant = (func as FunctionFragment).constant;
         let contract;
         if (!isConstant) {
-            const signer = new Wallet(pk, provider);
+            const signer = new Wallet(privateKey!, provider);
             contract = new Contract(contractRef, [func], signer);
         } else {
             contract = new Contract(contractRef, [func], provider);
         }
 
+        // try {
         let show;
         const result = await contract.functions[func.name](...args);
         if (isConstant) {
@@ -56,6 +59,14 @@ export function activate({ subscriptions }: ExtensionContext) {
         }
 
         window.showInformationMessage(`Method call result: ${show}`);
+        // } catch (err: any) {
+        // console.log(err);
+        // console.log(JSON.stringify(err));
+        // console.log(err.message);
+        // console.log(  'body', JSON.parse( err.error.body).error.message);
+        // console.log('msg',err.error.message);
+
+        // }
     });
 
     languages.registerHoverProvider('*', {
@@ -73,25 +84,6 @@ export function activate({ subscriptions }: ExtensionContext) {
             }
         }
     });
-
-
-    // const collection = languages.createDiagnosticCollection('ethers-mode');
-    // subscriptions.push(window.onDidChangeActiveTextEditor(
-    //     (e: TextEditor | undefined) => {
-    //         if (e !== undefined) {
-    //             const d: Diagnostic = new Diagnostic(
-    //                 new Range(
-    //                     new Position(3, 8), new Position(3, 9),
-    //                 ),
-    //                 'Repeated assignment of loop variables',
-    //                 DiagnosticSeverity.Warning,
-    //             );
-    //             d.source = 'ethers-mode';
-
-    //             collection.set(e.document.uri, [d]);
-    //         }
-    //     }));
-
 
 }
 

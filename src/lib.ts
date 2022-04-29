@@ -1,5 +1,5 @@
 import { providers } from "ethers";
-import { Fragment } from "ethers/lib/utils";
+import { Fragment, FunctionFragment } from "ethers/lib/utils";
 import { Address, Call, Id, parseAddress, parseCall } from "./parse";
 
 /**
@@ -30,6 +30,11 @@ export interface CallResolver {
 		 * 
 		 */
 		args: string[];
+
+		/**
+		 * The signer's private key where this fragment was defined, if any.
+		 */
+		privateKey?: string;
 	}
 }
 
@@ -39,16 +44,27 @@ export interface CallResolver {
 export class EthersMode {
 
 	/**
-	 * 
+	 * Defines the `this` keyword.
+	 * This is used to refer to the address of current scope.
 	 */
 	public static readonly THIS = 'this';
 
 	/**
-	 * 
+	 * Symbols table holds the address of each symbol.
 	 */
 	public readonly symbols: { [key: string]: string } = {};
 
-	public currentPrivateKey: string | null = null;
+	/**
+	 * Returns the address of the current scope.
+	 */
+	public get thisAddress(): string | undefined {
+		return this.symbols[EthersMode.THIS];
+	}
+
+	/**
+	 * Returns the private key of the current scope, if any.
+	 */
+	public thisPrivateKey?: string;
 
 	/**
 	 * Parse an address or private key,
@@ -75,6 +91,7 @@ export class EthersMode {
 			this.symbols[address.symbol] = address.address;
 		}
 		this.symbols[EthersMode.THIS] = address.address;
+		this.thisPrivateKey = address.privateKey;
 		return address;
 	}
 
@@ -102,6 +119,11 @@ export class EthersMode {
 		}
 
 		let thisAddress = this.symbols[EthersMode.THIS];
+		const privateKey = this.thisPrivateKey;
+
+		if (!(call.method as FunctionFragment).constant && !privateKey) {
+			return new Error('sending a transaction requires a signer');
+		}
 
 		return {
 			call,
@@ -117,6 +139,7 @@ export class EthersMode {
 					contractRef: thisAddress,
 					func: method,
 					args,
+					privateKey,
 				};
 			}
 		};

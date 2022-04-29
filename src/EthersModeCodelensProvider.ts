@@ -56,9 +56,7 @@ export class EthersModeCodeLensProvider implements CodeLensProvider {
         const mode = new EthersMode();
         const codeLenses: CodeLens[] = [];
         const callCodeLenses = [];
-        let currentAddress: string | null = null;
         let currentNetwork: string | null = null;
-        let pk;
         for (let i = 0; i < document.lineCount; i++) {
             const line = document.lineAt(i);
             const range = line.range;
@@ -70,8 +68,6 @@ export class EthersModeCodeLensProvider implements CodeLensProvider {
                         error(range, address.message);
                     } else {
 
-                        currentAddress = address.address;
-                        pk = address.privateKey;
                         codeLenses.push(new CodeLens(range, {
                             title: 'Address' + (address.isChecksumed ? '' : ` ${address.address}`),
                             command: ''
@@ -90,7 +86,7 @@ export class EthersModeCodeLensProvider implements CodeLensProvider {
                     const [_, network] = line.text.split(' ');
                     currentNetwork = network;
                     codeLenses.push(new NetworkCodeLens(network, range));
-                } else if (!line.isEmptyOrWhitespace && currentAddress) {
+                } else if (mode.thisAddress) {
                     const call = mode.call(line.text);
                     if (call instanceof Error) {
                         error(range, call.message);
@@ -101,7 +97,7 @@ export class EthersModeCodeLensProvider implements CodeLensProvider {
                         callCodeLenses.push(new CodeLens(range, {
                             title: `${icon} Call Contract Method`,
                             command: 'ethers-mode.codelens-call',
-                            arguments: [currentNetwork, call, pk],
+                            arguments: [currentNetwork, call],
                         }));
                     }
                 }
