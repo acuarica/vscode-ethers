@@ -1,6 +1,41 @@
 import { expect } from "chai";
 import { Fragment } from "ethers/lib/utils";
-import { parseAddress, parseCall, inferArgumentType, patchFragmentSignature, Id } from "../src/parse";
+import { parseNet, parseAddress, parseCall, inferArgumentType, patchFragmentSignature, Id, parse } from "../src/parse";
+
+describe("parse", () => {
+
+	it("should ignore blanks and comments", () => {
+		expect(parse('')).to.be.null;
+		expect(parse('   ')).to.be.null;
+		expect(parse('#   ')).to.be.null;
+		expect(parse('  #   ')).to.be.null;
+		expect(parse('  # net fuji  ')).to.be.null;
+	});
+
+	it("should accept valid declarations", () => {
+		expect(parse('net fuji')).to.have.property('kind', 'net');
+		expect(parse('0x5425890298aed601595a70AB815c96711a31Bc65')).to.have.property('kind', 'address');
+		expect(parse('method()')).to.have.property('kind', 'call');
+	});
+
+});
+
+describe("parseNet", () => {
+
+	it("should accept valid networks", () => {
+		expect(parseNet('net fuji')).to.be.equal('fuji');
+		expect(parseNet('net  fuji  ')).to.be.equal('fuji');
+		expect(parseNet('net  hola^fuji  ')).to.be.equal('hola^fuji');
+	});
+
+	it("should reject invalid networks", () => {
+		expect(parseNet('')).to.be.null;
+		expect(parseNet('net ')).to.be.null;
+		expect(parseNet(' net ')).to.be.null;
+		expect(parseNet(' net fu ji')).to.be.null;
+	});
+
+});
 
 describe("parseAddress", () => {
 

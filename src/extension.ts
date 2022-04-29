@@ -34,10 +34,10 @@ export function activate({ subscriptions }: ExtensionContext) {
         }
     });
 
-    commands.registerCommand("ethers-mode.codelens-call", async (network: string, call: CallResolver) => {
-        const { contractRef, func, args, privateKey } = call.resolve();
+    commands.registerCommand("ethers-mode.codelens-call", async (call: CallResolver) => {
+        const { contractRef, func, args, privateKey, network } = call.resolve();
 
-        const provider = createProvider(network);
+        const provider = createProvider(network!);
 
         const isConstant = (func as FunctionFragment).constant;
         let contract;

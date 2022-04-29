@@ -1,6 +1,6 @@
 import { providers } from "ethers";
 import { Fragment, FunctionFragment } from "ethers/lib/utils";
-import { Address, Call, Id, parseAddress, parseCall } from "./parse";
+import { Address, Call, Id } from "./parse";
 
 /**
  * 
@@ -35,6 +35,11 @@ export interface CallResolver {
 		 * The signer's private key where this fragment was defined, if any.
 		 */
 		privateKey?: string;
+
+		/**
+		 * The network this call should connect to, if any.
+		 */
+		network?: string;
 	}
 }
 
@@ -55,6 +60,11 @@ export class EthersMode {
 	public readonly symbols: { [key: string]: string } = {};
 
 	/**
+	 * 
+	 */
+	public currentNetwork?: string;
+
+	/**
 	 * Returns the address of the current scope.
 	 */
 	public get thisAddress(): string | undefined {
@@ -67,6 +77,15 @@ export class EthersMode {
 	public thisPrivateKey?: string;
 
 	/**
+	 * 
+	 * @param net 
+	 * @returns 
+	 */
+	net(net: string) {
+		this.currentNetwork = net;
+	}
+
+	/**
 	 * Parse an address or private key,
 	 * and optionally allows the user to define an alias for it.
 	 * 
@@ -74,15 +93,10 @@ export class EthersMode {
 	 * adds it to the symbol table.
 	 * Finally, adds the `this` current address to the symbol table.
 	 * 
-	 * @param line 
+	 * @param address 
 	 * @returns 
 	 */
-	address(line: string): Address | Error | null {
-		const address = parseAddress(line);
-		if (!address || address instanceof Error) {
-			return address;
-		}
-
+	address(address: Address) {
 		if (address.symbol) {
 			if (this.symbols[address.symbol]) {
 				return new Error(`identifier \`${address.symbol}\` already defined`);
@@ -92,23 +106,17 @@ export class EthersMode {
 		}
 		this.symbols[EthersMode.THIS] = address.address;
 		this.thisPrivateKey = address.privateKey;
-		return address;
 	}
 
 	/**
 	 * 
-	 * @param line 
+	 * @param call 
 	 * @returns 
 	 * 
 	 * For more info,
 	 * see https://docs.ethers.io/v5/api/utils/abi/fragments/#human-readable-abi.
 	 */
-	call(line: string): CallResolver | Error | null {
-		const call = parseCall(line);
-		if (!call || call instanceof Error) {
-			return call;
-		}
-
+	call(call: Call): CallResolver | Error {
 		const values: (string | Id)[] = [];
 		for (const value of call.values) {
 			if (value instanceof Id && value.id === EthersMode.THIS) {
@@ -120,6 +128,7 @@ export class EthersMode {
 
 		let thisAddress = this.symbols[EthersMode.THIS];
 		const privateKey = this.thisPrivateKey;
+		const network = this.currentNetwork;
 
 		if (!(call.method as FunctionFragment).constant && !privateKey) {
 			return new Error('sending a transaction requires a signer');
@@ -140,6 +149,7 @@ export class EthersMode {
 					func: method,
 					args,
 					privateKey,
+					network,
 				};
 			}
 		};

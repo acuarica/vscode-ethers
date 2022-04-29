@@ -1,12 +1,71 @@
 import { ethers } from "ethers";
 import { Fragment, isAddress, ParamType } from "ethers/lib/utils";
 
+const NET = /^net\s+(\S+)\s*$/;
 const ID = /[A-Za-z_]\w*/;
 const ETH = /(?:0x)?[0-9a-fA-F]{40}/;
 const PK = /(?:0x)?[0-9a-fA-F]{64}/;
 const ICAP = /XE[0-9]{2}[0-9A-Za-z]{30,31}/;
 const ADDRESS = new RegExp(`^(${ETH.source}|${ICAP.source}|${PK.source})(?:\\s+as\\s+(${ID.source}))?$`);
 const CONTRACT_REF = new RegExp(`^(?:\\s*function\\s)?\\s*(${ID.source})\\.`);
+
+/**
+ * 
+ */
+export type ParseResult =
+	{
+		kind: 'net',
+		value: string,
+	} |
+	{
+		kind: 'address',
+		value: Address,
+	} |
+	{
+		kind: 'call',
+		value: Call,
+	} |
+	{
+		kind: 'error',
+		value: Error,
+	};
+
+/**
+ * 
+ * @param line 
+ * @returns 
+ */
+export function parse(line: string): ParseResult | null {
+	if (line.trim().length === 0 || line.trimStart().startsWith('#')) {
+		return null;
+	}
+
+	let value;
+	if ((value = parseNet(line))) {
+		return { kind: 'net', value };
+	} else if ((value = parseAddress(line))) {
+		return value instanceof Error ? { kind: 'error', value } : { kind: 'address', value };
+	} else if ((value = parseCall(line))) {
+		return value instanceof Error ? { kind: 'error', value } : { kind: 'call', value };
+	}
+
+	return null;
+}
+
+/**
+ * 
+ * @param line 
+ * @returns 
+ */
+export function parseNet(line: string): string | null {
+	const match = line.match(NET);
+	if (match) {
+		const network = match[1];
+		return network;
+	}
+
+	return null;
+}
 
 /**
  * Represents a reference to a symbol.
@@ -138,7 +197,7 @@ export function parseCall(line: string): Call | Error | null {
 		return patch;
 	}
 
-	const [ patchedFuncSig, argv ] = patch;
+	const [patchedFuncSig, argv] = patch;
 	let fragment: Fragment;
 	try {
 		fragment = Fragment.from(patchedFuncSig);
