@@ -2,7 +2,7 @@
     "name": "ethers-mode",
     "displayName": "Ethers Mode",
     "description": "Ethers Mode for VS Code",
-    "version": "0.0.2",
+    "version": "0.0.4",
     "publisher": "acuarica",
     "private": true,
     "license": "MIT",

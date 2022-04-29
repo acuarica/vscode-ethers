@@ -4,4 +4,5 @@
 /out/*.js.map
 /ethers-mode-*.vsix
 /.gitignore
+/*.gif
 /tsconfig.json
