@@ -5,9 +5,12 @@ import { parseAddress, parseCall, inferArgumentType, patchFragmentSignature, Id 
 describe("parseAddress", () => {
 
 	it("should reject invalid addresses", () => {
-		expect(parseAddress('123')).to.be.null;
-		expect(parseAddress('0x123')).to.be.null;
-		expect((parseAddress('0x8Ba1f109551bD432803012645Ac136ddd64DBA72') as Error).message).to.contain('bad address checksum');
+		expect(parseAddress('123'))
+			.to.be.null;
+		expect(parseAddress('0x123'))
+			.to.be.null;
+		expect((parseAddress('0x8Ba1f109551bD432803012645Ac136ddd64DBA72') as Error).message)
+			.to.contain('bad address checksum');
 	});
 
 	it("should parse valid addresses", () => {
@@ -53,7 +56,8 @@ describe("parseAddress", () => {
 	});
 
 	it("should reject invalid private keys", () => {
-		expect((parseAddress('0000000000000000000000000000000000000000000000000000000000000000') as Error).message).to.contain('Invalid private key');
+		expect((parseAddress('0000000000000000000000000000000000000000000000000000000000000000') as Error).message)
+			.to.contain('Invalid private key');
 	});
 
 	it("should parse private keys to addresses", () => {
