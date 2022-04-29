@@ -9,7 +9,15 @@ const ADDRESS = new RegExp(`^(${ETH.source}|${ICAP.source}|${PK.source})(?:\\s+a
 const CONTRACT_REF = new RegExp(`^(?:\\s*function\\s)?\\s*(${ID.source})\\.`);
 
 /**
+ * Represents a reference to a symbol.
+ * An address can have be referenced using the `as` keyword.
+ * For example,
  * 
+ * ```ethers
+ * net localhost
+ * 
+ * 0x70997970c51812dc3a010c7d01b50e0d17dc79c8 as account
+ * ```
  */
 export class Id {
 
@@ -201,9 +209,24 @@ export function inferArgumentType(value: string): string | null {
 }
 
 /**
+ * Patches the string arguments in a fragment signature.
+ * Returns the method signature and a map of arguments to their string values.
+ * For example:
  * 
- * @param fragmentSig 
- * @returns 
+ * ```js
+ * expect(patchFragmentSignature('method(string "hola mundo")'))
+ *	   .to.be.deep.equal([
+ *	    	'method(string  $$arg0)',
+ *		    {
+ *		    	'$$arg0': 'hola mundo'
+ *	    	}]
+ *	   );
+ * ```
+ * 
+ * This is in order to parse the fragment signature using `Fragment` from `ethers`.
+ * 
+ * @param fragmentSig The fragment signature to patch
+ * @returns The patched signature and the map of argument replacements
  */
 export function patchFragmentSignature(fragmentSig: string): [string, Record<string, string>] | Error {
 	let openQuote = null;
