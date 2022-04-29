@@ -1,7 +1,7 @@
 import { CancellationToken, CodeLens, CodeLensProvider, Diagnostic, DiagnosticSeverity, languages, Range, TextDocument, workspace } from 'vscode';
-import { formatUnits } from 'ethers/lib/utils';
-import { CallResolver, createProvider, EthersMode } from './lib';
-import { Id, parse } from './parse';
+import { formatUnits, FunctionFragment } from 'ethers/lib/utils';
+import { createProvider, EthersMode, getUnresolvedSymbols } from './lib';
+import { parse } from './parse';
 
 /**
  * 
@@ -55,67 +55,60 @@ export class EthersModeCodeLensProvider implements CodeLensProvider {
 
         const mode = new EthersMode();
         const codeLenses: CodeLens[] = [];
-        const callCodeLenses = [];
+        const calls = [];
         for (let i = 0; i < document.lineCount; i++) {
             const line = document.lineAt(i);
             const range = line.range;
-            const result = parse(line.text);
-            if (!result) {
-                continue;
-            }
+            try {
+                const result = parse(line.text);
+                if (!result) {
+                    continue;
+                }
 
-            if (result.kind === 'net') {
-                mode.net(result.value);
-                codeLenses.push(new NetworkCodeLens(mode.currentNetwork!, range));
-            } else if (result.kind === 'address') {
-                mode.address(result.value);
-                codeLenses.push(new CodeLens(range, {
-                    title: 'Address' + (result.value.isChecksumed ? '' : ` ${result.value.address}`),
-                    command: ''
-                }));
-
-                if (mode.currentNetwork) {
-                    codeLenses.push(new AddressCodeLens(mode.currentNetwork, result.value.address, range));
-                } else {
+                if (result.kind === 'net') {
+                    mode.net(result.value);
+                    codeLenses.push(new NetworkCodeLens(mode.currentNetwork!, range));
+                } else if (result.kind === 'address') {
+                    mode.address(result.value);
                     codeLenses.push(new CodeLens(range, {
-                        title: 'No network selected -- first use `net <network>`',
+                        title: 'Address' + (result.value.isChecksumed ? '' : ` ${result.value.address}`),
                         command: ''
                     }));
+
+                    if (mode.currentNetwork) {
+                        codeLenses.push(new AddressCodeLens(mode.currentNetwork, result.value.address, range));
+                    } else {
+                        codeLenses.push(new CodeLens(range, {
+                            title: 'No network selected -- first use `net <network>`',
+                            command: ''
+                        }));
+                    }
+                } else if (result.kind === 'call') {
+                    const call = mode.call(result.value);
+                    calls.push({ call, range });
                 }
-            } else if (result.kind === 'call') {
-                const call = mode.call(result.value);
-                const icon = line.text.includes('payable') ? '$(credit-card)'
-                    : line.text.includes('view') ? '$(play)'
+            } catch (err: any) {
+                error(range, err.message);
+            }
+        }
+
+        for (const { call, range } of calls) {
+            let pushIt = true;
+            for (const id of getUnresolvedSymbols(call)) {
+                error(range, `symbol \`${id}\` not defined`);
+                pushIt = false;
+            }
+
+            if (pushIt) {
+                const mut = (call.call.method as FunctionFragment).stateMutability;
+                const icon = mut === 'payable' ? '$(credit-card)'
+                    : mut === 'view' ? '$(play)'
                         : '$(flame)';
-                callCodeLenses.push(new CodeLens(range, {
+                codeLenses.push(new CodeLens(range, {
                     title: `${icon} Call Contract Method`,
                     command: 'ethers-mode.codelens-call',
                     arguments: [call],
                 }));
-            } else {
-                error(range, result.value.message);
-            }
-        }
-
-        for (const ccl of callCodeLenses) {
-            const call = ccl.command!.arguments![1] as CallResolver;
-            const { contractRef, args } = call.resolve();
-            let pushIt = true;
-            if (!contractRef) {
-                error(ccl.range, `symbol \`${call.call.contractRef?.id}\` not defined`);
-                pushIt = false;
-            }
-
-            for (let i = 0; i < args.length; i++) {
-                const arg = args[i];
-                if (!arg) {
-                    error(ccl.range, `symbol \`${(call.call.values[i] as Id).id}\` not defined`);
-                    pushIt = false;
-                }
-            }
-
-            if (pushIt) {
-                codeLenses.push(ccl);
             }
         }
 

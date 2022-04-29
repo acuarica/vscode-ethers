@@ -24,12 +24,7 @@ export type ParseResult =
 	{
 		kind: 'call',
 		value: Call,
-	} |
-	{
-		kind: 'error',
-		value: Error,
 	};
-
 
 /**
  * 
@@ -114,9 +109,9 @@ export function parse(line: string): ParseResult | null {
 	if ((value = parseNet(line))) {
 		return { kind: 'net', value };
 	} else if ((value = parseAddress(line))) {
-		return value instanceof Error ? { kind: 'error', value } : { kind: 'address', value };
+		return { kind: 'address', value };
 	} else if ((value = parseCall(line))) {
-		return value instanceof Error ? { kind: 'error', value } : { kind: 'call', value };
+		return { kind: 'call', value };
 	}
 
 	return null;
@@ -147,7 +142,7 @@ export function parseNet(line: string): string | null {
  * @param line 
  * @returns 
  */
-export function parseAddress(line: string): Address | Error | null {
+export function parseAddress(line: string): Address | null {
 	const m = line.match(ADDRESS);
 	if (m) {
 		let address: string;
@@ -157,14 +152,10 @@ export function parseAddress(line: string): Address | Error | null {
 			try {
 				address = ethers.utils.computeAddress(privateKey as string);
 			} catch (err: any) {
-				return new Error('Invalid private key');
+				throw new Error('Invalid private key');
 			}
 		} else {
-			try {
-				address = ethers.utils.getAddress(m[1]);
-			} catch (err: any) {
-				return err;
-			}
+			address = ethers.utils.getAddress(m[1]);
 		}
 		const symbol = m[2];
 		return { address, isChecksumed: address === m[1], privateKey, symbol };
@@ -182,7 +173,7 @@ export function parseAddress(line: string): Address | Error | null {
  * @param line 
  * @returns 
  */
-export function parseCall(line: string): Call | Error | null {
+export function parseCall(line: string): Call {
 	const m = line.match(CONTRACT_REF);
 	let contractRef;
 	if (m) {
@@ -195,17 +186,9 @@ export function parseCall(line: string): Call | Error | null {
 	}
 
 	const patch = patchFragmentSignature(line)!;
-	if (patch instanceof Error) {
-		return patch;
-	}
 
 	const [patchedFuncSig, argv] = patch;
-	let fragment: Fragment;
-	try {
-		fragment = Fragment.from(patchedFuncSig);
-	} catch (err: any) {
-		return err;
-	}
+	const fragment = Fragment.from(patchedFuncSig);
 
 	const inputs = [];
 	const values = [];
@@ -289,7 +272,7 @@ export function inferArgumentType(value: string): string | null {
  * @param fragmentSig The fragment signature to patch
  * @returns The patched signature and the map of argument replacements
  */
-export function patchFragmentSignature(fragmentSig: string): [string, Record<string, string>] | Error {
+export function patchFragmentSignature(fragmentSig: string): [string, Record<string, string>] {
 	let openQuote = null;
 	const remaining = fragmentSig.length;
 	let strn = null;
@@ -315,7 +298,7 @@ export function patchFragmentSignature(fragmentSig: string): [string, Record<str
 	}
 
 	if (openQuote) {
-		return new Error('parsing error: unterminated string literal');
+		throw new Error('parsing error: unterminated string literal');
 	}
 
 	return [fragmentSig, strs];

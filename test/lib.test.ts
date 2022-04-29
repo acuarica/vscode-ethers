@@ -48,8 +48,8 @@ describe('EthersMode', () => {
 		expect(mode.symbols).to.be.have.property('this', '0x5425890298aed601595a70AB815c96711a31Bc65');
 		expect(mode.symbols).to.be.have.property('token', '0x5425890298aed601595a70AB815c96711a31Bc65');
 
-		expect(mode.address('0x70997970C51812dc3A010C7d01b50e0d17dc79C8 as token'.asAddress()))
-			.to.have.property('message', 'identifier `token` already defined');
+		expect(() => mode.address('0x70997970C51812dc3A010C7d01b50e0d17dc79C8 as token'.asAddress()))
+			.to.throw('identifier `token` already defined');
 		expect(mode.symbols).to.be.have.property('this', '0x5425890298aed601595a70AB815c96711a31Bc65');
 		expect(mode.symbols).to.be.have.property('token', '0x5425890298aed601595a70AB815c96711a31Bc65');
 	});
@@ -57,13 +57,13 @@ describe('EthersMode', () => {
 	it('should reject undefined signer', () => {
 		const mode = new EthersMode();
 
-		expect(mode.call('method(2)'.asCall()) as CallResolver)
-			.to.have.property('message', 'sending a transaction requires a signer');
+		expect(() => mode.call('method(2)'.asCall()) as CallResolver)
+			.to.throw('sending a transaction requires a signer');
 
 		mode.address('0x5425890298aed601595a70AB815c96711a31Bc65'.asAddress());
 
-		expect(mode.call('method(2)'.asCall()) as CallResolver)
-			.to.have.property('message', 'sending a transaction requires a signer');
+		expect(() => mode.call('method(2)'.asCall()) as CallResolver)
+			.to.throw('sending a transaction requires a signer');
 	});
 
 	it('should accept current signer', () => {

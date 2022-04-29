@@ -16,6 +16,7 @@ export interface CallResolver {
 	 * 
 	 */
 	resolve: () => {
+
 		/**
 		 * 
 		 */
@@ -40,6 +41,7 @@ export interface CallResolver {
 		 * The network this call should connect to, if any.
 		 */
 		network?: string;
+
 	}
 }
 
@@ -99,7 +101,7 @@ export class EthersMode {
 	address(address: Address) {
 		if (address.symbol) {
 			if (this.symbols[address.symbol]) {
-				return new Error(`identifier \`${address.symbol}\` already defined`);
+				throw new Error(`identifier \`${address.symbol}\` already defined`);
 			}
 
 			this.symbols[address.symbol] = address.address;
@@ -116,7 +118,7 @@ export class EthersMode {
 	 * For more info,
 	 * see https://docs.ethers.io/v5/api/utils/abi/fragments/#human-readable-abi.
 	 */
-	call(call: Call): CallResolver | Error {
+	call(call: Call): CallResolver {
 		const values: (string | Id)[] = [];
 		for (const value of call.values) {
 			if (value instanceof Id && value.id === EthersMode.THIS) {
@@ -131,7 +133,7 @@ export class EthersMode {
 		const network = this.currentNetwork;
 
 		if (!(call.method as FunctionFragment).constant && !privateKey) {
-			return new Error('sending a transaction requires a signer');
+			throw new Error('sending a transaction requires a signer');
 		}
 
 		return {
@@ -153,6 +155,24 @@ export class EthersMode {
 				};
 			}
 		};
+	}
+}
+
+/**
+ * 
+ * @param call 
+ */
+export function* getUnresolvedSymbols(call: CallResolver): Generator<string> {
+	const { contractRef, args } = call.resolve();
+	if (!contractRef) {
+		yield call.call.contractRef!.id;
+	}
+
+	for (let i = 0; i < args.length; i++) {
+		const arg = args[i];
+		if (!arg) {
+			yield (call.call.values[i] as Id).id;
+		}
 	}
 }
 

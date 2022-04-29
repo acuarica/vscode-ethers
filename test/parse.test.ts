@@ -44,8 +44,8 @@ describe("parseAddress", () => {
 			.to.be.null;
 		expect(parseAddress('0x123'))
 			.to.be.null;
-		expect((parseAddress('0x8Ba1f109551bD432803012645Ac136ddd64DBA72') as Error).message)
-			.to.contain('bad address checksum');
+		expect(() => parseAddress('0x8Ba1f109551bD432803012645Ac136ddd64DBA72'))
+			.to.throw('bad address checksum');
 	});
 
 	it("should parse valid addresses", () => {
@@ -91,8 +91,8 @@ describe("parseAddress", () => {
 	});
 
 	it("should reject invalid private keys", () => {
-		expect((parseAddress('0000000000000000000000000000000000000000000000000000000000000000') as Error).message)
-			.to.contain('Invalid private key');
+		expect(() => parseAddress('0000000000000000000000000000000000000000000000000000000000000000'))
+			.to.throw('Invalid private key');
 	});
 
 	it("should parse private keys to addresses", () => {
@@ -120,8 +120,8 @@ describe("parseCall", () => {
 	['', 'function ', '  function '].forEach(prefix => {
 
 		it(`should reject invalid function ^${prefix}`, () => {
-			expect((parseCall(prefix + 'method view returns (uint256)') as Error).message)
-				.to.contain('invalid function signature');
+			expect(() => parseCall(prefix + 'method view returns (uint256)'))
+				.to.throw('invalid function signature');
 		});
 
 		it(`should parse an argless function ^${prefix}`, () => {
@@ -268,12 +268,12 @@ describe('inferArgumentType', () => {
 describe('patchFragmentSignature', () => {
 
 	it('should reject patching non-closed strings', () => {
-		expect(patchFragmentSignature('  method   ( string "hola(mundo, world)) view returns (uint256)'))
-			.to.have.property('message', 'parsing error: unterminated string literal');
-		expect(patchFragmentSignature('method(string  "hola\\") view returns (uint256)'))
-			.to.have.property('message', 'parsing error: unterminated string literal');
-		expect(patchFragmentSignature('method( string  " hola \\", string " hola( ,world)"  ) view returns (uint256)'))
-			.to.have.property('message', 'parsing error: unterminated string literal');
+		expect(() => patchFragmentSignature('  method   ( string "hola(mundo, world)) view returns (uint256)'))
+			.to.throw('parsing error: unterminated string literal');
+		expect(() => patchFragmentSignature('method(string  "hola\\") view returns (uint256)'))
+			.to.throw('parsing error: unterminated string literal');
+		expect(() => patchFragmentSignature('method( string  " hola \\", string " hola( ,world)"  ) view returns (uint256)'))
+			.to.throw('parsing error: unterminated string literal');
 	});
 
 	it('should patch string values', () => {
