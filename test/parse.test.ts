@@ -119,12 +119,21 @@ describe("parseCall", () => {
 
 	['', 'function ', '  function '].forEach(prefix => {
 
-		it(`should reject invalid function ^${prefix}`, () => {
+		it(`should reject functions without argument parenthesis ^${prefix}`, () => {
+			expect(() => parseCall(prefix + 'method '))
+				.to.throw('invalid function signature');
 			expect(() => parseCall(prefix + 'method view returns (uint256)'))
 				.to.throw('invalid function signature');
 		});
 
-		it(`should parse an argless function ^${prefix}`, () => {
+		it(`should reject functions with empty arguments ^${prefix}`, () => {
+			expect(() => parseCall(prefix + 'method(,) view returns (uint256)'))
+				.to.throw('parsing error: invalid argument');
+			expect(() => parseCall(prefix + 'method(a, , ) view returns (uint256)'))
+				.to.throw('parsing error: invalid argument');
+		});
+
+		it(`should parse functions with no arguments ^${prefix}`, () => {
 			expect(parseCall(prefix + 'method() view returns (uint256)'))
 				.to.be.deep.equal({
 					method: Fragment.fromString('function method() view returns (uint256)'),
@@ -137,6 +146,16 @@ describe("parseCall", () => {
 					method: Fragment.fromString('function method() view returns (uint256)'),
 					values: [],
 					inferredPositions: [],
+					contractRef: undefined
+				});
+		});
+
+		it(`should parse functions iarguments ^${prefix}`, () => {
+			expect(parseCall(prefix + 'method(1,) view returns (uint256)'))
+				.to.be.deep.equal({
+					method: Fragment.fromString('function method(uint8) view returns (uint256)'),
+					values: ['1'],
+					inferredPositions: [prefix.length + 6],
 					contractRef: undefined
 				});
 		});
@@ -276,6 +295,11 @@ describe("parseCall", () => {
 		});
 
 	});
+
+	// it(`should reject invalid function `, () => {
+	// 	expect(() => parseCall('event method(uint256)'))
+	// 		.to.throw('invalid function signature');
+	// });
 
 });
 
