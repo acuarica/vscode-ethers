@@ -1,7 +1,7 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import { LogLevel } from '@ethersproject/logger';
-import { Contract, providers, Wallet } from 'ethers';
+import { Contract, providers, utils, Wallet } from 'ethers';
 import { FunctionFragment, Logger } from 'ethers/lib/utils';
 import { ExtensionContext, languages, commands, Disposable, window, Hover } from 'vscode';
 import { EthersModeCodeLensProvider } from './EthersModeCodelensProvider';
@@ -14,7 +14,7 @@ let disposables: Disposable[] = [];
 export function activate({ subscriptions }: ExtensionContext) {
     Logger.setLogLevel(LogLevel.OFF);
 
-    window.createOutputChannel('Ethers Mode', 'ethers');
+    const log = window.createOutputChannel('Ethers Mode', 'ethers');
     // const logLevel = workspace.getConfiguration("ethers-mode").get("logLevel");
     // console.log('act', logLevel);
     // if (logLevel) {
@@ -53,6 +53,8 @@ export function activate({ subscriptions }: ExtensionContext) {
 
     commands.registerCommand("ethers-mode.codelens-call", async (call: ResolvedCall) => {
         const { contractRef, func, args, privateKey, network } = call;
+
+        log.append(`Execute ${func.format(utils.FormatTypes.full)} on \u{1F310} ${network}`);
 
         const provider = createProvider(network!);
 
