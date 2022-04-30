@@ -19,7 +19,7 @@ export class EthersMode {
 	readonly symbols: { [key: string]: string | undefined } = {};
 
 	/**
-	 * 
+	 * Added contract calls, _i.e._, with `call`, are bound to `currentNetwork`.
 	 */
 	currentNetwork?: string;
 
@@ -36,6 +36,8 @@ export class EthersMode {
 	}
 
 	/**
+	 * Sets the current network name or JSON-RPC HTTP API URL.
+	 * Added contract calls, _i.e._, with `call`, are bound to `currentNetwork`.
 	 * 
 	 * @param net 
 	 * @returns 
