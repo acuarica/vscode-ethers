@@ -71,6 +71,11 @@ export interface Call {
 	/**
 	 * 
 	 */
+	inferredPositions: (number | null)[];
+
+	/**
+	 * 
+	 */
 	contractRef?: Id;
 }
 
@@ -174,24 +179,24 @@ export function parseAddress(line: string): Address | null {
  * @returns 
  */
 export function parseCall(line: string): Call {
+	const patch = patchFragmentSignature(line)!;
+	// eslint-disable-next-line prefer-const
+	let [patchedFuncSig, argv, pos] = patch;
+
 	const m = line.match(CONTRACT_REF);
 	let contractRef;
 	if (m) {
-		line = line.replace(CONTRACT_REF, '');
+		patchedFuncSig = patchedFuncSig.replace(CONTRACT_REF, '');
 		contractRef = new Id(m[1]);
 	}
 
-	if (!line.trim().startsWith('function ')) {
-		line = 'function ' + line;
-	}
-
-	const patch = patchFragmentSignature(line)!;
-
-	const [patchedFuncSig, argv] = patch;
-	const fragment = Fragment.from(patchedFuncSig);
+	const fragment = Fragment.from(!patchedFuncSig.trim().startsWith('function ')
+		? 'function ' + patchedFuncSig
+		: patchedFuncSig);
 
 	const inputs = [];
 	const values = [];
+	const inferredPositions = [];
 	for (const input of fragment.inputs) {
 		let type = null, value: string | Id | null = null;
 		if (input.name) {
@@ -200,6 +205,7 @@ export function parseCall(line: string): Call {
 			if (value.startsWith('$$')) {
 				value = argv[value];
 			}
+			inferredPositions.push(null);
 		} else {
 			value = input.type;
 			if (value.startsWith('$$')) {
@@ -208,7 +214,10 @@ export function parseCall(line: string): Call {
 			} else {
 				type = inferArgumentType(value);
 			}
+
+			inferredPositions.push(pos[0]);
 		}
+		pos.shift();
 
 		if (!type) {
 			type = 'address';
@@ -222,6 +231,7 @@ export function parseCall(line: string): Call {
 	return {
 		method: Fragment.fromObject({ ...fragment, inputs, _isFragment: false }),
 		values,
+		inferredPositions,
 		contractRef,
 	};
 }
@@ -272,20 +282,23 @@ export function inferArgumentType(value: string): string | null {
  * @param fragmentSig The fragment signature to patch
  * @returns The patched signature and the map of argument replacements
  */
-export function patchFragmentSignature(fragmentSig: string): [string, Record<string, string>] {
+export function patchFragmentSignature(fragmentSig: string): [string, Record<string, string>, number[]] {
 	let openQuote = null;
 	const remaining = fragmentSig.length;
 	let strn = null;
 	const strs: { [key: string]: string } = {};
+	const pos = [];
 	for (let i = 0; i < remaining; i++) {
 		if (!openQuote && fragmentSig[i] === '(') {
 			strn = 0;
+			pos.push(i);
 		} else if (!openQuote && fragmentSig[i] === ')') {
 			strn = null;
 		} else if (!openQuote && fragmentSig[i] === ',') {
 			strn!++;
-		} else if (fragmentSig[i] === '"' && i > 0 && fragmentSig[i - 1] !== '\\') {
-			if (!openQuote) {
+			pos.push(i);
+		} else if (fragmentSig[i] === '"' && (i === 0 || fragmentSig[i - 1] !== '\\')) {
+			if (openQuote === null) {
 				openQuote = i;
 			} else {
 				strs['$$arg' + strn] = fragmentSig.substring(openQuote + 1, i);
@@ -297,9 +310,9 @@ export function patchFragmentSignature(fragmentSig: string): [string, Record<str
 		}
 	}
 
-	if (openQuote) {
+	if (openQuote !== null) {
 		throw new Error('parsing error: unterminated string literal');
 	}
 
-	return [fragmentSig, strs];
+	return [fragmentSig, strs, pos];
 }

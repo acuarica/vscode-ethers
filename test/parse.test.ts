@@ -129,12 +129,14 @@ describe("parseCall", () => {
 				.to.be.deep.equal({
 					method: Fragment.fromString('function method() view returns (uint256)'),
 					values: [],
+					inferredPositions: [],
 					contractRef: undefined
 				});
 			expect(parseCall(prefix + '  method (  ) view returns (uint256)'))
 				.to.be.deep.equal({
 					method: Fragment.fromString('function method() view returns (uint256)'),
 					values: [],
+					inferredPositions: [],
 					contractRef: undefined
 				});
 		});
@@ -144,46 +146,60 @@ describe("parseCall", () => {
 				.to.be.deep.equal({
 					method: Fragment.fromString('function method(uint8) view returns (uint256)'),
 					values: ['1'],
+					inferredPositions: [null],
 					contractRef: undefined
 				});
 			expect(parseCall(prefix + 'method( uint8  1  ) view returns (uint256)'))
 				.to.be.deep.equal({
 					method: Fragment.fromString('function method(uint8) view returns (uint256)'),
 					values: ['1'],
+					inferredPositions: [null],
 					contractRef: undefined
 				});
 			expect(parseCall(prefix + 'method( uint8  1   ,  string  "hola"   ) view returns (uint256)'))
 				.to.be.deep.equal({
 					method: Fragment.fromString('function method(uint8, string) view returns (uint256)'),
 					values: ['1', 'hola'],
+					inferredPositions: [null, null],
 					contractRef: undefined
 				});
 			expect(parseCall(prefix + 'method( uint8  2   ,  string  " hola, mundo", string "hello"   ) view returns (uint256)'))
 				.to.be.deep.equal({
 					method: Fragment.fromString('function method(uint8, string, string) view returns (uint256)'),
 					values: ['2', ' hola, mundo', 'hello'],
+					inferredPositions: [null, null, null],
 					contractRef: undefined
 				});
 		});
 
 
 		it(`should parse 'string' arguments properly ^${prefix}`, () => {
+			expect(parseCall(prefix + 'method(string "") view returns (uint256)'))
+				.to.be.deep.equal({
+					method: Fragment.fromString('function method(string) view returns (uint256)'),
+					values: [''],
+					inferredPositions: [null],
+					contractRef: undefined
+				});
 			expect(parseCall(prefix + '  method   ( string "hola(mundo, world)") view returns (uint256)'))
 				.to.be.deep.equal({
 					method: Fragment.fromString('function method(string) view returns (uint256)'),
 					values: ['hola(mundo, world)'],
+					inferredPositions: [null],
 					contractRef: undefined
 				});
 			expect(parseCall(prefix + 'method( string  " hola mundo ", string " hola( ,world)"  ) view returns (uint256)'))
 				.to.be.deep.equal({
 					method: Fragment.fromString('function method(string, string) view returns (uint256)'),
 					values: [' hola mundo ', ' hola( ,world)'],
+					inferredPositions: [null, null],
 					contractRef: undefined
 				});
 			expect(parseCall(prefix + 'method(string  "hola\\"mundo") view returns (uint256)'))
 				.to.be.deep.equal({
 					method: Fragment.fromString('function method(string) view returns (uint256)'),
 					values: ['hola\\"mundo'],
+					inferredPositions: [null],
 					contractRef: undefined
 				});
 		});
@@ -193,18 +209,28 @@ describe("parseCall", () => {
 				.to.be.deep.equal({
 					method: Fragment.fromString('function method(uint8) view returns (uint256)'),
 					values: ['1'],
+					inferredPositions: [6].map(p => p + prefix.length),
+					contractRef: undefined
+				});
+			expect(parseCall(prefix + 'method("") view returns (uint256)'))
+				.to.be.deep.equal({
+					method: Fragment.fromString('function method(string) view returns (uint256)'),
+					values: [''],
+					inferredPositions: [6].map(p => p + prefix.length),
 					contractRef: undefined
 				});
 			expect(parseCall(prefix + 'method(1, "hola, mundo", uint8 2) view returns (uint256)'))
 				.to.be.deep.equal({
 					method: Fragment.fromString('function method(uint8, string, uint8) view returns (uint256)'),
 					values: ['1', 'hola, mundo', '2'],
+					inferredPositions: [6, 8, null].map(p => p ? p + prefix.length : null),
 					contractRef: undefined
 				});
 			expect(parseCall(prefix + "method(0x5425890298aed601595a70AB815c96711a31Bc65) view returns (uint256)"))
 				.to.be.deep.equal({
 					method: Fragment.fromString('function method(address) view returns (uint256)'),
 					values: ['0x5425890298aed601595a70AB815c96711a31Bc65'],
+					inferredPositions: [6].map(p => p + prefix.length),
 					contractRef: undefined
 				});
 		});
@@ -214,12 +240,14 @@ describe("parseCall", () => {
 				.to.be.deep.equal({
 					method: Fragment.fromString('function method(address, string) view returns (uint256)'),
 					values: [new Id('token'), 'token'],
+					inferredPositions: [6, 12].map(p => p ? p + prefix.length : null),
 					contractRef: undefined
 				});
 			expect(parseCall(prefix + 'method(token, address "token") view returns (uint256)'))
 				.to.be.deep.equal({
 					method: Fragment.fromString('function method(address, address) view returns (uint256)'),
 					values: [new Id('token'), 'token'],
+					inferredPositions: [6, null].map(p => p ? p + prefix.length : null),
 					contractRef: undefined
 				});
 		});
@@ -229,12 +257,21 @@ describe("parseCall", () => {
 				.to.be.deep.equal({
 					method: Fragment.fromString('function method(uint8) view returns (uint256)'),
 					values: ['1'],
+					inferredPositions: [11].map(p => p + prefix.length),
+					contractRef: new Id('hola')
+				});
+			expect(parseCall(prefix + 'hola.method("") view returns (uint256)'))
+				.to.be.deep.equal({
+					method: Fragment.fromString('function method(string) view returns (uint256)'),
+					values: [''],
+					inferredPositions: [11].map(p => p + prefix.length),
 					contractRef: new Id('hola')
 				});
 			expect(parseCall(prefix + "  hola.  method(1) view returns (uint256)"))
 				.to.be.deep.equal({
 					method: Fragment.fromString('function method(uint8) view returns (uint256)'),
 					values: ['1'],
+					inferredPositions: [15].map(p => p + prefix.length),
 					contractRef: new Id('hola')
 				});
 		});
@@ -283,19 +320,21 @@ describe('patchFragmentSignature', () => {
 	});
 
 	it('should patch string values', () => {
+		expect(patchFragmentSignature('("")'))
+			.to.be.deep.equal(['($$arg0)', { '$$arg0': '' }, [0]]);
 		expect(patchFragmentSignature('  method   ( string "hola(mundo, world)") view returns (uint256)'))
 			.to.be.deep.equal([
 				'  method   ( string $$arg0) view returns (uint256)',
 				{
 					'$$arg0': 'hola(mundo, world)'
-				}]
+				}, [11, 41]]
 			);
 		expect(patchFragmentSignature('method(string  "hola\\"mundo") view returns (uint256)'))
 			.to.be.deep.equal([
 				'method(string  $$arg0) view returns (uint256)',
 				{
 					'$$arg0': 'hola\\"mundo'
-				}]
+				}, [6, 36]]
 			);
 		expect(patchFragmentSignature('method( string  " hola mundo ", string " hola( ,world)"  ) view returns (uint256)'))
 			.to.be.deep.equal([
@@ -303,7 +342,7 @@ describe('patchFragmentSignature', () => {
 				{
 					'$$arg0': ' hola mundo ',
 					'$$arg1': ' hola( ,world)'
-				}]
+				}, [6, 22, 54]]
 			);
 	});
 
