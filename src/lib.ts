@@ -176,6 +176,11 @@ export function* getUnresolvedSymbols(call: CallResolver): Generator<string> {
 	}
 }
 
+/**
+ * 
+ * @param network 
+ * @returns 
+ */
 export function createProvider(network: string): providers.Provider {
 	if (network.includes(':')) {
 		return new providers.JsonRpcProvider(network);
