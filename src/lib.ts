@@ -5,78 +5,35 @@ import { Address, Call, Id } from "./parse";
 /**
  * 
  */
-export interface CallResolver {
-
-	/**
-	 * 
-	 */
-	call: Call,
-
-	/**
-	 * 
-	 */
-	resolve: () => {
-
-		/**
-		 * 
-		 */
-		contractRef: string;
-
-		/**
-		 * 
-		 */
-		func: Fragment;
-
-		/**
-		 * 
-		 */
-		args: string[];
-
-		/**
-		 * The signer's private key where this fragment was defined, if any.
-		 */
-		privateKey?: string;
-
-		/**
-		 * The network this call should connect to, if any.
-		 */
-		network?: string;
-
-	}
-}
-
-/**
- * 
- */
 export class EthersMode {
 
 	/**
 	 * Defines the `this` keyword.
 	 * This is used to refer to the address of current scope.
 	 */
-	public static readonly THIS = 'this';
+	private static readonly THIS = 'this';
 
 	/**
 	 * Symbols table holds the address of each symbol.
 	 */
-	public readonly symbols: { [key: string]: string } = {};
+	readonly symbols: { [key: string]: string | undefined } = {};
 
 	/**
 	 * 
 	 */
-	public currentNetwork?: string;
-
-	/**
-	 * Returns the address of the current scope.
-	 */
-	public get thisAddress(): string | undefined {
-		return this.symbols[EthersMode.THIS];
-	}
+	currentNetwork?: string;
 
 	/**
 	 * Returns the private key of the current scope, if any.
 	 */
-	public thisPrivateKey?: string;
+	thisPrivateKey?: string;
+
+	/**
+	 * Returns the address of the current scope.
+	 */
+	get thisAddress(): string | undefined {
+		return this.symbols[EthersMode.THIS];
+	}
 
 	/**
 	 * 
@@ -118,62 +75,82 @@ export class EthersMode {
 	 * For more info,
 	 * see https://docs.ethers.io/v5/api/utils/abi/fragments/#human-readable-abi.
 	 */
-	call(call: Call): CallResolver {
-		const values: (string | Id)[] = [];
-		for (const value of call.values) {
-			if (value instanceof Id && value.id === EthersMode.THIS) {
-				values.push(this.symbols[value.id]);
-			} else {
-				values.push(value);
-			}
-		}
-
-		let thisAddress = this.symbols[EthersMode.THIS];
-		const privateKey = this.thisPrivateKey;
-		const network = this.currentNetwork;
-
-		if (!(call.method as FunctionFragment).constant && !privateKey) {
+	call(call: Call): { resolve: () => ResolvedCall } {
+		if (!(call.method as FunctionFragment).constant && !this.thisPrivateKey) {
 			throw new Error('sending a transaction requires a signer');
 		}
 
+		const values = call.values.map(value => value instanceof Id && value.id === EthersMode.THIS
+			? this.symbols[value.id]
+			: value);
+		const symbols = this.symbols;
+		const thisAddress = this.thisAddress;
+		const privateKey = this.thisPrivateKey;
+		const network = this.currentNetwork;
+
 		return {
-			call,
 			resolve: () => {
-				const { method, contractRef } = call;
+				return new class {
+					contractRef = call.contractRef ? symbols[call.contractRef.id] : thisAddress;
+					func = call.method;
+					args = values.map(value => value instanceof Id ? symbols[value.id] : value);
+					privateKey = privateKey;
+					network = network;
 
-				if (contractRef) {
-					thisAddress = this.symbols[contractRef.id];
-				}
-				const args = values.map(value => value instanceof Id ? this.symbols[value.id] : value);
+					*getUnresolvedSymbols(): Generator<string> {
+						if (!this.contractRef) {
+							yield call.contractRef!.id;
+						}
 
-				return {
-					contractRef: thisAddress,
-					func: method,
-					args,
-					privateKey,
-					network,
+						for (let i = 0; i < this.args.length; i++) {
+							const arg = this.args[i];
+							if (arg === undefined) {
+								yield (call.values[i] as Id).id;
+							}
+						}
+					}
 				};
 			}
 		};
 	}
+
 }
 
 /**
  * 
- * @param call 
  */
-export function* getUnresolvedSymbols(call: CallResolver): Generator<string> {
-	const { contractRef, args } = call.resolve();
-	if (!contractRef) {
-		yield call.call.contractRef!.id;
-	}
+export interface ResolvedCall {
 
-	for (let i = 0; i < args.length; i++) {
-		const arg = args[i];
-		if (arg === null) {
-			yield (call.call.values[i] as Id).id;
-		}
-	}
+	/**
+	 * 
+	 */
+	contractRef: string | undefined;
+
+	/**
+	 * 
+	 */
+	func: Fragment;
+
+	/**
+	 * 
+	 */
+	args: (string | undefined)[];
+
+	/**
+	 * The signer's private key where this fragment was defined, if any.
+	 */
+	privateKey?: string;
+
+	/**
+	 * The network this call should connect to, if any.
+	 */
+	network?: string;
+
+	/**
+	 * 
+	 */
+	getUnresolvedSymbols: () => Generator<string>;
+
 }
 
 /**

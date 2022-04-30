@@ -1,6 +1,6 @@
 import { CancellationToken, CodeLens, CodeLensProvider, DecorationInstanceRenderOptions, DecorationOptions, Diagnostic, DiagnosticSeverity, languages, Position, Range, TextDocument, TextLine, ThemeColor, window, workspace } from 'vscode';
 import { formatUnits, FunctionFragment } from 'ethers/lib/utils';
-import { createProvider, EthersMode, getUnresolvedSymbols } from './lib';
+import { createProvider, EthersMode } from './lib';
 import { Call, parse } from './parse';
 
 /**
@@ -99,20 +99,21 @@ export class EthersModeCodeLensProvider implements CodeLensProvider {
 
         for (const { call, range } of calls) {
             let pushIt = true;
-            for (const id of getUnresolvedSymbols(call)) {
+            const resolvedCall = call.resolve();
+            for (const id of resolvedCall.getUnresolvedSymbols()) {
                 error(range, `symbol \`${id}\` not defined`);
                 pushIt = false;
             }
 
             if (pushIt) {
-                const mut = (call.call.method as FunctionFragment).stateMutability;
+                const mut = (resolvedCall.func as FunctionFragment).stateMutability;
                 const icon = mut === 'payable' ? '$(credit-card)'
                     : mut === 'view' ? '$(play)'
                         : '$(flame)';
                 codeLenses.push(new CodeLens(range, {
                     title: `${icon} Call Contract Method`,
                     command: 'ethers-mode.codelens-call',
-                    arguments: [call],
+                    arguments: [resolvedCall],
                 }));
             }
         }

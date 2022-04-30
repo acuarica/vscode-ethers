@@ -5,7 +5,7 @@ import { Contract, providers, Wallet } from 'ethers';
 import { FunctionFragment, Logger } from 'ethers/lib/utils';
 import { ExtensionContext, languages, commands, Disposable, window, Hover } from 'vscode';
 import { EthersModeCodeLensProvider } from './EthersModeCodelensProvider';
-import { CallResolver, createProvider } from './lib';
+import { createProvider, ResolvedCall } from './lib';
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
@@ -51,8 +51,8 @@ export function activate({ subscriptions }: ExtensionContext) {
         }
     });
 
-    commands.registerCommand("ethers-mode.codelens-call", async (call: CallResolver) => {
-        const { contractRef, func, args, privateKey, network } = call.resolve();
+    commands.registerCommand("ethers-mode.codelens-call", async (call: ResolvedCall) => {
+        const { contractRef, func, args, privateKey, network } = call;
 
         const provider = createProvider(network!);
 
@@ -60,9 +60,9 @@ export function activate({ subscriptions }: ExtensionContext) {
         let contract;
         if (!isConstant) {
             const signer = new Wallet(privateKey!, provider);
-            contract = new Contract(contractRef, [func], signer);
+            contract = new Contract(contractRef!, [func], signer);
         } else {
-            contract = new Contract(contractRef, [func], provider);
+            contract = new Contract(contractRef!, [func], provider);
         }
 
         // try {
