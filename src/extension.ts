@@ -13,6 +13,8 @@ let disposables: Disposable[] = [];
 
 export function activate({ subscriptions }: ExtensionContext) {
     Logger.setLogLevel(LogLevel.OFF);
+
+    window.createOutputChannel('Ethers Mode', 'ethers');
     // const logLevel = workspace.getConfiguration("ethers-mode").get("logLevel");
     // console.log('act', logLevel);
     // if (logLevel) {
