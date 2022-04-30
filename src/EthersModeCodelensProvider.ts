@@ -1,7 +1,7 @@
-import { CancellationToken, CodeLens, CodeLensProvider, Diagnostic, DiagnosticSeverity, languages, Range, TextDocument, workspace } from 'vscode';
+import { CancellationToken, CodeLens, CodeLensProvider, DecorationInstanceRenderOptions, DecorationOptions, Diagnostic, DiagnosticSeverity, languages, Position, Range, TextDocument, TextLine, ThemeColor, window, workspace } from 'vscode';
 import { formatUnits, FunctionFragment } from 'ethers/lib/utils';
 import { createProvider, EthersMode, getUnresolvedSymbols } from './lib';
-import { parse } from './parse';
+import { Call, parse } from './parse';
 
 /**
  * 
@@ -53,6 +53,8 @@ export class EthersModeCodeLensProvider implements CodeLensProvider {
             diagnostics.push(diagnostic);
         }
 
+        const languageFunctions: DecorationOptions[] = [];
+
         const mode = new EthersMode();
         const codeLenses: CodeLens[] = [];
         const calls = [];
@@ -84,6 +86,7 @@ export class EthersModeCodeLensProvider implements CodeLensProvider {
                         }));
                     }
                 } else if (result.kind === 'call') {
+                    decor(languageFunctions, result.value, line);
                     const call = mode.call(result.value);
                     calls.push({ call, range });
                 }
@@ -91,6 +94,8 @@ export class EthersModeCodeLensProvider implements CodeLensProvider {
                 error(range, err.message);
             }
         }
+
+        window.activeTextEditor?.setDecorations(hintDecorationType, languageFunctions);
 
         for (const { call, range } of calls) {
             let pushIt = true;
@@ -165,5 +170,58 @@ export class EthersModeCodeLensProvider implements CodeLensProvider {
         }
 
         return null;
+    }
+}
+
+
+const hintDecorationType = window.createTextEditorDecorationType({});
+
+function decor(languageFunctions: DecorationOptions[], call: Call, line: TextLine) {
+
+    for (let i = 0; i < call.inferredPositions.length; i++) {
+        const p = call.inferredPositions[i];
+        if (p !== null) {
+            const text = ' ' + call.method.inputs[i].type + ' '.repeat(1);
+            const pos = new Position(line.lineNumber, p + 1);
+            const range = new Range(pos, pos);
+            const annotation = Annotations.parameterAnnotation(
+                text,
+                range,
+            );
+
+            languageFunctions.push(annotation);
+        }
+    }
+
+}
+
+export class Annotations {
+    public static parameterAnnotation(
+        message: string,
+        range: Range
+    ): DecorationOptions {
+        return {
+            range,
+            renderOptions: {
+                after: {
+                    contentText: message,
+                    color: new ThemeColor("editorInlayHint.typeForeground"),
+                    // backgroundColor: new ThemeColor("inlineparameters.annotationBackground"),
+                    backgroundColor: new ThemeColor("editorInlayHint.typeBackground"),
+
+
+                    // fontStyle: workspace.getConfiguration("inline-parameters").get("fontStyle", 'bold'),
+                    // fontWeight: workspace.getConfiguration("inline-parameters").get("fontWeight", '18'),
+                    border: 'blue',
+                    textDecoration: `;
+                        font-size: ${workspace.getConfiguration("inline-parameters").get("fontSize", 16)};
+                        margin: 10;
+                        padding: ${workspace.getConfiguration("inline-parameters").get("padding", 20)};
+                        border-radius: ${workspace.getConfiguration("inline-parameters").get("borderRadius", '15')};
+                        border: ${workspace.getConfiguration("inline-parameters").get("border", 2)};
+                    `,
+                },
+            } as DecorationInstanceRenderOptions,
+        } as DecorationOptions;
     }
 }
