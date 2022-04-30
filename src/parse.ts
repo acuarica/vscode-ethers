@@ -175,6 +175,10 @@ export function parseAddress(line: string): Address | null {
  * For more info,
  * see https://docs.ethers.io/v5/api/utils/abi/fragments/#human-readable-abi.
  * 
+ * Internally this function uses
+ * [`Fragment`](https://docs.ethers.io/v5/api/utils/abi/fragments/#Fragment)`.from`
+ * to parse a method signature.
+ * 
  * @param line 
  * @returns 
  */
@@ -263,8 +267,13 @@ export function inferArgumentType(value: string): string | null {
 }
 
 /**
- * Patches the string arguments in a fragment signature.
- * Returns the method signature and a map of arguments to their string values.
+ * This method performs an initial parsing of the fragment signature.
+ * It patches the string arguments in a fragment signature, inside the first parenthesis group, and
+ * keeps track of the argument's positions.
+ * Returns the method signature,
+ * a map of arguments to their string values and
+ * an array of argument's positions.
+ * 
  * For example:
  * 
  * ```js
@@ -280,27 +289,34 @@ export function inferArgumentType(value: string): string | null {
  * This is in order to parse the fragment signature using `Fragment` from `ethers`.
  * 
  * @param fragmentSig The fragment signature to patch
- * @returns The patched signature and the map of argument replacements
+ * @returns The patched signature, the map of argument replacements and the argument's positions
  */
 export function patchFragmentSignature(fragmentSig: string): [string, Record<string, string>, number[]] {
 	let openQuote = null;
 	const remaining = fragmentSig.length;
 	let strn = null;
 	const strs: { [key: string]: string } = {};
-	const pos = [];
+	const positions = [];
 	for (let i = 0; i < remaining; i++) {
 		if (!openQuote && fragmentSig[i] === '(') {
+			if (strn !== null) {
+				throw new Error('parsing error: nesting parenthesis not allowed');
+			}
+
 			strn = 0;
-			pos.push(i);
+			positions.push(i);
 		} else if (!openQuote && fragmentSig[i] === ')') {
-			strn = null;
+			break;
 		} else if (!openQuote && fragmentSig[i] === ',') {
 			strn!++;
-			pos.push(i);
+			positions.push(i);
 		} else if (fragmentSig[i] === '"' && (i === 0 || fragmentSig[i - 1] !== '\\')) {
 			if (openQuote === null) {
 				openQuote = i;
 			} else {
+				if (strn === null) {
+					throw new Error('parsing error: found comma outside parenthesis group');
+				}
 				strs['$$arg' + strn] = fragmentSig.substring(openQuote + 1, i);
 				const name = `$$arg${strn}`;
 				fragmentSig = `${fragmentSig.substring(0, openQuote)}${name}${fragmentSig.substring(i + 1, fragmentSig.length)}`;
@@ -314,5 +330,5 @@ export function patchFragmentSignature(fragmentSig: string): [string, Record<str
 		throw new Error('parsing error: unterminated string literal');
 	}
 
-	return [fragmentSig, strs, pos];
+	return [fragmentSig, strs, positions];
 }

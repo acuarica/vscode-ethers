@@ -172,7 +172,6 @@ describe("parseCall", () => {
 				});
 		});
 
-
 		it(`should parse 'string' arguments properly ^${prefix}`, () => {
 			expect(parseCall(prefix + 'method(string "") view returns (uint256)'))
 				.to.be.deep.equal({
@@ -316,7 +315,9 @@ describe('patchFragmentSignature', () => {
 		expect(() => patchFragmentSignature('method(string  "hola\\") view returns (uint256)'))
 			.to.throw('parsing error: unterminated string literal');
 		expect(() => patchFragmentSignature('method( string  " hola \\", string " hola( ,world)"  ) view returns (uint256)'))
-			.to.throw('parsing error: unterminated string literal');
+			.to.throw('parsing error: nesting parenthesis not allowed');
+		expect(() => patchFragmentSignature('method " hola", "mundo"'))
+			.to.throw('parsing error: found comma outside parenthesis group');
 	});
 
 	it('should patch string values', () => {
@@ -327,14 +328,14 @@ describe('patchFragmentSignature', () => {
 				'  method   ( string $$arg0) view returns (uint256)',
 				{
 					'$$arg0': 'hola(mundo, world)'
-				}, [11, 41]]
+				}, [11]]
 			);
 		expect(patchFragmentSignature('method(string  "hola\\"mundo") view returns (uint256)'))
 			.to.be.deep.equal([
 				'method(string  $$arg0) view returns (uint256)',
 				{
 					'$$arg0': 'hola\\"mundo'
-				}, [6, 36]]
+				}, [6]]
 			);
 		expect(patchFragmentSignature('method( string  " hola mundo ", string " hola( ,world)"  ) view returns (uint256)'))
 			.to.be.deep.equal([
@@ -342,7 +343,7 @@ describe('patchFragmentSignature', () => {
 				{
 					'$$arg0': ' hola mundo ',
 					'$$arg1': ' hola( ,world)'
-				}, [6, 22, 54]]
+				}, [6, 22]]
 			);
 	});
 
