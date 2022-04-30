@@ -61,6 +61,11 @@ export interface Call {
 	/**
 	 * 
 	 */
+	contractRef?: Id;
+
+	/**
+	 * 
+	 */
 	method: Fragment;
 
 	/**
@@ -72,11 +77,6 @@ export interface Call {
 	 * 
 	 */
 	inferredPositions: (number | null)[];
-
-	/**
-	 * 
-	 */
-	contractRef?: Id;
 }
 
 /**
@@ -210,7 +210,7 @@ export function parseCall(line: string): Call {
 				value = argv[value];
 			}
 			inferredPositions.push(null);
-		} else {
+		} else if (input.type) {
 			value = input.type;
 			if (value.startsWith('$$')) {
 				type = 'string';
@@ -220,6 +220,8 @@ export function parseCall(line: string): Call {
 			}
 
 			inferredPositions.push(pos[0]);
+		} else {
+			throw new Error('parsing error: invalid argument');
 		}
 		pos.shift();
 
