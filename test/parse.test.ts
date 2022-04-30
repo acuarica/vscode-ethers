@@ -273,12 +273,6 @@ describe("parseCall", () => {
 					inferredPositions: [15].map(p => p + prefix.length),
 					contractRef: new Id('hola')
 				});
-			expect(parseCall(prefix + "  hola.  method(1) view returns (uint256)"))
-				.to.be.deep.equal({
-					method: Fragment.fromString('function method(uint8) view returns (uint256)'),
-					values: ['1'],
-					contractRef: new Id('hola')
-				});
 		});
 
 	});
