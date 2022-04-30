@@ -170,12 +170,17 @@ export function* getUnresolvedSymbols(call: CallResolver): Generator<string> {
 
 	for (let i = 0; i < args.length; i++) {
 		const arg = args[i];
-		if (!arg) {
+		if (arg === null) {
 			yield (call.call.values[i] as Id).id;
 		}
 	}
 }
 
+/**
+ * 
+ * @param network 
+ * @returns 
+ */
 export function createProvider(network: string): providers.Provider {
 	if (network.includes(':')) {
 		return new providers.JsonRpcProvider(network);
