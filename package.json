@@ -60,9 +60,17 @@
         ],
         "configuration": {
             "properties": {
-                "codelens-sample.enableCodeLens": {
-                    "type": "boolean",
-                    "default": true
+                "ethers-mode.logLevel": {
+                    "type": "string",
+                    "enum": [
+                        "DEBUG",
+                        "INFO",
+                        "WARNING",
+                        "ERROR",
+                        "OFF"
+                    ],
+                    "default": "DEBUG",
+                    "description": "Sets `ethers.js` log level to filter logging output below that level"
                 }
             }
         }
