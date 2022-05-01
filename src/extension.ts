@@ -1,20 +1,20 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import { LogLevel } from '@ethersproject/logger';
-import { Contract, providers, utils, Wallet } from 'ethers';
+import { providers, utils } from 'ethers';
 import { FunctionFragment, Logger } from 'ethers/lib/utils';
-import { ExtensionContext, languages, commands, Disposable, window, Hover } from 'vscode';
+import { ExtensionContext, languages, commands, Disposable, window } from 'vscode';
 import { EthersModeCodeLensProvider } from './EthersModeCodelensProvider';
-import { createProvider, ResolvedCall } from './lib';
+import { execCall, ResolvedCall } from './lib';
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
 let disposables: Disposable[] = [];
 
 export function activate({ subscriptions }: ExtensionContext) {
-    Logger.setLogLevel(LogLevel.OFF);
+    Logger.setLogLevel(LogLevel.DEBUG);
 
-    const log = window.createOutputChannel('Ethers Mode', 'ethers');
+    const log = window.createOutputChannel('Ethers Mode');
     // const logLevel = workspace.getConfiguration("ethers-mode").get("logLevel");
     // console.log('act', logLevel);
     // if (logLevel) {
@@ -52,25 +52,14 @@ export function activate({ subscriptions }: ExtensionContext) {
     });
 
     commands.registerCommand("ethers-mode.codelens-call", async (call: ResolvedCall) => {
-        const { contractRef, func, args, privateKey, network } = call;
+        const { func, network } = call;
 
-        log.append(`Execute ${func.format(utils.FormatTypes.full)} on \u{1F310} ${network}`);
-
-        const provider = createProvider(network!);
-
-        const isConstant = (func as FunctionFragment).constant;
-        let contract;
-        if (!isConstant) {
-            const signer = new Wallet(privateKey!, provider);
-            contract = new Contract(contractRef!, [func], signer);
-        } else {
-            contract = new Contract(contractRef!, [func], provider);
-        }
+        log.appendLine(`Execute \`${func.format(utils.FormatTypes.full)}\` on \u{1F310} ${network}`);
 
         // try {
         let show;
-        const result = await contract.functions[func.name](...args);
-        if (isConstant) {
+        const result = await execCall(call);
+        if ((func as FunctionFragment).constant) {
             show = result;
         } else {
             const receipt = await (result as providers.TransactionResponse).wait();
@@ -86,22 +75,6 @@ export function activate({ subscriptions }: ExtensionContext) {
         // console.log('msg',err.error.message);
 
         // }
-    });
-
-    languages.registerHoverProvider('*', {
-        provideHover(document, position, _token) {
-
-            const range = document.getWordRangeAtPosition(position);
-            const word = document.getText(range);
-
-            if (word == "HELLO") {
-
-                return new Hover({
-                    language: "Hello language",
-                    value: "Hello Value"
-                });
-            }
-        }
     });
 
 }

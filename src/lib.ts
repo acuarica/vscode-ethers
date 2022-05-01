@@ -1,4 +1,4 @@
-import { providers } from "ethers";
+import { Contract, providers, Wallet } from "ethers";
 import { Fragment, FunctionFragment } from "ethers/lib/utils";
 import { Address, Call, Id } from "./parse";
 
@@ -153,6 +153,26 @@ export interface ResolvedCall {
 	 */
 	getUnresolvedSymbols: () => Generator<string>;
 
+}
+
+/**
+ * 
+ * @param call 
+ * @returns 
+ */
+export async function execCall(call: ResolvedCall) {
+	const { contractRef, func, args, privateKey, network } = call;
+
+	if (!network) {
+		throw new Error("No network provided");
+	}
+
+	const provider = createProvider(network!);
+	const contract = new Contract(contractRef!, [func], (func as FunctionFragment).constant
+		? provider
+		: new Wallet(privateKey!, provider));
+
+	return await contract.functions[func.name](...args);
 }
 
 /**

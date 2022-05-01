@@ -198,3 +198,16 @@ describe('EthersMode', () => {
 	});
 
 });
+
+describe('execCall', () => {
+
+	it('should resolve method calls', async () => {
+		// const mode = new EthersMode();
+
+		// mode.address('0x70997970C51812dc3A010C7d01b50e0d17dc79C8'.asAddress());
+		// const call = mode.call('method(1) view returns (uint)'.asCall());
+
+		// await expect(execCall(call.resolve())).be.equal('No network provideda');
+	});
+
+});
