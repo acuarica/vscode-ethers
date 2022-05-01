@@ -20,10 +20,11 @@
         "Programming Languages",
         "Other"
     ],
+    "keywords": ["ethereum", "ethers", "solidity", "evm", "address"],
     "activationEvents": [
         "onLanguage:ethers"
     ],
-    "main": "./out/extension",
+    "main": "./dist/main",
     "contributes": {
         "languages": [
             {
@@ -87,13 +88,13 @@
         }
     },
     "scripts": {
-        "compile": "tsc -p ./",
-        "lint": "eslint . --ext .ts,.tsx",
-        "watch": "tsc -watch -p ./",
+        "compile": "tsc --noEmit",
+        "build": "esbuild ./src/extension.ts --bundle --outfile=dist/main.js --external:vscode --format=cjs --platform=node",
         "test": "mocha",
-        "vscode:prepublish": "npm run compile",
-        "vscode:package": "vsce package",
-        "vscode:publish": "vsce publish"
+        "lint": "eslint . --ext .ts",
+        "vsce:prepublish": "npm run compile",
+        "vsce:package": "vsce package",
+        "vsce:publish": "vsce publish"
     },
     "devDependencies": {
         "@types/chai": "^4.3.1",
@@ -103,6 +104,7 @@
         "@typescript-eslint/eslint-plugin": "^4.16.0",
         "@typescript-eslint/parser": "^4.16.0",
         "chai": "^4.3.6",
+        "esbuild": "^0.14.38",
         "eslint": "^7.21.0",
         "mocha": "^9.2.2",
         "ts-node": "^10.7.0",
