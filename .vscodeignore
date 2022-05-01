@@ -1,11 +1,9 @@
 .github/**
 .vscode/**
 node_modules
-out/*.js.map
-out/*
+images/*.gif
 src/**
 test/**
 .gitignore
-*.gif
 sample.ethers
 tsconfig.json
