@@ -3,7 +3,7 @@
 Ethers Mode allows you to call Smart Contracts methods using [Ethers.js](https://docs.ethers.io/v5/) and view the response in Visual Studio Code directly.
 It uses VS CodeLens to display contextual information about Contracts, Externally Owned Accounts and networks.
 
-![preview](preview.gif)
+![preview](https://user-images.githubusercontent.com/4592980/166147485-ae00599b-d6c0-456b-9777-0a42706cbf9a.gif)
 
 ## Main Features
 
@@ -54,7 +54,7 @@ You can define aliases using the `as` keyword.
 These aliases can be used to reference the aliased address within another address.
 Moreover, you can use the `this` reference to use the address in the current scope.
 
-![preview-aliases](preview-aliases.gif)
+![preview-aliases](https://user-images.githubusercontent.com/4592980/166147504-f41a8a57-e628-4ab2-8503-e93eece2406b.gif)
 
 ### Sending and Signing Transactions
 
@@ -62,7 +62,7 @@ To send and sign transactions,
 you can provide a private key for an account.
 The address will be displayed as a code lens.
 
-![preview-signing](preview-signing.gif)
+![preview-signing](https://user-images.githubusercontent.com/4592980/166147513-e9670847-92b1-4380-84b7-d6c03b51e0d4.gif)
 
 ### Display inferred types
 
@@ -76,20 +76,20 @@ When you know that a contract implements a specific ERC,
 you can use snippets to insert its methods.
 The errors are caused because on methods that require sending a transaction without specifying a signer.
 
-![preview-snippets](preview-snippets.gif)
+![preview-snippets](https://user-images.githubusercontent.com/4592980/166147529-7302d0bb-a0bd-469c-9f39-3c4b96ab5157.gif)
 
 ### Error Reporting
 
 Whenever there is a syntax error or the method call is inconsistent, _e.g._, trying to send a transaction without a signer, the extension will show provide diagnostics about them.
 
-![preview-errors](preview-errors.gif)
+![preview-errors](https://user-images.githubusercontent.com/4592980/166147549-e28da62b-1376-4ee3-97f2-88c511fcb00f.gif)
 
 ### Language Auto Detection
 
 Just write `net <provider>` at the beginning of the file and select
 `Change Language Mode -> Auto Detect`.
 
-![preview-autodetect](preview-autodetect.gif)
+![preview-autodetect](https://user-images.githubusercontent.com/4592980/166147557-c7e516d3-caa9-40bb-821c-d530bf17915c.gif)
 
 ## Contributing
 
