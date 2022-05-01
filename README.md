@@ -64,6 +64,12 @@ The address will be displayed as a code lens.
 
 ![preview-signing](preview-signing.gif)
 
+### Display inferred types
+
+When you omit the type of an argument, it will display an inlay with the inferred type.
+
+![preview-inlays](https://user-images.githubusercontent.com/4592980/166147364-ddbd652d-e284-4927-85d1-5b92e61c1c1b.gif)
+
 ### Snippets
 
 When you know that a contract implements a specific ERC,
