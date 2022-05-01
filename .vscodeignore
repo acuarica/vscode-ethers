@@ -6,3 +6,4 @@
 /.gitignore
 /*.gif
 /tsconfig.json
+/yarn.lock
