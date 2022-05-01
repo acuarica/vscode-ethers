@@ -61,6 +61,7 @@
         "configuration": {
             "properties": {
                 "ethers-mode.logLevel": {
+                    "description": "Sets `ethers.js` log level to filter logging output below that level.",
                     "type": "string",
                     "enum": [
                         "DEBUG",
@@ -69,8 +70,17 @@
                         "ERROR",
                         "OFF"
                     ],
-                    "default": "DEBUG",
-                    "description": "Sets `ethers.js` log level to filter logging output below that level"
+                    "default": "DEBUG"
+                },
+                "ethers-mode.shouldDisplayNetworkInfo": {
+                    "description": "Whether to fetch and display network additional info, such as chain Id, block number and gas price.",
+                    "type": "boolean",
+                    "default": "true"
+                },
+                "ethers-mode.shouldDisplayAddressInfo": {
+                    "description": "Whether to fetch and display address additional info, such as Contract/EOA and balance.",
+                    "type": "boolean",
+                    "default": "true"
                 }
             }
         }

@@ -1,4 +1,4 @@
-import { CancellationToken, CodeLens, CodeLensProvider, DecorationInstanceRenderOptions, DecorationOptions, Diagnostic, DiagnosticSeverity, languages, Position, Range, TextDocument, TextLine, ThemeColor, window, workspace } from 'vscode';
+import { CancellationToken, CodeLens, CodeLensProvider, DecorationOptions, Diagnostic, DiagnosticSeverity, languages, Position, Range, TextDocument, TextLine, ThemeColor, window, workspace } from 'vscode';
 import { formatUnits, FunctionFragment } from 'ethers/lib/utils';
 import { createProvider, EthersMode } from './lib';
 import { Call, parse } from './parse';
@@ -42,6 +42,9 @@ export class EthersModeCodeLensProvider implements CodeLensProvider {
      * see https://code.visualstudio.com/api/references/vscode-api#CodeLensProvider.provideCodeLenses.
      */
     public provideCodeLenses(document: TextDocument, _token: CancellationToken): CodeLens[] | Thenable<CodeLens[]> {
+        const shouldDisplayNetworkInfo = (workspace.getConfiguration("ethers-mode").get("shouldDisplayNetworkInfo", true));
+        const shouldDisplayAddressInfo = (workspace.getConfiguration("ethers-mode").get("shouldDisplayAddressInfo", true));
+
         const diagnostics: Diagnostic[] = [];
         function error(range: Range, message: string) {
             const diagnostic = new Diagnostic(
@@ -53,7 +56,7 @@ export class EthersModeCodeLensProvider implements CodeLensProvider {
             diagnostics.push(diagnostic);
         }
 
-        const languageFunctions: DecorationOptions[] = [];
+        const inferredTypeDecorations: DecorationOptions[] = [];
 
         const mode = new EthersMode();
         const codeLenses: CodeLens[] = [];
@@ -69,7 +72,9 @@ export class EthersModeCodeLensProvider implements CodeLensProvider {
 
                 if (result.kind === 'net') {
                     mode.net(result.value);
-                    codeLenses.push(new NetworkCodeLens(mode.currentNetwork!, range));
+                    if (shouldDisplayNetworkInfo) {
+                        codeLenses.push(new NetworkCodeLens(mode.currentNetwork!, range));
+                    }
                 } else if (result.kind === 'address') {
                     mode.address(result.value);
                     codeLenses.push(new CodeLens(range, {
@@ -78,7 +83,9 @@ export class EthersModeCodeLensProvider implements CodeLensProvider {
                     }));
 
                     if (mode.currentNetwork) {
-                        codeLenses.push(new AddressCodeLens(mode.currentNetwork, result.value.address, range));
+                        if (shouldDisplayAddressInfo) {
+                            codeLenses.push(new AddressCodeLens(mode.currentNetwork, result.value.address, range));
+                        }
                     } else {
                         codeLenses.push(new CodeLens(range, {
                             title: 'No network selected -- first use `net <network>`',
@@ -86,7 +93,7 @@ export class EthersModeCodeLensProvider implements CodeLensProvider {
                         }));
                     }
                 } else if (result.kind === 'call') {
-                    decor(languageFunctions, result.value, line);
+                    decorate(inferredTypeDecorations, result.value, line);
                     const call = mode.call(result.value);
                     calls.push({ call, range });
                 }
@@ -95,7 +102,7 @@ export class EthersModeCodeLensProvider implements CodeLensProvider {
             }
         }
 
-        window.activeTextEditor?.setDecorations(hintDecorationType, languageFunctions);
+        window.activeTextEditor?.setDecorations(inferredTypeDecorationType, inferredTypeDecorations);
 
         for (const { call, range } of calls) {
             let pushIt = true;
@@ -133,96 +140,71 @@ export class EthersModeCodeLensProvider implements CodeLensProvider {
      * see https://code.visualstudio.com/api/references/vscode-api#CodeLensProvider.resolveCodeLens.
      */
     public async resolveCodeLens(codeLens: CodeLens, _token: CancellationToken): Promise<CodeLens | null> {
-        if (workspace.getConfiguration("codelens-sample").get("enableCodeLens", true)) {
-            if (codeLens instanceof NetworkCodeLens) {
-                try {
-                    const provider = createProvider(codeLens.network);
-                    const network = await provider.getNetwork();
-                    const blockNumber = await provider.getBlockNumber();
-                    const gasPrice = await provider.getGasPrice();
-                    codeLens.command = {
-                        title: `$(server-environment) Chain ID ${network.chainId} -- Block # ${blockNumber} | Gas Price ${formatUnits(gasPrice)}`,
-                        command: '',
-                    };
-                } catch (err: any) {
-                    console.debug(err.message);
-                    codeLens.command = {
-                        title: `No network: ${err.message}`,
-                        command: '',
-                    };
-                }
-            } else if (codeLens instanceof AddressCodeLens) {
-                try {
-                    const provider = createProvider(codeLens.network);
-                    const code = await provider.getCode(codeLens.address);
-                    const value = await provider.getBalance(codeLens.address);
-                    codeLens.command = {
-                        title: (code === '0x' ? '$(account) EOA' : '$(file-code) Contract') + ' -- Balance: ' + formatUnits(value),
-                        command: '',
-                    };
-                } catch (_err) {
-                    codeLens.command = {
-                        title: 'No network',
-                        command: '',
-                    };
-                }
+        if (codeLens instanceof NetworkCodeLens) {
+            try {
+                const provider = createProvider(codeLens.network);
+                const network = await provider.getNetwork();
+                const blockNumber = await provider.getBlockNumber();
+                const gasPrice = await provider.getGasPrice();
+                codeLens.command = {
+                    title: `$(server-environment) Chain ID ${network.chainId} -- Block # ${blockNumber} | Gas Price ${formatUnits(gasPrice)}`,
+                    command: '',
+                };
+            } catch (err: any) {
+                console.debug(err.message);
+                codeLens.command = {
+                    title: `No network: ${err.message}`,
+                    command: '',
+                };
             }
-            return codeLens;
+        } else if (codeLens instanceof AddressCodeLens) {
+            try {
+                const provider = createProvider(codeLens.network);
+                const code = await provider.getCode(codeLens.address);
+                const value = await provider.getBalance(codeLens.address);
+                codeLens.command = {
+                    title: (code === '0x' ? '$(account) EOA' : '$(file-code) Contract') + ' -- Balance: ' + formatUnits(value),
+                    command: '',
+                };
+            } catch (_err) {
+                codeLens.command = {
+                    title: 'No network',
+                    command: '',
+                };
+            }
         }
 
-        return null;
+        return codeLens;
     }
 }
 
 
-const hintDecorationType = window.createTextEditorDecorationType({});
+const inferredTypeDecorationType = window.createTextEditorDecorationType({
+    after: {
+        color: new ThemeColor("editorInlayHint.typeForeground"),
+        backgroundColor: new ThemeColor("editorInlayHint.typeBackground"),
+        textDecoration: `;
+                        margin-left: 4px;
+                        margin-right: 6px;
+                        padding: 4px;
+                        border-radius: 4px;
+                    `,
+    }
+});
 
-function decor(languageFunctions: DecorationOptions[], call: Call, line: TextLine) {
-
+function decorate(inferredTypeDecorations: DecorationOptions[], call: Call, line: TextLine) {
     for (let i = 0; i < call.inferredPositions.length; i++) {
         const p = call.inferredPositions[i];
         if (p !== null) {
-            const text = ' ' + call.method.inputs[i].type + ' '.repeat(1);
             const pos = new Position(line.lineNumber, p + 1);
-            const range = new Range(pos, pos);
-            const annotation = Annotations.parameterAnnotation(
-                text,
-                range,
-            );
-
-            languageFunctions.push(annotation);
-        }
-    }
-
-}
-
-export class Annotations {
-    public static parameterAnnotation(
-        message: string,
-        range: Range
-    ): DecorationOptions {
-        return {
-            range,
-            renderOptions: {
-                after: {
-                    contentText: message,
-                    color: new ThemeColor("editorInlayHint.typeForeground"),
-                    // backgroundColor: new ThemeColor("inlineparameters.annotationBackground"),
-                    backgroundColor: new ThemeColor("editorInlayHint.typeBackground"),
-
-
-                    // fontStyle: workspace.getConfiguration("inline-parameters").get("fontStyle", 'bold'),
-                    // fontWeight: workspace.getConfiguration("inline-parameters").get("fontWeight", '18'),
-                    border: 'blue',
-                    textDecoration: `;
-                        font-size: ${workspace.getConfiguration("inline-parameters").get("fontSize", 16)};
-                        margin: 10;
-                        padding: ${workspace.getConfiguration("inline-parameters").get("padding", 20)};
-                        border-radius: ${workspace.getConfiguration("inline-parameters").get("borderRadius", '15')};
-                        border: ${workspace.getConfiguration("inline-parameters").get("border", 2)};
-                    `,
+            inferredTypeDecorations.push({
+                range: new Range(pos, pos),
+                renderOptions: {
+                    after: {
+                        contentText: call.method.inputs[i].type,
+                    },
                 },
-            } as DecorationInstanceRenderOptions,
-        } as DecorationOptions;
+            });
+        }
     }
 }
