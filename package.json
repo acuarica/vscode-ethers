@@ -89,10 +89,10 @@
     },
     "scripts": {
         "compile": "tsc --noEmit",
+        "lint": "eslint . --ext .ts",
         "build": "esbuild ./src/extension.ts --bundle --outfile=dist/main.js --external:vscode --format=cjs --platform=node",
         "test": "mocha",
-        "lint": "eslint . --ext .ts",
-        "vsce:prepublish": "npm run compile",
+        "vsce:prepublish": "compile",
         "vsce:package": "vsce package",
         "vsce:publish": "vsce publish"
     },
