@@ -1,0 +1,37 @@
+
+net http://localhost:8545
+
+0x5425890298aed601595a70ab815c96711a31bc65
+    name() view returns (string)
+    symbol() view returns (string)
+    decimals() view returns (uint8)
+    totalSupply() view returns (uint256)
+
+# net add
+
+net http://localhost:8545
+
+0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 as hh0
+    token._mint(this, uint32 50000, 253323)
+    token._mint(this, uint32 50000)
+    token.balanceOf(this) view returns (uint256)
+    token.approve(deposit, uint256 1500) returns (bool success)
+    token.allowance(this, deposit) public view returns (uint256 remaining)
+    deposit.approveDeposit(uint256 1000)
+
+0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512 as deposit
+
+    token.balanceOf(this) view returns (uint256)
+
+    balanceOf(this) view returns (uint256) 
+
+0x5FbDB2315678afecb367f032d93F642f64180aa3 as token
+
+    name() view returns (string)
+
+    symbol() view returns (string)
+
+    decimals() view returns (uint8)
+
+    totalSupply() view returns (uint256)
+
