@@ -2,7 +2,7 @@
     "name": "ethers-mode",
     "displayName": "Ethers Mode",
     "description": "Ethers Mode for VS Code",
-    "icon": "logo.drawio.png",
+    "icon": "icon.drawio.png",
     "version": "0.0.6",
     "publisher": "acuarica",
     "private": true,
