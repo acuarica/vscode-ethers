@@ -20,7 +20,15 @@
         "Programming Languages",
         "Other"
     ],
-    "keywords": ["ethereum", "ethers", "solidity", "evm", "address"],
+    "keywords": [
+        "ethereum",
+        "ethers",
+        "solidity",
+        "evm",
+        "address",
+        "bytecode",
+        "repl"
+    ],
     "activationEvents": [
         "onLanguage:ethers"
     ],
@@ -112,7 +120,8 @@
         "vsce": "^2.7.0"
     },
     "dependencies": {
-        "ethers": "^5.6.2"
+        "ethers": "^5.6.2",
+        "evm": "^0.2.0"
     },
     "mocha": {
         "require": "ts-node/register/files",
