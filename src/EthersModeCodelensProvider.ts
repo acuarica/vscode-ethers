@@ -111,7 +111,9 @@ export class EthersModeCodeLensProvider implements CodeLensProvider {
             let pushIt = true;
             const resolvedCall = call.resolve();
             for (const id of resolvedCall.getUnresolvedSymbols()) {
-                warn(range, `symbol \`${id}\` not defined`);
+                const line = range.start.line;
+                const symbolRange = new Range(new Position(line, id.col), new Position(line, id.col + id.id.length));
+                warn(symbolRange, `symbol \`${id.id}\` not defined`);
                 pushIt = false;
             }
 
@@ -136,7 +138,7 @@ export class EthersModeCodeLensProvider implements CodeLensProvider {
     /**
      * 
      * @param codeLens 
-     * @param _token 
+     * @param token 
      * @returns 
      * 
      * For more info,

@@ -112,15 +112,15 @@ export class EthersMode {
 					privateKey = privateKey;
 					network = network;
 
-					*getUnresolvedSymbols(): Generator<string> {
+					*getUnresolvedSymbols(): Generator<Id> {
 						if (!this.contractRef) {
-							yield call.contractRef!.id;
+							yield call.contractRef!;
 						}
 
 						for (let i = 0; i < this.args.length; i++) {
 							const arg = this.args[i];
 							if (arg === undefined) {
-								yield (call.values[i] as Id).id;
+								yield call.values[i] as Id;
 							}
 						}
 					}
@@ -167,7 +167,7 @@ export interface ResolvedCall {
 	 * If this `ResolvedCall` is fully resolved, and it can be executed,
 	 * then this list is empty.
 	 */
-	getUnresolvedSymbols: () => Generator<string>;
+	getUnresolvedSymbols: () => Generator<Id>;
 
 }
 

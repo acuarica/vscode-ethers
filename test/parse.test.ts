@@ -1,6 +1,6 @@
 import { expect } from "chai";
 import { Fragment } from "ethers/lib/utils";
-import { parseNet, parseAddress, parseCall, inferArgumentType, patchFragmentSignature, Id, parse } from "../src/parse";
+import { parseNet, parseAddress, parseCall, inferArgumentType, patchFragmentSignature, Id, parse, Call } from "../src/parse";
 
 describe("parse", () => {
 
@@ -253,52 +253,62 @@ describe("parseCall", () => {
 				});
 		});
 
+		function p({ values, inferredPositions, contractRef, ...call }: Call) {
+			const prefixId = (id: Id) => new Id(id.id, id.col + prefix.length);
+			return {
+				...call,
+				values: values.map(value => value instanceof Id ? prefixId(value) : value),
+				inferredPositions: inferredPositions.map(pos => pos === null ? null : pos + prefix.length),
+				contractRef: contractRef ? prefixId(contractRef) : undefined,
+			};
+		}
+
 		it(`should parse functions signatures with symbols ^${prefix}`, () => {
 			expect(parseCall(prefix + 'method(token, "token") view returns (uint256)'))
-				.to.be.deep.equal({
+				.to.be.deep.equal(p({
 					method: Fragment.fromString('function method(address, string) view returns (uint256)'),
-					values: [new Id('token'), 'token'],
-					inferredPositions: [6, 12].map(p => p ? p + prefix.length : null),
+					values: [new Id('token', 6), 'token'],
+					inferredPositions: [6, 12],
 					contractRef: undefined
-				});
+				}));
 			expect(parseCall(prefix + 'method(token, address "token") view returns (uint256)'))
-				.to.be.deep.equal({
+				.to.be.deep.equal(p({
 					method: Fragment.fromString('function method(address, address) view returns (uint256)'),
-					values: [new Id('token'), 'token'],
-					inferredPositions: [6, null].map(p => p ? p + prefix.length : null),
+					values: [new Id('token', 6), 'token'],
+					inferredPositions: [6, null],
 					contractRef: undefined
-				});
+				}));
 			expect(parseCall(prefix + 'method(address token, address "token") view returns (uint256)'))
-				.to.be.deep.equal({
+				.to.be.deep.equal(p({
 					method: Fragment.fromString('function method(address, address) view returns (uint256)'),
-					values: [new Id('token'), 'token'],
-					inferredPositions: [null, null].map(p => p ? p + prefix.length : null),
+					values: [new Id('token', 6), 'token'],
+					inferredPositions: [null, null],
 					contractRef: undefined
-				});
+				}));
 		});
 
 		it(`should parse functions signatures with contract ref ^${prefix}`, () => {
 			expect(parseCall(prefix + "hola.method(1) view returns (uint256)"))
-				.to.be.deep.equal({
+				.to.be.deep.equal(p({
 					method: Fragment.fromString('function method(uint8) view returns (uint256)'),
 					values: ['1'],
-					inferredPositions: [11].map(p => p + prefix.length),
-					contractRef: new Id('hola')
-				});
+					inferredPositions: [11],
+					contractRef: new Id('hola', 0)
+				}));
 			expect(parseCall(prefix + 'hola.method("") view returns (uint256)'))
-				.to.be.deep.equal({
+				.to.be.deep.equal(p({
 					method: Fragment.fromString('function method(string) view returns (uint256)'),
 					values: [''],
-					inferredPositions: [11].map(p => p + prefix.length),
-					contractRef: new Id('hola')
-				});
+					inferredPositions: [11],
+					contractRef: new Id('hola', 0)
+				}));
 			expect(parseCall(prefix + "  hola.  method(1) view returns (uint256)"))
-				.to.be.deep.equal({
+				.to.be.deep.equal(p({
 					method: Fragment.fromString('function method(uint8) view returns (uint256)'),
 					values: ['1'],
-					inferredPositions: [15].map(p => p + prefix.length),
-					contractRef: new Id('hola')
-				});
+					inferredPositions: [15],
+					contractRef: new Id('hola', 2)
+				}));
 		});
 
 	});

@@ -1,7 +1,7 @@
 import { expect } from "chai";
 import { Fragment } from "ethers/lib/utils";
 import { EthersMode } from "../src/lib";
-import { Address, Call, parseAddress, parseCall, parseNet } from "../src/parse";
+import { Address, Call, Id, parseAddress, parseCall, parseNet } from "../src/parse";
 
 declare global {
 	interface String {
@@ -174,7 +174,7 @@ describe('EthersMode', () => {
 					privateKey: undefined,
 					network: undefined,
 				});
-			expect([...resolvedCall.getUnresolvedSymbols()]).to.be.deep.equal(['token']);
+			expect([...resolvedCall.getUnresolvedSymbols()]).to.be.deep.equal([new Id('token', 0)]);
 		});
 
 		it('should support unresolved arguments', () => {
@@ -192,7 +192,7 @@ describe('EthersMode', () => {
 				privateKey: undefined,
 				network: undefined,
 			});
-			expect([...resolvedCall.getUnresolvedSymbols()]).to.be.deep.equal(['eoa']);
+			expect([...resolvedCall.getUnresolvedSymbols()]).to.be.deep.equal([new Id('eoa', 20)]);
 		});
 
 	});
@@ -208,7 +208,7 @@ describe('execCall', () => {
 		// console.log(evm.decompile());
 		// console.log(evm.getFunctions());
 		// console.log(evm.getOpcodes());
-		
+
 		// const mode = new EthersMode();
 
 		// mode.address('0x70997970C51812dc3A010C7d01b50e0d17dc79C8'.asAddress());

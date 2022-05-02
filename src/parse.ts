@@ -96,7 +96,7 @@ export class Id {
 	 * 
 	 * @param id 
 	 */
-	constructor(public readonly id: string) { }
+	constructor(readonly id: string, readonly col: number) { }
 
 }
 
@@ -191,7 +191,7 @@ export function parseCall(line: string): Call {
 	let contractRef;
 	if (m) {
 		patchedFuncSig = patchedFuncSig.replace(CONTRACT_REF, '');
-		contractRef = new Id(m[1]);
+		contractRef = new Id(m[1], m[0].length - m[1].length - 1);
 	}
 
 	const fragment = Fragment.from(!patchedFuncSig.trim().startsWith('function ')
@@ -209,7 +209,7 @@ export function parseCall(line: string): Call {
 			if (value.startsWith('$$')) {
 				value = argv[value];
 			} else if (value.match(ID)) {
-				value = new Id(value);
+				value = new Id(value, pos[0]);
 			}
 			inferredPositions.push(null);
 		} else if (input.type) {
@@ -221,7 +221,7 @@ export function parseCall(line: string): Call {
 				type = inferArgumentType(value);
 				if (!type) {
 					type = 'address';
-					value = new Id(value);
+					value = new Id(value, pos[0]);
 				}
 			}
 
