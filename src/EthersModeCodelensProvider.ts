@@ -49,11 +49,11 @@ export class EthersModeCodeLensProvider implements CodeLensProvider {
         const shouldDisplayAddressInfo = (workspace.getConfiguration("ethers-mode").get("shouldDisplayAddressInfo", true));
 
         const diagnostics: Diagnostic[] = [];
-        function error(range: Range, message: string) {
+        function warn(range: Range, message: string) {
             const diagnostic = new Diagnostic(
                 range,
                 message,
-                DiagnosticSeverity.Error
+                DiagnosticSeverity.Warning
             );
             diagnostic.source = 'ethers-mode';
             diagnostics.push(diagnostic);
@@ -101,7 +101,7 @@ export class EthersModeCodeLensProvider implements CodeLensProvider {
                     calls.push({ call, range });
                 }
             } catch (err: any) {
-                error(range, err.message);
+                warn(range, err.message);
             }
         }
 
@@ -111,7 +111,7 @@ export class EthersModeCodeLensProvider implements CodeLensProvider {
             let pushIt = true;
             const resolvedCall = call.resolve();
             for (const id of resolvedCall.getUnresolvedSymbols()) {
-                error(range, `symbol \`${id}\` not defined`);
+                warn(range, `symbol \`${id}\` not defined`);
                 pushIt = false;
             }
 
