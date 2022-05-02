@@ -268,6 +268,13 @@ describe("parseCall", () => {
 					inferredPositions: [6, null].map(p => p ? p + prefix.length : null),
 					contractRef: undefined
 				});
+			expect(parseCall(prefix + 'method(address token, address "token") view returns (uint256)'))
+				.to.be.deep.equal({
+					method: Fragment.fromString('function method(address, address) view returns (uint256)'),
+					values: [new Id('token'), 'token'],
+					inferredPositions: [null, null].map(p => p ? p + prefix.length : null),
+					contractRef: undefined
+				});
 		});
 
 		it(`should parse functions signatures with contract ref ^${prefix}`, () => {

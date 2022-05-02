@@ -208,6 +208,8 @@ export function parseCall(line: string): Call {
 			value = input.name;
 			if (value.startsWith('$$')) {
 				value = argv[value];
+			} else if (value.match(ID)) {
+				value = new Id(value);
 			}
 			inferredPositions.push(null);
 		} else if (input.type) {
@@ -217,6 +219,10 @@ export function parseCall(line: string): Call {
 				value = argv[value];
 			} else {
 				type = inferArgumentType(value);
+				if (!type) {
+					type = 'address';
+					value = new Id(value);
+				}
 			}
 
 			inferredPositions.push(pos[0]);
@@ -224,11 +230,6 @@ export function parseCall(line: string): Call {
 			throw new Error('parsing error: invalid argument');
 		}
 		pos.shift();
-
-		if (!type) {
-			type = 'address';
-			value = new Id(value);
-		}
 
 		inputs.push(ParamType.fromObject({ ...input as any, name: null, type, _isParamType: false }));
 		values.push(value);
