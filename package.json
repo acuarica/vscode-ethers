@@ -27,7 +27,10 @@
         "evm",
         "address",
         "bytecode",
-        "repl"
+        "repl",
+	"blockchain",
+	"polygon",
+	"avalanche"
     ],
     "activationEvents": [
         "onLanguage:ethers"

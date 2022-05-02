@@ -1,6 +1,7 @@
 # VS Code Ethers Mode
 
-Ethers Mode allows you to call Smart Contracts methods using [Ethers.js](https://docs.ethers.io/v5/) and view the response in Visual Studio Code directly.
+Ethers Mode allows you to explore and call Smart Contracts methods using [Ethers.js](https://docs.ethers.io/v5/) and view the response directly in VS Code.
+It interacts with any EVM-compatible blockchain, _e.g._, Ethereum, Polygon, Avalanche, _etc_.
 It uses VS CodeLens to display contextual information about Contracts, Externally Owned Accounts and networks.
 
 ![preview](https://user-images.githubusercontent.com/4592980/166147485-ae00599b-d6c0-456b-9777-0a42706cbf9a.gif)
