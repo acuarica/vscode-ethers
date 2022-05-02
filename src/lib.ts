@@ -3,7 +3,12 @@ import { Fragment, FunctionFragment } from "ethers/lib/utils";
 import { Address, Call, Id } from "./parse";
 
 /**
+ * The `EthersMode` represents the mode where the user can 
+ * add networks, addresses and contract call to these addresses.
  * 
+ * It keeps track of contract calls scopes and addresses aliases.
+ * 
+ * You can use the `this` symbol to refer to the current address scope.
  */
 export class EthersMode {
 
@@ -77,7 +82,15 @@ export class EthersMode {
 	 * For more info,
 	 * see https://docs.ethers.io/v5/api/utils/abi/fragments/#human-readable-abi.
 	 */
-	call(call: Call): { resolve: () => ResolvedCall } {
+	call(call: Call): {
+
+		/**
+		 * Resolves call's symbols and
+		 * assigns the `thisAddress` and `thisPrivateKey` from the current scope.
+		 * It looks up for symbol definitions of both the `contractRef` and `args`.
+		 */
+		resolve: () => ResolvedCall
+	} {
 		if (!(call.method as FunctionFragment).constant && !this.thisPrivateKey) {
 			throw new Error('sending a transaction requires a signer');
 		}
@@ -149,7 +162,10 @@ export interface ResolvedCall {
 	network?: string;
 
 	/**
-	 * 
+	 * Returns a list of unresolved symbols, _i.e._, symbols that are not defined
+	 * in this `EthersMode`. 
+	 * If this `ResolvedCall` is fully resolved, and it can be executed,
+	 * then this list is empty.
 	 */
 	getUnresolvedSymbols: () => Generator<string>;
 
