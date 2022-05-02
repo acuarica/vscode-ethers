@@ -28,9 +28,11 @@
         "address",
         "bytecode",
         "repl",
-	"blockchain",
-	"polygon",
-	"avalanche"
+        "blockchain",
+        "polygon",
+        "avalanche",
+        "smart-contracts",
+        "web3"
     ],
     "activationEvents": [
         "onLanguage:ethers"
