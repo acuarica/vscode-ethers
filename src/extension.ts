@@ -3,8 +3,11 @@
 import { LogLevel } from '@ethersproject/logger';
 import { providers, utils } from 'ethers';
 import { FunctionFragment, Logger } from 'ethers/lib/utils';
-import { ExtensionContext, languages, commands, Disposable, window } from 'vscode';
+import { EVM } from 'evm';
+import { ExtensionContext, languages, commands, Disposable, window, workspace } from 'vscode';
+import { EthersModeCodeActionProvider } from './EthersModeCodeActionProvider';
 import { EthersModeCodeLensProvider } from './EthersModeCodelensProvider';
+import { EthersModeHoverProvider } from './EthersModeHoverProvider';
 import { execCall, ResolvedCall } from './lib';
 
 // this method is called when your extension is activated
@@ -12,6 +15,9 @@ import { execCall, ResolvedCall } from './lib';
 let disposables: Disposable[] = [];
 
 export function activate({ subscriptions }: ExtensionContext) {
+    const registerCommand = (command: string, callback: (...args: any[]) => any) => subscriptions.push(commands.registerCommand(command, callback));
+    // const registerCommandTextEditor = (command: string, callback: (textEditor: TextEditor, edit: TextEditorEdit, ...args: any[]) => void) => subscriptions.push(commands.registerTextEditorCommand(command, callback));
+
     Logger.setLogLevel(LogLevel.DEBUG);
 
     const log = window.createOutputChannel('Ethers Mode');
@@ -33,8 +39,10 @@ export function activate({ subscriptions }: ExtensionContext) {
     const codelensProvider = new EthersModeCodeLensProvider();
 
     languages.registerCodeLensProvider("ethers", codelensProvider);
+    languages.registerCodeActionsProvider("ethers", new EthersModeCodeActionProvider(codelensProvider));
+    languages.registerHoverProvider("ethers", new EthersModeHoverProvider(codelensProvider));
 
-    commands.registerCommand("ethers-mode.call", async () => {
+    registerCommand("ethers-mode.call", async () => {
         const editor = window.activeTextEditor;
         const document = window.activeTextEditor?.document;
 
@@ -51,7 +59,7 @@ export function activate({ subscriptions }: ExtensionContext) {
         }
     });
 
-    commands.registerCommand("ethers-mode.codelens-call", async (call: ResolvedCall) => {
+    registerCommand("ethers-mode.codelens-call", async (call: ResolvedCall) => {
         const { func, network } = call;
 
         log.appendLine(`Execute \`${func.format(utils.FormatTypes.full)}\` on \u{1F310} ${network}`);
@@ -75,6 +83,12 @@ export function activate({ subscriptions }: ExtensionContext) {
         // console.log('msg',err.error.message);
 
         // }
+    });
+
+    registerCommand('ethers-mode.decompile', async (code: string) => {
+        const evm = new EVM(code);
+        const text = evm.decompile();
+        await workspace.openTextDocument({ language: 'solidity', content: text });
     });
 
 }

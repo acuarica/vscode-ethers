@@ -6,7 +6,7 @@ import { Call, parse } from './parse';
 /**
  * 
  */
-class NetworkCodeLens extends CodeLens {
+export class NetworkCodeLens extends CodeLens {
     constructor(readonly network: string, range: Range) {
         super(range);
     }
@@ -15,7 +15,10 @@ class NetworkCodeLens extends CodeLens {
 /**
  * 
  */
-class AddressCodeLens extends CodeLens {
+export class AddressCodeLens extends CodeLens {
+
+    code?: string;
+
     constructor(readonly network: string, readonly address: string, range: Range) {
         super(range);
     }
@@ -139,7 +142,7 @@ export class EthersModeCodeLensProvider implements CodeLensProvider {
      * For more info,
      * see https://code.visualstudio.com/api/references/vscode-api#CodeLensProvider.resolveCodeLens.
      */
-    public async resolveCodeLens(codeLens: CodeLens, _token: CancellationToken): Promise<CodeLens | null> {
+    public async resolveCodeLens(codeLens: CodeLens, token: CancellationToken): Promise<CodeLens | null> {
         if (codeLens instanceof NetworkCodeLens) {
             try {
                 const provider = createProvider(codeLens.network);
@@ -162,9 +165,15 @@ export class EthersModeCodeLensProvider implements CodeLensProvider {
                 const provider = createProvider(codeLens.network);
                 const code = await provider.getCode(codeLens.address);
                 const value = await provider.getBalance(codeLens.address);
+                const [title, command, args, tooltip] = code === '0x'
+                    ? ['$(account) EOA', '', [], '']
+                    : ['$(file-code) Decompile Contract', 'ethers-mode.decompile', [code], 'Package evm, https://github.com/MrLuit/evm, performs contract decompilation, which has some issues https://github.com/MrLuit/evm/issues.'];
+                codeLens.code = code;
                 codeLens.command = {
-                    title: (code === '0x' ? '$(account) EOA' : '$(file-code) Contract') + ' -- Balance: ' + formatUnits(value),
-                    command: '',
+                    title: title + ' -- Balance: ' + formatUnits(value),
+                    command,
+                    arguments: args,
+                    tooltip,
                 };
             } catch (_err) {
                 codeLens.command = {
@@ -172,6 +181,10 @@ export class EthersModeCodeLensProvider implements CodeLensProvider {
                     command: '',
                 };
             }
+        }
+
+        if (token.isCancellationRequested) {
+            return null;
         }
 
         return codeLens;
