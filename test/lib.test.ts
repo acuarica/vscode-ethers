@@ -202,6 +202,13 @@ describe('EthersMode', () => {
 describe('execCall', () => {
 
 	it('should resolve method calls', async () => {
+		// const p = createProvider('http://localhost:8545');
+		// const c = await p.getCode('0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512');
+		// const evm = new EVM(c);
+		// console.log(evm.decompile());
+		// console.log(evm.getFunctions());
+		// console.log(evm.getOpcodes());
+		
 		// const mode = new EthersMode();
 
 		// mode.address('0x70997970C51812dc3A010C7d01b50e0d17dc79C8'.asAddress());
