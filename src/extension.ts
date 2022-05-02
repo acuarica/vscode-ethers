@@ -6,7 +6,7 @@ import { FunctionFragment, Logger } from 'ethers/lib/utils';
 import { EVM } from 'evm';
 import { ExtensionContext, languages, commands, Disposable, window, workspace } from 'vscode';
 import { EthersModeCodeActionProvider } from './EthersModeCodeActionProvider';
-import { EthersModeCodeLensProvider } from './EthersModeCodelensProvider';
+import { EthersModeCodeLensProvider } from './EthersModeCodeLensProvider';
 import { EthersModeHoverProvider } from './EthersModeHoverProvider';
 import { execCall, ResolvedCall } from './lib';
 
