@@ -17,7 +17,7 @@ export class EthersModeHoverProvider implements HoverProvider {
                     let addressHoverContent = ``;
                     try {
                         const evm = new EVM(codeLens.code);
-                        addressHoverContent += `\n### Functions\n\n_View functions are not properly identified_\n\n\`\`\`solidity\n${evm.getFunctions().join('\n')}\n\`\`\``;
+                        addressHoverContent += `\n### Functions\n\n_Functions might not be properly identified_\n\n\`\`\`solidity\n${evm.getFunctions().join('\n')}\n\`\`\``;
                     } catch (err: any) {
                         console.log(err);
                     }
