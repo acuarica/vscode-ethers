@@ -1,11 +1,36 @@
 import * as assert from 'assert';
 import { after } from 'mocha';
 
-// You can import and use all API from the 'vscode' module
-// as well as import your extension to test it
 import * as vscode from 'vscode';
-import { Position, Selection } from 'vscode';
-// import * as myExtension from '../extension';
+import { commands, Position, Selection, TextEditor } from 'vscode';
+
+const wait = (ms: number): Promise<void> => new Promise(resolve => setTimeout(resolve, ms));
+
+async function typewrite(editor: TextEditor, start: Position, text: string, ms = 80) {
+    let pos = start;
+    for (const c of text) {
+        await editor.edit(
+            function (b: vscode.TextEditorEdit) {
+                b.insert(pos, c);
+            }
+        );
+        if (c === '\n') {
+            pos = new Position(pos.line + 1, 0);
+        } else {
+            pos = new Position(pos.line, pos.character + 1);
+        }
+        await wait(ms);
+    }
+
+    await wait(1000);
+
+    return pos;
+}
+
+function hoverAt(editor: TextEditor, position: Position) {
+    editor.selection = new Selection(position, position);
+    vscode.commands.executeCommand('editor.action.showHover');
+}
 
 suite('Extension Test Suite', () => {
     after(() => {
@@ -13,57 +38,25 @@ suite('Extension Test Suite', () => {
     });
 
     test('Sample test', async () => {
-
-        const document = await vscode.workspace.openTextDocument({
-            language: 'ethers',
-            content: `
-net fuji
-
-net goerli
-
-0x0 as ciao
-        `
-        });
-
+        const document = await vscode.workspace.openTextDocument({ language: 'ethers' });
         const editor = await vscode.window.showTextDocument(document);
 
-        // vscode.tests.
+        let pos = new Position(0, 0);
+        pos = await typewrite(editor, pos, `\n`);
 
-        // await editor.edit(
-        //     function (b: vscode.TextEditorEdit) {
-        //         b.insert(new vscode.Position(0, 0), 'net fuji\n');
-        //     }
-        // );
-        function hoverAt(l: number, c: number) {
-            const pos = new Position(l, c);
-            editor.selection = new Selection(pos, pos);
-            vscode.commands.executeCommand('editor.action.showHover');
-        }
+        pos = await typewrite(editor, pos, `net fuji\n\n`);
+        // hoverAt(editor, pos.translate(-2));
+        pos = await typewrite(editor, pos, `0x5425890298aed601595a70AB815c96711a31Bc65`, 20);
 
-        await sleep(2000);
-        hoverAt(1, 0);
+        pos = await typewrite(editor, pos, ` as usdc\n\n`,);
+        pos = await typewrite(editor, pos, `net goerli\n\n`);
 
-        await sleep(3000);
-        hoverAt(3, 3);
+        await wait(10000);
 
+        commands.executeCommand('workbench.action.closeActiveEditor');
 
+        await wait(500);
 
-        // await editor.edit(
-        //     function (b: vscode.TextEditorEdit) {
-        //         b.insert(new vscode.Position(1, 0), 'net goerli\n');
-        //     }
-        // );
-        await sleep(4000);
-        vscode.commands.executeCommand('editor.action.showHover');
-
-
-        assert.strictEqual(-1, [1, 2, 3].indexOf(5));
         assert.strictEqual(-1, [1, 2, 3].indexOf(0));
     });
 });
-
-function sleep(ms: number): Promise<void> {
-    return new Promise(resolve => {
-        setTimeout(resolve, ms);
-    });
-}
