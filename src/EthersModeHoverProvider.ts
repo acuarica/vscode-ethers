@@ -10,7 +10,12 @@ export class EthersModeHoverProvider implements HoverProvider {
     provideHover(_document: TextDocument, position: Position, token: CancellationToken): ProviderResult<Hover> {
         for (const codeLens of this.codelensProvider.codeLenses) {
             if (codeLens.range.contains(position)) {
-                if (codeLens instanceof AddressCodeLens &&
+                if (codeLens instanceof NetworkCodeLens) {
+                    const provider = createProvider(codeLens.network);
+                    const explorerUrl = provider.explorerUrl ? `\n\n#### Explorer\n${provider.explorerUrl}` : '';
+                    const netHoverContent = `#### Connection\n${provider.connectionUrl}${explorerUrl}`;
+                    return new Hover(netHoverContent);
+                } else if (codeLens instanceof AddressCodeLens &&
                     codeLens.code !== undefined &&
                     codeLens.code !== '0x') {
 
@@ -33,10 +38,6 @@ export class EthersModeHoverProvider implements HoverProvider {
                     }
 
                     return new Hover(contents);
-                } else if (codeLens instanceof NetworkCodeLens) {
-                    const provider = createProvider(codeLens.network);
-                    const netHoverContent = `### Connection Info\n${provider.connectionUrl}`;
-                    return new Hover(netHoverContent);
                 }
             }
         }
