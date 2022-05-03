@@ -4,6 +4,7 @@ node_modules
 images/*.gif
 src/**
 test/**
+out/**
 .gitignore
 sample.ethers
 tsconfig.json

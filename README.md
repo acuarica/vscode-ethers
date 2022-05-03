@@ -48,7 +48,6 @@ click the `Call Smart Contract Method` link above the call
 (this will appear if the file's language is `Ethers`, by default `.ethers` and `.web3` files are like this).
 
 ## Features
-![preview-decompile](https://user-images.githubusercontent.com/4592980/166395723-64519b4a-2648-4e05-aeab-3f2a1c6c3226.gif)
 
 ### Aliases
 
@@ -57,6 +56,12 @@ These aliases can be used to reference the aliased address within another addres
 Moreover, you can use the `this` reference to use the address in the current scope.
 
 ![preview-aliases](https://user-images.githubusercontent.com/4592980/166147504-f41a8a57-e628-4ab2-8503-e93eece2406b.gif)
+
+### Hovers & Decompile
+
+Provide connection info and decompilation of smart contracts.
+
+![preview-decompile](https://user-images.githubusercontent.com/4592980/166395723-64519b4a-2648-4e05-aeab-3f2a1c6c3226.gif)
 
 ### Sending and Signing Transactions
 
