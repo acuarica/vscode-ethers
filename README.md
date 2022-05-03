@@ -48,6 +48,7 @@ click the `Call Smart Contract Method` link above the call
 (this will appear if the file's language is `Ethers`, by default `.ethers` and `.web3` files are like this).
 
 ## Features
+![preview-decompile](https://user-images.githubusercontent.com/4592980/166395723-64519b4a-2648-4e05-aeab-3f2a1c6c3226.gif)
 
 ### Aliases
 
