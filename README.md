@@ -1,5 +1,10 @@
 # VS Code Ethers Mode
 
+[![marketplace](https://vsmarketplacebadge.apphb.com/version-short/acuarica.ethers-mode.svg)](https://marketplace.visualstudio.com/items?acuarica.ethers-mode)
+[![installs](https://vsmarketplacebadge.apphb.com/installs/acuarica.ethers-mode.svg)](https://marketplace.visualstudio.com/items?acuarica.ethers-mode)
+[![downloads](https://vsmarketplacebadge.apphb.com/downloads/acuarica.ethers-mode.svg)](https://marketplace.visualstudio.com/items?acuarica.ethers-mode)
+[![rating](https://vsmarketplacebadge.apphb.com/rating-star/acuarica.ethers-mode.svg)](https://marketplace.visualstudio.com/items?acuarica.ethers-mode)
+
 Ethers Mode allows you to explore and call Smart Contracts methods using [Ethers.js](https://docs.ethers.io/v5/) and view the response directly in VS Code.
 It interacts with any EVM-compatible blockchain, _e.g._, Ethereum, Polygon, Avalanche, _etc_.
 It uses VS CodeLens to display contextual information about Contracts, Externally Owned Accounts and networks.
