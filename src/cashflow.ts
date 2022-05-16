@@ -6,7 +6,7 @@ import { BlockRange } from "./parse";
  * Keeps track of account balances.
  * It can be used for both sender and receiver accounts.
  */
-export type Balances = { [from: string]: BigNumber };
+export type Balances = { [address: string]: BigNumber };
 
 /**
  * Fetch and flatten transactions from blocks specified in the `blockRange`.
@@ -63,8 +63,8 @@ export function cashFlow(transactions:
     receivers: Balances,
 } {
     let total = constants.Zero;
-    const senders: { [to: string]: BigNumber } = {};
-    const receivers: { [from: string]: BigNumber } = {};
+    const senders: Balances = {};
+    const receivers: Balances = {};
 
     for (const tx of transactions) {
         if (!tx.value.isZero()) {
