@@ -111,6 +111,34 @@ Just write `net <provider>` at the beginning of the file and select
   - Start a task `npm: watch` to compile the code
   - Run the extension in a new VS Code window
 
+### Typechecking and Building
+
+To typecheck the extension using `tsc`, run
+
+```sh
+yarn compile
+```
+
+To build and package the extension we use the `esbuild` bundler.
+To bundle the extension into `dist/main.js`, run
+
+```sh
+yarn build
+```
+
+### Unit Testing
+
+Unit tests can be found under the `test` folder.
+Our test suite uses `mocha` to run the tests.
+
+```sh
+yarn test
+```
+
+### VS Code Testing
+
+**TODO!**
+
 ### VS Code API Overview
 
 ### `languages` module
