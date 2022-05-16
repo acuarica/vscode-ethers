@@ -35,3 +35,9 @@ net http://localhost:8545
 
     totalSupply() view returns (uint256)
 
+
+net fuji
+
+123
+
+9744200-9744215
