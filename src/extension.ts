@@ -5,7 +5,7 @@ import { providers, utils } from 'ethers';
 import { formatEther, FunctionFragment, Logger } from 'ethers/lib/utils';
 import { EVM } from 'evm';
 import { ExtensionContext, languages, commands, Disposable, window, workspace, ProgressLocation, ViewColumn } from 'vscode';
-import { Balances, cashFlow, fetchTransactions } from './cashflow';
+import { Balances, cashFlow, fetchTransactions, isContract } from './cashflow';
 import { EthersModeCodeActionProvider } from './providers/EthersModeCodeActionProvider';
 import { EthersModeCodeLensProvider } from './providers/EthersModeCodeLensProvider';
 import { EthersModeHoverProvider } from './providers/EthersModeHoverProvider';
@@ -66,8 +66,9 @@ export function activate({ subscriptions }: ExtensionContext) {
 
         const transactions = await window.withProgress({
             location: ProgressLocation.Notification,
-            title: 'Fetching Transactions...',
+            title: 'Fetching transactions',
             cancellable: true,
+
         }, (progress, token) => {
             token.onCancellationRequested(() => {
                 console.log('User canceled the long running operation');
@@ -76,12 +77,18 @@ export function activate({ subscriptions }: ExtensionContext) {
             progress.report({ increment: 0 });
 
             return fetchTransactions(provider, (block) => {
-                progress.report({ increment: 5, message: `Fetching block #${block}` });
+                progress.report({ increment: 2, message: `block #${block}...` });
                 return provider.getBlockWithTransactions(block);
             }, blockRange);
 
         });
         const result = cashFlow(transactions);
+        const contractAddresses = new Set<string>();
+        for (const address of new Set([...Object.keys(result.senders), ...Object.keys(result.receivers)])) {
+            if (await isContract(provider, address)) {
+                contractAddresses.add(address);
+            }
+        }
 
         const content = `# Ether Cash Flow Report\n\n## Total **${formatEther(result.total)}**\n\n${formatBalances(result.senders, 'Senders')}\n${formatBalances(result.receivers, 'Receivers')}`;
 
@@ -90,8 +97,9 @@ export function activate({ subscriptions }: ExtensionContext) {
 
         function formatBalances(balances: Balances, title: string) {
             let result = `## ${title}\n\n`;
-            for (const [key, value] of Object.entries(balances)) {
-                result += `${key}: ${formatEther(value)}\n`;
+            for (const [address, value] of Object.entries(balances)) {
+                const isContract = contractAddresses.has(address) ? 'Contract' : 'EOA';
+                result += `${address} ${isContract}: ${formatEther(value)}\n`;
             }
             return result;
         }
