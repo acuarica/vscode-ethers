@@ -1,7 +1,8 @@
-import { CancellationToken, CodeLens, CodeLensProvider, DecorationOptions, Diagnostic, DiagnosticSeverity, languages, Position, Range, TextDocument, TextLine, ThemeColor, window, workspace } from 'vscode';
+import { Block } from "@ethersproject/abstract-provider";
 import { formatUnits, FunctionFragment } from 'ethers/lib/utils';
+import { CancellationToken, CodeLens, CodeLensProvider, DecorationOptions, Diagnostic, DiagnosticSeverity, languages, Position, Range, TextDocument, TextLine, ThemeColor, window, workspace } from 'vscode';
 import { createProvider, EthersMode } from '../mode';
-import { Call, parse } from '../parse';
+import { BlockRange, Call, parse } from '../parse';
 
 /**
  * 
@@ -20,6 +21,18 @@ export class AddressCodeLens extends CodeLens {
     code?: string;
 
     constructor(readonly network: string, readonly address: string, range: Range) {
+        super(range);
+    }
+}
+
+/**
+ * 
+ */
+export class BlockCodeLens extends CodeLens {
+
+    block?: Block;
+
+    constructor(readonly network: string, readonly blockRange: BlockRange, range: Range) {
         super(range);
     }
 }
@@ -80,8 +93,9 @@ export class EthersModeCodeLensProvider implements CodeLensProvider {
                     }
                 } else if (result.kind === 'block') {
                     if (mode.currentNetwork) {
+                        codeLenses.push(new BlockCodeLens(mode.currentNetwork, result.value, range));
                         codeLenses.push(new CodeLens(range, {
-                            title: 'Block - See Ether Cash Flow',
+                            title: 'See Ether Cash Flow',
                             command: 'ethers-mode.codelens-cashflow',
                             arguments: [mode.currentNetwork, result.value],
                         }));
@@ -172,6 +186,20 @@ export class EthersModeCodeLensProvider implements CodeLensProvider {
                 console.debug(err.message);
                 codeLens.command = {
                     title: `No network: ${err.message}`,
+                    command: '',
+                };
+            }
+        } else if (codeLens instanceof BlockCodeLens) {
+            try {
+                const provider = createProvider(codeLens.network);
+                codeLens.block = await provider.getBlock(codeLens.blockRange.from);
+                codeLens.command = {
+                    title: '$(symbol-function) Block',
+                    command: '',
+                };
+            } catch (_err) {
+                codeLens.command = {
+                    title: 'No network',
                     command: '',
                 };
             }

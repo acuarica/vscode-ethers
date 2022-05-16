@@ -1,6 +1,6 @@
 import { EVM } from 'evm';
 import { CancellationToken, Hover, HoverProvider, MarkdownString, Position, ProviderResult, TextDocument } from 'vscode';
-import { AddressCodeLens, EthersModeCodeLensProvider, NetworkCodeLens } from './EthersModeCodeLensProvider';
+import { AddressCodeLens, BlockCodeLens, EthersModeCodeLensProvider, NetworkCodeLens } from './EthersModeCodeLensProvider';
 import { createProvider } from '../mode';
 
 export class EthersModeHoverProvider implements HoverProvider {
@@ -15,6 +15,12 @@ export class EthersModeHoverProvider implements HoverProvider {
                     const explorerUrl = provider.explorerUrl ? `\n\n#### Explorer\n${provider.explorerUrl}` : '';
                     const netHoverContent = `#### Connection\n${provider.connectionUrl}${explorerUrl}`;
                     return new Hover(netHoverContent);
+                } else if (codeLens instanceof BlockCodeLens &&
+                    codeLens.block !== undefined) {
+                    const block = codeLens.block;
+                    const timestamp = new Date(block.timestamp * 1000).toUTCString();
+                    const content = `## Block ${block.number}\n\n- Block Hash: \`${block.hash}\`\n- Timestamp: ${timestamp}`;
+                    return new Hover(content);
                 } else if (codeLens instanceof AddressCodeLens &&
                     codeLens.code !== undefined &&
                     codeLens.code !== '0x') {
