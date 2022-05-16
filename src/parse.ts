@@ -2,6 +2,7 @@ import { ethers } from "ethers";
 import { Fragment, isAddress, ParamType } from "ethers/lib/utils";
 
 const NET = /^net\s+(\S+)\s*$/;
+const BLOCK_RANGE = /^(\d+)(?:\s*-\s*(\d+))?$/;
 const ID = /[A-Za-z_]\w*/;
 const ETH = /(?:0x)?[0-9a-fA-F]{40}/;
 const PK = /(?:0x)?[0-9a-fA-F]{64}/;
@@ -18,6 +19,10 @@ export type ParseResult =
 		value: string,
 	} |
 	{
+		kind: 'block',
+		value: BlockRange,
+	} |
+	{
 		kind: 'address',
 		value: Address,
 	} |
@@ -25,6 +30,22 @@ export type ParseResult =
 		kind: 'call',
 		value: Call,
 	};
+
+/**
+ * 
+ */
+export interface BlockRange {
+
+	/**
+	 * 
+	 */
+	from: number;
+
+	/**
+	 * 
+	 */
+	to?: number
+}
 
 /**
  * 
@@ -113,6 +134,8 @@ export function parse(line: string): ParseResult | null {
 	let value;
 	if ((value = parseNet(line))) {
 		return { kind: 'net', value };
+	} else if ((value = parseBlock(line))) {
+		return { kind: 'block', value };
 	} else if ((value = parseAddress(line))) {
 		return { kind: 'address', value };
 	} else if ((value = parseCall(line))) {
@@ -137,6 +160,26 @@ export function parseNet(line: string): string | null {
 	return null;
 }
 
+/**
+ * 
+ * @param line 
+ * @returns 
+ */
+export function parseBlock(line: string): BlockRange | null {
+	const match = line.match(BLOCK_RANGE);
+	if (match) {
+		const fromBlock = Number.parseInt(match[1]);
+		if (match[2] !== undefined) {
+			const toBlock = Number.parseInt(match[2]);
+			return { from: fromBlock, to: toBlock };
+		}
+
+		return { from: fromBlock };
+	}
+
+	return null;
+
+}
 
 /**
  * Parse an address or private key,

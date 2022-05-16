@@ -1,6 +1,6 @@
 import { expect } from "chai";
 import { Fragment } from "ethers/lib/utils";
-import { parseNet, parseAddress, parseCall, inferArgumentType, patchFragmentSignature, Id, parse, Call } from "../src/parse";
+import { parseNet, parseAddress, parseCall, inferArgumentType, patchFragmentSignature, Id, parse, Call, parseBlock } from "../src/parse";
 
 describe("parse", () => {
 
@@ -14,6 +14,7 @@ describe("parse", () => {
 
 	it("should accept valid declarations", () => {
 		expect(parse('net fuji')).to.have.property('kind', 'net');
+		expect(parse('123')).to.have.property('kind', 'block');
 		expect(parse('0x5425890298aed601595a70AB815c96711a31Bc65')).to.have.property('kind', 'address');
 		expect(parse('method()')).to.have.property('kind', 'call');
 	});
@@ -33,6 +34,32 @@ describe("parseNet", () => {
 		expect(parseNet('net ')).to.be.null;
 		expect(parseNet(' net ')).to.be.null;
 		expect(parseNet(' net fu ji')).to.be.null;
+	});
+
+});
+
+describe("parseBlock", () => {
+
+	it("should accept single block number", () => {
+		expect(parseBlock('123')).to.be.deep.equal({ from: 123 });
+		expect(parseBlock('123456789')).to.be.deep.equal({ from: 123456789 });
+		expect(parseBlock('0')).to.be.deep.equal({ from: 0 });
+	});
+
+	it("should accept block number range", () => {
+		expect(parseBlock('1-2')).to.be.deep.equal({ from: 1, to: 2 });
+		expect(parseBlock('123 - 234')).to.be.deep.equal({ from: 123, to: 234 });
+	});
+
+	it("should reject spaced single block number", () => {
+		expect(parseBlock(' 123')).to.be.equal(null);
+		expect(parseBlock('123 ')).to.be.equal(null);
+		expect(parseBlock(' 123')).to.be.equal(null);
+	});
+
+	it("should reject invalid block number spec", () => {
+		expect(parseBlock('-123')).to.be.equal(null);
+		expect(parseBlock('123- -234')).to.be.equal(null);
 	});
 
 });
