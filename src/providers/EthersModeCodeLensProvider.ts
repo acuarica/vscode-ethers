@@ -1,7 +1,7 @@
 import { CancellationToken, CodeLens, CodeLensProvider, DecorationOptions, Diagnostic, DiagnosticSeverity, languages, Position, Range, TextDocument, TextLine, ThemeColor, window, workspace } from 'vscode';
 import { formatUnits, FunctionFragment } from 'ethers/lib/utils';
-import { createProvider, EthersMode } from './lib';
-import { Call, parse } from './parse';
+import { createProvider, EthersMode } from '../mode';
+import { Call, parse } from '../parse';
 
 /**
  * 
@@ -77,6 +77,19 @@ export class EthersModeCodeLensProvider implements CodeLensProvider {
                     mode.net(result.value);
                     if (shouldDisplayNetworkInfo) {
                         codeLenses.push(new NetworkCodeLens(mode.currentNetwork!, range));
+                    }
+                } else if (result.kind === 'block') {
+                    if (mode.currentNetwork) {
+                        codeLenses.push(new CodeLens(range, {
+                            title: 'Block - See Ether Cash Flow',
+                            command: 'ethers-mode.codelens-cashflow',
+                            arguments: [mode.currentNetwork, result.value],
+                        }));
+                    } else {
+                        codeLenses.push(new CodeLens(range, {
+                            title: 'No network selected -- first use `net <network>`',
+                            command: ''
+                        }));
                     }
                 } else if (result.kind === 'address') {
                     mode.address(result.value);

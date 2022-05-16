@@ -1,6 +1,6 @@
 import { expect } from "chai";
 import { Fragment } from "ethers/lib/utils";
-import { EthersMode } from "../src/lib";
+import { EthersMode } from "../src/mode";
 import { Address, Call, Id, parseAddress, parseCall, parseNet } from "../src/parse";
 
 declare global {
@@ -195,26 +195,6 @@ describe('EthersMode', () => {
 			expect([...resolvedCall.getUnresolvedSymbols()]).to.be.deep.equal([new Id('eoa', 20)]);
 		});
 
-	});
-
-});
-
-describe('execCall', () => {
-
-	it('should resolve method calls', async () => {
-		// const p = createProvider('http://localhost:8545');
-		// const c = await p.getCode('0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512');
-		// const evm = new EVM(c);
-		// console.log(evm.decompile());
-		// console.log(evm.getFunctions());
-		// console.log(evm.getOpcodes());
-
-		// const mode = new EthersMode();
-
-		// mode.address('0x70997970C51812dc3A010C7d01b50e0d17dc79C8'.asAddress());
-		// const call = mode.call('method(1) view returns (uint)'.asCall());
-
-		// await expect(execCall(call.resolve())).be.equal('No network provideda');
 	});
 
 });

@@ -2,13 +2,15 @@
 // Import the module and reference it with the alias vscode in your code below
 import { LogLevel } from '@ethersproject/logger';
 import { providers, utils } from 'ethers';
-import { FunctionFragment, Logger } from 'ethers/lib/utils';
+import { formatEther, FunctionFragment, Logger } from 'ethers/lib/utils';
 import { EVM } from 'evm';
-import { ExtensionContext, languages, commands, Disposable, window, workspace } from 'vscode';
-import { EthersModeCodeActionProvider } from './EthersModeCodeActionProvider';
-import { EthersModeCodeLensProvider } from './EthersModeCodeLensProvider';
-import { EthersModeHoverProvider } from './EthersModeHoverProvider';
-import { execCall, ResolvedCall } from './lib';
+import { ExtensionContext, languages, commands, Disposable, window, workspace, ProgressLocation, ViewColumn } from 'vscode';
+import { Balances, cashFlow, fetchTransactions } from './cashflow';
+import { EthersModeCodeActionProvider } from './providers/EthersModeCodeActionProvider';
+import { EthersModeCodeLensProvider } from './providers/EthersModeCodeLensProvider';
+import { EthersModeHoverProvider } from './providers/EthersModeHoverProvider';
+import { createProvider, execCall, ResolvedCall } from './mode';
+import { BlockRange } from './parse';
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
@@ -56,6 +58,42 @@ export function activate({ subscriptions }: ExtensionContext) {
                 commands.executeCommand(command.command, ...command.arguments!);
                 return;
             }
+        }
+    });
+
+    registerCommand("ethers-mode.codelens-cashflow", async (currentNetwork: string, blockRange: BlockRange) => {
+        const provider = createProvider(currentNetwork);
+
+        const transactions = await window.withProgress({
+            location: ProgressLocation.Notification,
+            title: 'Fetching Transactions...',
+            cancellable: true,
+        }, (progress, token) => {
+            token.onCancellationRequested(() => {
+                console.log('User canceled the long running operation');
+            });
+
+            progress.report({ increment: 0 });
+
+            return fetchTransactions(provider, (block) => {
+                progress.report({ increment: 5, message: `Fetching block #${block}` });
+                return provider.getBlockWithTransactions(block);
+            }, blockRange);
+
+        });
+        const result = cashFlow(transactions);
+
+        const content = `# Ether Cash Flow Report\n\n## Total **${formatEther(result.total)}**\n\n${formatBalances(result.senders, 'Senders')}\n${formatBalances(result.receivers, 'Receivers')}`;
+
+        const doc = await workspace.openTextDocument({ language: 'markdown', content });
+        window.showTextDocument(doc, ViewColumn.Beside);
+
+        function formatBalances(balances: Balances, title: string) {
+            let result = `## ${title}\n\n`;
+            for (const [key, value] of Object.entries(balances)) {
+                result += `${key}: ${formatEther(value)}\n`;
+            }
+            return result;
         }
     });
 
