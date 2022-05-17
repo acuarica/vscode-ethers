@@ -1,5 +1,4 @@
-import { ethers } from "ethers";
-import { Fragment, isAddress, ParamType } from "ethers/lib/utils";
+import { computeAddress, Fragment, getAddress, isAddress, ParamType } from "ethers/lib/utils";
 
 const NET = /^net\s+(\S+)\s*$/;
 const BLOCK_RANGE = /^(\d+)(?:\s*-\s*(\d+))?$/;
@@ -9,6 +8,18 @@ const PK = /(?:0x)?[0-9a-fA-F]{64}/;
 const ICAP = /XE[0-9]{2}[0-9A-Za-z]{30,31}/;
 const ADDRESS = new RegExp(`^(${ETH.source}|${ICAP.source}|${PK.source})(?:\\s+as\\s+(${ID.source}))?$`);
 const CONTRACT_REF = new RegExp(`^(?:\\s*function\\s)?\\s*(${ID.source})\\.`);
+
+declare global {
+	interface String {
+		asNet(this: string): string | null;
+		asAddress(this: string): Address;
+		asCall(this: string): Call;
+	}
+}
+
+String.prototype.asNet = function (this: string) { return parseNet(this); };
+String.prototype.asAddress = function (this: string) { return parseAddress(this) as Address; };
+String.prototype.asCall = function (this: string) { return parseCall(this) as Call; };
 
 /**
  * 
@@ -198,12 +209,12 @@ export function parseAddress(line: string): Address | null {
 		if (m[1].length >= 64) {
 			privateKey = m[1].length === 64 ? '0x' + m[1] : m[1];
 			try {
-				address = ethers.utils.computeAddress(privateKey as string);
+				address = computeAddress(privateKey as string);
 			} catch (err: any) {
 				throw new Error('Invalid private key');
 			}
 		} else {
-			address = ethers.utils.getAddress(m[1]);
+			address = getAddress(m[1]);
 		}
 		const symbol = m[2];
 		return { address, isChecksumed: address === m[1], privateKey, symbol };
