@@ -5,12 +5,12 @@ import { providers, utils } from 'ethers';
 import { formatEther, FunctionFragment, Logger } from 'ethers/lib/utils';
 import { EVM } from 'evm';
 import { ExtensionContext, languages, commands, Disposable, window, workspace, ProgressLocation, ViewColumn } from 'vscode';
-import { Balances, cashFlow, fetchTransactions, isContract } from './cashflow';
+import { Balances, cashFlow, fetchTransactions, isContract } from './lib/cashflow';
 import { EthersModeCodeActionProvider } from './providers/EthersModeCodeActionProvider';
 import { EthersModeCodeLensProvider } from './providers/EthersModeCodeLensProvider';
 import { EthersModeHoverProvider } from './providers/EthersModeHoverProvider';
-import { createProvider, execCall, ResolvedCall } from './mode';
-import { BlockRange } from './parse';
+import { createProvider, execCall, ResolvedCall } from './lib/mode';
+import { BlockRange } from './lib/parse';
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed

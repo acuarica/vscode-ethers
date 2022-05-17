@@ -1,6 +1,6 @@
 import { expect } from "chai";
 import { Fragment } from "ethers/lib/utils";
-import { parseNet, parseAddress, parseCall, inferArgumentType, patchFragmentSignature, Id, parse, Call, parseBlock } from "../src/parse";
+import { parseNet, parseAddress, parseCall, inferArgumentType, patchFragmentSignature, Id, parse, Call, parseBlock } from "../src/lib/parse";
 
 describe("parse", () => {
 

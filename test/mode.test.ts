@@ -1,7 +1,7 @@
 import { expect } from "chai";
 import { Fragment } from "ethers/lib/utils";
-import { EthersMode } from "../src/mode";
-import { Address, Call, Id, parseAddress, parseCall, parseNet } from "../src/parse";
+import { EthersMode } from "../src/lib/mode";
+import { Address, Call, Id, parseAddress, parseCall, parseNet } from "../src/lib/parse";
 
 declare global {
 	interface String {

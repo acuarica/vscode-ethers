@@ -1,7 +1,7 @@
 import { EVM } from 'evm';
 import { CancellationToken, Hover, HoverProvider, MarkdownString, Position, ProviderResult, TextDocument } from 'vscode';
 import { AddressCodeLens, BlockCodeLens, EthersModeCodeLensProvider, NetworkCodeLens } from './EthersModeCodeLensProvider';
-import { createProvider } from '../mode';
+import { createProvider } from '../lib/mode';
 
 export class EthersModeHoverProvider implements HoverProvider {
 

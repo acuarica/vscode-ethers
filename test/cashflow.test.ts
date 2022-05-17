@@ -1,6 +1,6 @@
 import { expect } from "chai";
 import { BigNumber } from "ethers";
-import { cashFlow, fetchTransactions } from "../src/cashflow";
+import { cashFlow, fetchTransactions } from "../src/lib/cashflow";
 import { providers } from "ethers";
 import ganache from "ganache";
 

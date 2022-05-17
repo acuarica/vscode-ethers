@@ -1,8 +1,8 @@
 import { Block } from "@ethersproject/abstract-provider";
 import { formatUnits, FunctionFragment } from 'ethers/lib/utils';
 import { CancellationToken, CodeLens, CodeLensProvider, DecorationOptions, Diagnostic, DiagnosticSeverity, languages, Position, Range, TextDocument, TextLine, ThemeColor, window, workspace } from 'vscode';
-import { createProvider, EthersMode } from '../mode';
-import { BlockRange, Call, parse } from '../parse';
+import { createProvider, EthersMode } from '../lib/mode';
+import { BlockRange, Call, parse } from '../lib/parse';
 
 /**
  * 
