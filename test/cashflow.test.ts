@@ -3,6 +3,7 @@ import { BigNumber } from "ethers";
 import { cashFlow, fetchTransactions } from "../src/lib/cashflow";
 import { providers } from "ethers";
 import ganache from "ganache";
+import '../src/lib/str';
 
 const provider = new providers.Web3Provider(ganache.provider({
     logging: {
@@ -107,14 +108,6 @@ describe('cashFlow', () => {
     });
 
 });
-
-declare global {
-    interface String {
-        bn(this: string): BigNumber;
-    }
-}
-
-String.prototype.bn = function (this: string) { return BigNumber.from(this); };
 
 const txs = [
     {
