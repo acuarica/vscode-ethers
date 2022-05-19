@@ -7,6 +7,7 @@ import ganache from "ganache";
 import * as deposit from "../artifacts/LDToken.json";
 import { EthersMode } from "../src/lib/mode";
 import { execCall } from "../src/lib/provider";
+import '../src/lib/str';
 
 use(chaiAsPromised);
 use(waffleChai);
