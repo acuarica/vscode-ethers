@@ -2,7 +2,7 @@ import { EVM } from 'evm';
 import { CancellationToken, Hover, HoverProvider, MarkdownString, Position, ProviderResult, TextDocument } from 'vscode';
 import { AddressCodeLens, BlockCodeLens, EthersModeCodeLensProvider, NetworkCodeLens } from './EthersModeCodeLensProvider';
 import { createProvider } from '../lib/provider';
-import { getProviderMarkdown } from '../lib/markdown';
+import { getBlockMarkdown, getProviderMarkdown } from '../lib/markdown';
 
 export class EthersModeHoverProvider implements HoverProvider {
 
@@ -13,12 +13,8 @@ export class EthersModeHoverProvider implements HoverProvider {
             if (codeLens.range.contains(position)) {
                 if (codeLens instanceof NetworkCodeLens) {
                     return new Hover(getProviderMarkdown(createProvider(codeLens.network)));
-                } else if (codeLens instanceof BlockCodeLens &&
-                    codeLens.block !== undefined) {
-                    const block = codeLens.block;
-                    const timestamp = new Date(block.timestamp * 1000).toUTCString();
-                    const content = `## Block ${block.number}\n\n- Block Hash: \`${block.hash}\`\n- Timestamp: ${timestamp}`;
-                    return new Hover(content);
+                } else if (codeLens instanceof BlockCodeLens && codeLens.block !== undefined) {
+                    return new Hover(getBlockMarkdown(codeLens.block));
                 } else if (codeLens instanceof AddressCodeLens &&
                     codeLens.code !== undefined &&
                     codeLens.code !== '0x') {
