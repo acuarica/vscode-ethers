@@ -12,11 +12,11 @@ export type Balances = { [address: string]: BigNumber };
  * Fetch and flatten transactions from blocks specified in the `blockRange`.
  * 
  * @param provider the provider to use to fetch the current block number when `to` it is not specified.
- * @param getBlock the actual function to use to fetch blocks.
+ * @param getBlockFn the actual function to use to fetch blocks.
  * @param blockRange specifies the `from` and optional `to` block numbers to fetch transactions from.
  * @returns the list of transactions contained in the specified block range.
  */
-export async function fetchTransactions(provider: providers.Provider, getBlock: (block: number) => Promise<BlockWithTransactions>, blockRange: BlockRange): Promise<Transaction[]> {
+export async function fetchTransactions(provider: providers.Provider, getBlockFn: (block: number) => Promise<BlockWithTransactions>, blockRange: BlockRange): Promise<Transaction[]> {
     if (blockRange.to === undefined) {
         blockRange.to = await provider.getBlockNumber();
     }
@@ -32,7 +32,7 @@ export async function fetchTransactions(provider: providers.Provider, getBlock: 
 
     const transactions = [];
     while (blockNumber <= blockTo) {
-        const block = await getBlock(blockNumber);
+        const block = await getBlockFn(blockNumber);
         for (const tx of block.transactions) {
             transactions.push(tx);
         }
