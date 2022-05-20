@@ -16,7 +16,7 @@ export type Balances = { [address: string]: BigNumber };
  * @param blockRange specifies the `from` and optional `to` block numbers to fetch transactions from.
  * @returns the list of transactions contained in the specified block range.
  */
-export async function fetchTransactions(provider: providers.Provider, getBlockFn: (block: number) => Promise<BlockWithTransactions>, blockRange: BlockRange): Promise<Transaction[]> {
+export async function fetchTransactions(provider: providers.Provider, getBlockFn: (blockNumber: number) => Promise<BlockWithTransactions>, blockRange: BlockRange): Promise<Transaction[]> {
     if (blockRange.to === undefined) {
         blockRange.to = await provider.getBlockNumber();
     }
