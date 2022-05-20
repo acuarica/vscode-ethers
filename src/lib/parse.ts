@@ -59,27 +59,35 @@ export interface BlockRange {
 }
 
 /**
+ * Represents an Ethereum address.
  * 
+ * For more info,
+ * see https://docs.ethers.io/v5/api/utils/address/#address.
  */
 export interface Address {
 
 	/**
-	 * 
+	 * An address is a `DataHexString` of 20 bytes (40 nibbles),
+	 * with optional mixed case.
 	 */
 	address: string;
 
 	/**
+	 * If the case is mixed, it is a **Checksum Address**,
+	 * which uses a specific pattern of uppercase and lowercase letters within
+	 * a given address to reduce the risk of errors introduced from typing an address or cut and paste issues.
+	 * 
 	 * 
 	 */
 	isChecksumed: boolean;
 
 	/**
-	 * 
+	 * If `privateKey` is present, this address is able to sign transactions.
 	 */
 	privateKey?: string;
 
 	/**
-	 * 
+	 * Whether this address 
 	 */
 	symbol?: string;
 
