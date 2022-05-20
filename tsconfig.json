@@ -7,7 +7,6 @@
         ],
         "outDir": "out",
         "sourceMap": true,
-        "rootDir": "src",
         "resolveJsonModule": true,
         /* Strict Type-Checking Option */
         "strict": true, /* enable all strict type-checking options */
@@ -16,6 +15,5 @@
     },
     "exclude": [
         "node_modules",
-        "test"
     ]
 }
