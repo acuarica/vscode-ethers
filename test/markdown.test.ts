@@ -1,7 +1,7 @@
-import { createProvider } from "../src/lib/provider";
-import { getProviderMarkdown } from "../src/lib/markdown";
-
 import { expect } from "chai";
+import { getBlockMarkdown, getProviderMarkdown } from "../src/lib/markdown";
+import { createProvider } from "../src/lib/provider";
+import * as blocks from "./blocks/fuji-972388-972394.json";
 
 describe('markdown', () => {
 
@@ -53,4 +53,17 @@ https://${network}.etherscan.io/address/
         }));
 
     });
+
+    describe('getBlockMarkdown', () => {
+
+        it('should return `Connection` and `Explorer` URLs', () => {
+            expect(getBlockMarkdown(blocks[0])).to.be.equal(`### Block 972388
+
+- Block Hash: \`0xa926afe8a5e97a9516a62cfe0cb86367ef12d2bea17fe919bb30882a9cb769bd\`
+- Timestamp: Tue, 31 Aug 2021 09:17:22 GMT
+`);
+        });
+
+    });
+
 });
