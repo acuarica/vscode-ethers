@@ -24,26 +24,37 @@ export async function execCall(call: ResolvedCall, createProviderFn: (network: s
 }
 
 /**
+ * Given a `network` name or RPC URL,
+ * creates an Ethers network provider.
  * 
  * @param network 
  * @returns 
  */
 export function createProvider(network: string): providers.Provider & ModeProvider {
     if (network.includes(':')) {
-        return new JsonRpcModeProvider(network);
+        return new JsonRpcModeProvider('', network);
     }
 
     switch (network) {
         case 'fuji':
-            return new JsonRpcModeProvider('https://api.avax-test.network/ext/bc/C/rpc', 'https://testnet.snowtrace.io/address/');
+            return new JsonRpcModeProvider('fuji', 'https://api.avax-test.network/ext/bc/C/rpc', 'https://testnet.snowtrace.io/address/');
         default:
             return new EtherscanModeProvider(network);
     }
 }
 
-interface ModeProvider {
+export interface ModeProvider {
+    name: string;
     connectionUrl: string;
     explorerUrl?: string;
+}
+
+class JsonRpcModeProvider extends providers.JsonRpcProvider implements ModeProvider {
+
+    constructor(readonly name: string, readonly connectionUrl: string, readonly explorerUrl?: string) {
+        super(connectionUrl);
+    }
+
 }
 
 class EtherscanModeProvider extends providers.EtherscanProvider implements ModeProvider {
@@ -52,21 +63,17 @@ class EtherscanModeProvider extends providers.EtherscanProvider implements ModeP
         super(net);
     }
 
+    get name(): string {
+        return this.net;
+    }
+
     get connectionUrl(): string {
         return this.getBaseUrl();
     }
 
     get explorerUrl(): string {
-        const domain = this.net === 'homestead' ? '' : `${this.net}.`;
+        const domain = ['homestead', 'mainnet'].includes(this.net) ? '' : `${this.net}.`;
         return `https://${domain}etherscan.io/address/`;
-    }
-
-}
-
-class JsonRpcModeProvider extends providers.JsonRpcProvider implements ModeProvider {
-
-    constructor(readonly connectionUrl: string, readonly explorerUrl?: string) {
-        super(connectionUrl);
     }
 
 }
