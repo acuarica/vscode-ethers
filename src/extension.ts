@@ -65,31 +65,44 @@ export function activate({ subscriptions }: ExtensionContext) {
     registerCommand("ethers-mode.codelens-cashflow", async (currentNetwork: string, blockRange: BlockRange) => {
         const provider = createProvider(currentNetwork);
 
-        const transactions = await window.withProgress({
-            location: ProgressLocation.Notification,
-            title: 'Fetching transactions',
-            cancellable: true,
+        const progressOptions = (title: string) => {
+            return {
+                location: ProgressLocation.Notification,
+                title,
+                cancellable: true,
+            };
+        };
 
-        }, (progress, token) => {
+        const transactions = await window.withProgress(progressOptions('Fetching transactions for block'), (progress, token) => {
             token.onCancellationRequested(() => {
-                console.log('User canceled the long running operation');
+                log.appendLine('User canceled the long running operation');
             });
 
             progress.report({ increment: 0 });
 
-            return fetchTransactions(provider, (block) => {
-                progress.report({ increment: 2, message: `block #${block}...` });
-                return provider.getBlockWithTransactions(block);
-            }, blockRange);
+            const getBlock = (blockNumber: number) => {
+                progress.report({ increment: 2, message: `#${blockNumber}...` });
+                return provider.getBlockWithTransactions(blockNumber);
+            };
 
+            return fetchTransactions(provider, getBlock, blockRange);
         });
+
         const result = cashFlow(transactions);
+
         const contractAddresses = new Set<string>();
-        for (const address of new Set([...Object.keys(result.senders), ...Object.keys(result.receivers)])) {
-            if (await isContract(provider, address)) {
-                contractAddresses.add(address);
+        await window.withProgress(progressOptions('Fetching info for address'), async (progress, token) => {
+            token.onCancellationRequested(() => {
+                log.appendLine('User icanceled the long running operation');
+            });
+
+            for (const address of new Set([...Object.keys(result.senders), ...Object.keys(result.receivers)])) {
+                progress.report({ increment: 2, message: `${address}...` });
+                if (await isContract(provider, address)) {
+                    contractAddresses.add(address);
+                }
             }
-        }
+        });
 
         const content = `# Ether Cash Flow Report\n\n## Total **${formatEther(result.total)}**\n\n${formatBalances(result.senders, 'Senders')}\n${formatBalances(result.receivers, 'Receivers')}`;
 
