@@ -9,6 +9,26 @@ import { BlockRange } from "./parse";
 export type Balances = { [address: string]: BigNumber };
 
 /**
+ * Represents the result of the `cashFlow` function.
+ */
+export type CashFlowReport = {
+    /**
+     * Total of Ether that has been transferred.
+     */
+    total: BigNumber,
+
+    /**
+     * Map of who sent how much ether.
+     */
+    senders: Balances,
+
+    /**
+     * Map of who received how much ether.
+     */
+    receivers: Balances,
+};
+
+/**
  * Fetch and flatten transactions from blocks specified in the `blockRange`.
  * 
  * @param provider the provider to use to fetch the current block number when `to` it is not specified.
@@ -51,17 +71,7 @@ export async function fetchTransactions(provider: providers.Provider, getBlockFn
  * @returns the `total` of Ether transferred,
  * and the list of `senders` and `receivers` the participated in the list of transactions.
  */
-export function cashFlow(transactions:
-    {
-        from?: string,
-        to?: string,
-        value: BigNumber
-    }[]
-): {
-    total: BigNumber,
-    senders: Balances,
-    receivers: Balances,
-} {
+export function cashFlow(transactions: Pick<Transaction, 'from' | 'to' | 'value'>[]): CashFlowReport {
     let total = constants.Zero;
     const senders: Balances = {};
     const receivers: Balances = {};
