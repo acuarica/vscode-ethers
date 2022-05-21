@@ -1,6 +1,8 @@
 import { ModeProvider } from "./provider";
 import { Block } from "@ethersproject/abstract-provider";
 import { EVM } from "evm";
+import { Balances, CashFlowReport } from "./cashflow";
+import { formatEther } from "ethers/lib/utils";
 
 /**
  * 
@@ -44,5 +46,26 @@ export function getCodeMarkdown(provider: ModeProvider, address: string, code: s
 
     content += provider.explorerUrl ? `\n### Explorer\n\n${provider.explorerUrl + address}\n` : '';
 
+    return content;
+}
+
+/**
+ * Formats the `report` to a Markdown document.
+ * 
+ * @param report 
+ * @param contractAddresses 
+ * @returns the formatted Markdown document.
+ */
+export function getCashFlowMarkdown(report: CashFlowReport, contractAddresses: Set<string>) {
+    function formatBalances(balances: Balances, title: string) {
+        let result = `## ${title}\n\n`;
+        for (const [address, value] of Object.entries(balances)) {
+            const isContract = contractAddresses.has(address) ? 'Contract' : 'EOA';
+            result += `${address} ${isContract}: ${formatEther(value)}\n`;
+        }
+        return result;
+    }
+
+    const content = `# Ether Cash Flow Report\n\n## Total **${formatEther(report.total)}**\n\n${formatBalances(report.senders, 'Senders')}\n${formatBalances(report.receivers, 'Receivers')}`;
     return content;
 }

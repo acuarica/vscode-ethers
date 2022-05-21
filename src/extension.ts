@@ -2,10 +2,11 @@
 // Import the module and reference it with the alias vscode in your code below
 import { LogLevel } from '@ethersproject/logger';
 import { providers, utils } from 'ethers';
-import { formatEther, FunctionFragment, Logger } from 'ethers/lib/utils';
+import { FunctionFragment, Logger } from 'ethers/lib/utils';
 import { EVM } from 'evm';
 import { commands, Disposable, ExtensionContext, languages, ProgressLocation, ViewColumn, window, workspace } from 'vscode';
-import { Balances, cashFlow, fetchTransactions, isContract } from './lib/cashflow';
+import { cashFlow, fetchTransactions, isContract } from './lib/cashflow';
+import { getCashFlowMarkdown } from './lib/markdown';
 import { ResolvedCall } from './lib/mode';
 import { BlockRange } from './lib/parse';
 import { createProvider, execCall } from './lib/provider';
@@ -75,7 +76,7 @@ export function activate({ subscriptions }: ExtensionContext) {
 
         const transactions = await window.withProgress(progressOptions('Fetching transactions for block'), (progress, token) => {
             token.onCancellationRequested(() => {
-                log.appendLine('User canceled the long running operation');
+                log.appendLine('User canceled fetching blocks');
             });
 
             progress.report({ increment: 0 });
@@ -88,15 +89,15 @@ export function activate({ subscriptions }: ExtensionContext) {
             return fetchTransactions(provider, getBlock, blockRange);
         });
 
-        const result = cashFlow(transactions);
+        const report = cashFlow(transactions);
 
         const contractAddresses = new Set<string>();
         await window.withProgress(progressOptions('Fetching info for address'), async (progress, token) => {
             token.onCancellationRequested(() => {
-                log.appendLine('User icanceled the long running operation');
+                log.appendLine('User canceled fetching address info');
             });
 
-            for (const address of new Set([...Object.keys(result.senders), ...Object.keys(result.receivers)])) {
+            for (const address of new Set([...Object.keys(report.senders), ...Object.keys(report.receivers)])) {
                 progress.report({ increment: 2, message: `${address}...` });
                 if (await isContract(provider, address)) {
                     contractAddresses.add(address);
@@ -104,19 +105,9 @@ export function activate({ subscriptions }: ExtensionContext) {
             }
         });
 
-        const content = `# Ether Cash Flow Report\n\n## Total **${formatEther(result.total)}**\n\n${formatBalances(result.senders, 'Senders')}\n${formatBalances(result.receivers, 'Receivers')}`;
-
+        const content = getCashFlowMarkdown(report, contractAddresses);
         const doc = await workspace.openTextDocument({ language: 'markdown', content });
         window.showTextDocument(doc, ViewColumn.Beside);
-
-        function formatBalances(balances: Balances, title: string) {
-            let result = `## ${title}\n\n`;
-            for (const [address, value] of Object.entries(balances)) {
-                const isContract = contractAddresses.has(address) ? 'Contract' : 'EOA';
-                result += `${address} ${isContract}: ${formatEther(value)}\n`;
-            }
-            return result;
-        }
     });
 
     registerCommand("ethers-mode.codelens-call", async (call: ResolvedCall) => {
