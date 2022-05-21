@@ -116,8 +116,8 @@ describe('cashflow', function () {
                     };
                 });
 
-            const flow = cashFlow(txs);
-            expect(flow.total).to.be.deep.equal('116018526345391259043'.bn());
+            const report = cashFlow(txs);
+            expect(report.total).to.be.deep.equal('116018526345391259043'.bn());
         });
 
     });
