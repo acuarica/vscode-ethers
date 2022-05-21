@@ -4,9 +4,9 @@ import * as chaiAsPromised from "chai-as-promised";
 import { ContractFactory, providers, Wallet } from "ethers";
 import { computeAddress } from "ethers/lib/utils";
 import ganache from "ganache";
-import * as token from "../artifacts/LDToken.json";
 import { EthersMode } from "../src/lib/mode";
 import { execCall } from "../src/lib/provider";
+import * as token from "./artifacts/LDToken.json";
 import './utils/str';
 
 use(chaiAsPromised);
