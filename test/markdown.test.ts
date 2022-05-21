@@ -1,8 +1,9 @@
 import { expect } from "chai";
 import { getBlockMarkdown, getCodeMarkdown, getProviderMarkdown } from "../src/lib/markdown";
 import { createProvider } from "../src/lib/provider";
+import * as token from "./artifacts/LDToken.json";
 import * as blocks from "./data/fuji-972388-972394.json";
-import * as token from "../artifacts/LDToken.json";
+import * as usdcCode from "./data/fuji-0x5425890298aed601595a70ab815c96711a31bc65.json";
 
 describe('markdown', () => {
 
@@ -142,6 +143,27 @@ _Functions might not be properly identified_
 
 \`\`\`solidity
 \`\`\`
+`);
+        });
+
+        it('should return code Markdown for USDC Token in Fuji', () => {
+            const provider = createProvider('fuji');
+
+            expect(getCodeMarkdown(provider, '0x5425890298aed601595a70ab815c96711a31bc65', usdcCode)).to.be.equal(`### Functions
+
+_Functions might not be properly identified_
+
+\`\`\`solidity
+implementation()
+changeAdmin(address)
+admin()
+upgradeTo(address)
+upgradeToAndCall(address,bytes)
+\`\`\`
+
+### Explorer
+
+https://testnet.snowtrace.io/address/0x5425890298aed601595a70ab815c96711a31bc65
 `);
         });
 
