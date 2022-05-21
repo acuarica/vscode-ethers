@@ -2,8 +2,8 @@ import { expect } from "chai";
 import { cashFlow, fetchTransactions } from "../src/lib/cashflow";
 import { providers } from "ethers";
 import ganache from "ganache";
-import * as blocks from "./blocks/fuji-972388-972394.json";
-import '../src/lib/str';
+import * as blocks from "./data/fuji-972388-972394.json";
+import './utils/str';
 
 describe('cashflow', function () {
 

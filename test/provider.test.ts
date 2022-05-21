@@ -4,10 +4,10 @@ import * as chaiAsPromised from "chai-as-promised";
 import { ContractFactory, providers, Wallet } from "ethers";
 import { computeAddress } from "ethers/lib/utils";
 import ganache from "ganache";
-import * as deposit from "../artifacts/LDToken.json";
+import * as token from "../artifacts/LDToken.json";
 import { EthersMode } from "../src/lib/mode";
 import { execCall } from "../src/lib/provider";
-import '../src/lib/str';
+import './utils/str';
 
 use(chaiAsPromised);
 use(waffleChai);
@@ -38,7 +38,7 @@ describe('provider', function () {
             const deployer = new Wallet(privateKey, provider);
             expect(await provider.getBalance(deployer.address)).to.be.deep.equal('0xffffffffffffffffffffff'.bn());
 
-            const factory = new ContractFactory(deposit.abi, deposit.bytecode, deployer);
+            const factory = new ContractFactory(token.abi, token.bytecode, deployer);
             const contract = await factory.deploy('LD Token', 'LDT');
             ldtokenAddress = contract.address;
         });
