@@ -1,5 +1,5 @@
 import { CancellationToken, Hover, HoverProvider, MarkdownString, Position, ProviderResult, TextDocument } from 'vscode';
-import { getBlockMarkdown, getCodeMarkdown, getProviderMarkdown } from '../lib/markdown';
+import { getAddressMarkdown, getBlockMarkdown, getProviderMarkdown } from '../lib/markdown';
 import { createProvider } from '../lib/provider';
 import { AddressCodeLens, BlockCodeLens, EthersModeCodeLensProvider, NetworkCodeLens } from './EthersModeCodeLensProvider';
 
@@ -29,10 +29,11 @@ export class EthersModeHoverProvider implements HoverProvider {
                 if (codeLens instanceof NetworkCodeLens) {
                     return new Hover(getProviderMarkdown(createProvider(codeLens.network)));
                 } else if (codeLens instanceof BlockCodeLens && codeLens.block !== undefined) {
-                    return new Hover(getBlockMarkdown(codeLens.block));
-                } else if (codeLens instanceof AddressCodeLens && codeLens.code !== undefined && codeLens.code !== '0x') {
                     const provider = createProvider(codeLens.network);
-                    const contents = new MarkdownString(getCodeMarkdown(provider, codeLens.address, codeLens.code));
+                    return new Hover(getBlockMarkdown(provider, codeLens.block));
+                } else if (codeLens instanceof AddressCodeLens && codeLens.code !== undefined) {
+                    const provider = createProvider(codeLens.network);
+                    const contents = new MarkdownString(getAddressMarkdown(provider, codeLens.address, codeLens.code));
                     contents.isTrusted = true;
 
                     if (token.isCancellationRequested) {

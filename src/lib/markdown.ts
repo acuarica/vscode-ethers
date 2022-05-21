@@ -18,35 +18,53 @@ export function getProviderMarkdown(provider: ModeProvider) {
 
 /**
  * 
+ * @param provider 
  * @param block 
  * @returns 
  */
-export function getBlockMarkdown(block: Pick<Block, 'number' | 'hash' | 'timestamp'>) {
+export function getBlockMarkdown(provider: ModeProvider, block: Pick<Block, 'number' | 'hash' | 'timestamp'>) {
+    const sections = [];
+
     const timestamp = new Date(block.timestamp * 1000).toUTCString();
-    const content = `### Block ${block.number}\n\n- Block Hash: \`${block.hash}\`\n- Timestamp: ${timestamp}\n`;
-    return content;
+    sections.push(`### Block ${block.number}\n\n- Block Hash: \`${block.hash}\`\n- Timestamp: ${timestamp}\n`);
+
+    if (provider.explorerUrl) {
+        sections.push(`### Explorer\n\n${provider.blockExplorerUrl(block.number)}\n`);
+    }
+
+    return sections.join('\n');
 }
 
 /**
+ * Generates Markdown content from the given `address`, 
+ * and `code` if any.
+ * 
+ * The `provider`, if any, is used to provide a link to its explorer URL.
  * 
  * @param provider 
  * @param address 
- * @param code 
+ * @param code the bytecode stored in this address if this is a contract address.
+ * If this address is not a contract address, use `0x`.
  * @returns 
  */
-export function getCodeMarkdown(provider: ModeProvider, address: string, code: string | Buffer) {
-    let content = '';
-    try {
-        const evm = new EVM(code);
-        const functions = evm.getFunctions().map(line => line + '\n').join('');
-        content += `### Functions\n\n_Functions might not be properly identified_\n\n\`\`\`solidity\n${functions}\`\`\`\n`;
-    } catch (err: any) {
-        console.log(err);
+export function getAddressMarkdown(provider: ModeProvider, address: string, code: string | Buffer) {
+    const sections = [];
+
+    if (code !== '0x') {
+        try {
+            const evm = new EVM(code);
+            const functions = evm.getFunctions().map(line => line + '\n').join('');
+            sections.push(`### Functions\n\n_Functions might not be properly identified_\n\n\`\`\`solidity\n${functions}\`\`\`\n`);
+        } catch (err: any) {
+            console.log(err);
+        }
     }
 
-    content += provider.explorerUrl ? `\n### Explorer\n\n${provider.explorerUrl + address}\n` : '';
+    if (provider.explorerUrl) {
+        sections.push(`### Explorer\n\n${provider.addressExplorerUrl(address)}\n`);
+    }
 
-    return content;
+    return sections.join('\n');
 }
 
 /**

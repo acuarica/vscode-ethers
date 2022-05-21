@@ -37,7 +37,7 @@ export function createProvider(network: string): providers.Provider & ModeProvid
 
     switch (network) {
         case 'fuji':
-            return new JsonRpcModeProvider('fuji', 'https://api.avax-test.network/ext/bc/C/rpc', 'https://testnet.snowtrace.io/address/');
+            return new JsonRpcModeProvider('fuji', 'https://api.avax-test.network/ext/bc/C/rpc', 'https://testnet.snowtrace.io');
         default:
             return new EtherscanModeProvider(network);
     }
@@ -47,6 +47,10 @@ export interface ModeProvider {
     name: string;
     connectionUrl: string;
     explorerUrl?: string;
+
+    addressExplorerUrl(address: string): string;
+
+    blockExplorerUrl(blockNumber: number): string;
 }
 
 class JsonRpcModeProvider extends providers.JsonRpcProvider implements ModeProvider {
@@ -55,6 +59,13 @@ class JsonRpcModeProvider extends providers.JsonRpcProvider implements ModeProvi
         super(connectionUrl);
     }
 
+    addressExplorerUrl(address: string): string {
+        return `${this.explorerUrl}/address/${address}`;
+    }
+
+    blockExplorerUrl(blockNumber: number): string {
+        return `${this.explorerUrl}/block/${blockNumber}`;
+    }
 }
 
 class EtherscanModeProvider extends providers.EtherscanProvider implements ModeProvider {
@@ -73,7 +84,15 @@ class EtherscanModeProvider extends providers.EtherscanProvider implements ModeP
 
     get explorerUrl(): string {
         const domain = ['homestead', 'mainnet'].includes(this.net) ? '' : `${this.net}.`;
-        return `https://${domain}etherscan.io/address/`;
+        return `https://${domain}etherscan.io`;
+    }
+
+    addressExplorerUrl(address: string): string {
+        return `${this.explorerUrl}/address/${address}`;
+    }
+
+    blockExplorerUrl(blockNumber: number): string {
+        return `${this.explorerUrl}/block/${blockNumber}`;
     }
 
 }

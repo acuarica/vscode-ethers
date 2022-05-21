@@ -1,11 +1,11 @@
 import { expect } from "chai";
-import { getBlockMarkdown, getCashFlowMarkdown, getCodeMarkdown, getProviderMarkdown } from "../src/lib/markdown";
+import { formatEther } from "ethers/lib/utils";
+import { cashFlow, fetchTransactions } from "../src/lib/cashflow";
+import { getAddressMarkdown, getBlockMarkdown, getCashFlowMarkdown, getProviderMarkdown } from "../src/lib/markdown";
 import { createProvider } from "../src/lib/provider";
 import * as token from "./artifacts/LDToken.json";
-import * as blocks from "./data/fuji-972388-972394.json";
 import * as usdcCode from "./data/fuji-0x5425890298aed601595a70ab815c96711a31bc65.json";
-import { cashFlow, fetchTransactions } from "../src/lib/cashflow";
-import { formatEther } from "ethers/lib/utils";
+import * as blocks from "./data/fuji-972388-972394.json";
 
 describe('markdown', () => {
 
@@ -19,7 +19,7 @@ describe('markdown', () => {
 https://api.avax-test.network/ext/bc/C/rpc
 
 #### Explorer
-https://testnet.snowtrace.io/address/
+https://testnet.snowtrace.io
 `);
         });
 
@@ -40,7 +40,7 @@ http://localhost:1234
 https://api.etherscan.io
 
 #### Explorer
-https://etherscan.io/address/
+https://etherscan.io
 `);
         }));
 
@@ -52,7 +52,7 @@ https://etherscan.io/address/
 https://api-${network}.etherscan.io
 
 #### Explorer
-https://${network}.etherscan.io/address/
+https://${network}.etherscan.io
 `);
         }));
 
@@ -60,8 +60,22 @@ https://${network}.etherscan.io/address/
 
     describe('getBlockMarkdown', () => {
 
-        it('should return `Connection` and `Explorer` URLs', () => {
-            expect(getBlockMarkdown(blocks[0])).to.be.equal(`### Block 972388
+        it('should return block Markdown when explorer url is present', () => {
+            const provider = createProvider('fuji');
+            expect(getBlockMarkdown(provider, blocks[0])).to.be.equal(`### Block 972388
+
+- Block Hash: \`0xa926afe8a5e97a9516a62cfe0cb86367ef12d2bea17fe919bb30882a9cb769bd\`
+- Timestamp: Tue, 31 Aug 2021 09:17:22 GMT
+
+### Explorer
+
+https://testnet.snowtrace.io/block/972388
+`);
+        });
+
+        it('should return block Markdown when explorer url is not present', () => {
+            const provider = createProvider('http://localhost');
+            expect(getBlockMarkdown(provider, blocks[0])).to.be.equal(`### Block 972388
 
 - Block Hash: \`0xa926afe8a5e97a9516a62cfe0cb86367ef12d2bea17fe919bb30882a9cb769bd\`
 - Timestamp: Tue, 31 Aug 2021 09:17:22 GMT
@@ -74,7 +88,7 @@ https://${network}.etherscan.io/address/
 
         it('should return code Markdown when both explorer url and functions are present', () => {
             const provider = createProvider('fuji');
-            expect(getCodeMarkdown(provider, '0x123', token.deployedBytecode)).to.be.equal(`### Functions
+            expect(getAddressMarkdown(provider, '0x123', token.deployedBytecode)).to.be.equal(`### Functions
 
 _Functions might not be properly identified_
 
@@ -101,7 +115,7 @@ https://testnet.snowtrace.io/address/0x123
 
         it('should return code Markdown when only explorer url is present but functions are empty', () => {
             const provider = createProvider('fuji');
-            expect(getCodeMarkdown(provider, '0x123', '0x1234567890')).to.be.equal(`### Functions
+            expect(getAddressMarkdown(provider, '0x123', '0x1234567890')).to.be.equal(`### Functions
 
 _Functions might not be properly identified_
 
@@ -116,7 +130,7 @@ https://testnet.snowtrace.io/address/0x123
 
         it('should return code Markdown when `explorerUrl` is not defined', () => {
             const provider = createProvider('http://localhost:1234');
-            expect(getCodeMarkdown(provider, '0x123', token.deployedBytecode)).to.be.equal(`### Functions
+            expect(getAddressMarkdown(provider, '0x123', token.deployedBytecode)).to.be.equal(`### Functions
 
 _Functions might not be properly identified_
 
@@ -139,7 +153,7 @@ DOMAIN_SEPARATOR()
 
         it('should return code Markdown when neither explorer url nor functions are present', () => {
             const provider = createProvider('http://localhost:1234');
-            expect(getCodeMarkdown(provider, '0x123', '0x1234567890')).to.be.equal(`### Functions
+            expect(getAddressMarkdown(provider, '0x123', '0x1234567890')).to.be.equal(`### Functions
 
 _Functions might not be properly identified_
 
@@ -148,10 +162,23 @@ _Functions might not be properly identified_
 `);
         });
 
+        it('should return address Markdown when explorer url is present', () => {
+            const provider = createProvider('fuji');
+            expect(getAddressMarkdown(provider, '0x123', '0x')).to.be.equal(`### Explorer
+
+https://testnet.snowtrace.io/address/0x123
+`);
+        });
+
+        it('should return address Markdown when explorer url is not present', () => {
+            const provider = createProvider('http://localhost:1234');
+            expect(getAddressMarkdown(provider, '0x123', '0x')).to.be.equal(``);
+        });
+
         it('should return code Markdown for USDC Token in Fuji', () => {
             const provider = createProvider('fuji');
 
-            expect(getCodeMarkdown(provider, '0x5425890298aed601595a70ab815c96711a31bc65', usdcCode)).to.be.equal(`### Functions
+            expect(getAddressMarkdown(provider, '0x5425890298aed601595a70ab815c96711a31bc65', usdcCode)).to.be.equal(`### Functions
 
 _Functions might not be properly identified_
 
