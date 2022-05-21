@@ -1,7 +1,8 @@
 import { expect } from "chai";
-import { getBlockMarkdown, getProviderMarkdown } from "../src/lib/markdown";
+import { getBlockMarkdown, getCodeMarkdown, getProviderMarkdown } from "../src/lib/markdown";
 import { createProvider } from "../src/lib/provider";
-import * as blocks from "./blocks/fuji-972388-972394.json";
+import * as blocks from "./data/fuji-972388-972394.json";
+import * as token from "../artifacts/LDToken.json";
 
 describe('markdown', () => {
 
@@ -61,6 +62,86 @@ https://${network}.etherscan.io/address/
 
 - Block Hash: \`0xa926afe8a5e97a9516a62cfe0cb86367ef12d2bea17fe919bb30882a9cb769bd\`
 - Timestamp: Tue, 31 Aug 2021 09:17:22 GMT
+`);
+        });
+
+    });
+
+    describe('getCodeMarkdown', () => {
+
+        it('should return code Markdown when both explorer url and functions are present', () => {
+            const provider = createProvider('fuji');
+            expect(getCodeMarkdown(provider, '0x123', token.deployedBytecode)).to.be.equal(`### Functions
+
+_Functions might not be properly identified_
+
+\`\`\`solidity
+_mint(address,uint256)
+symbol()
+transfer(address,uint256)
+allowance(address,address)
+balanceOf(address)
+nonces(address)
+name()
+approve(address,uint256)
+totalSupply()
+transferFrom(address,address,uint256)
+decimals()
+DOMAIN_SEPARATOR()
+\`\`\`
+
+### Explorer
+
+https://testnet.snowtrace.io/address/0x123
+`);
+        });
+
+        it('should return code Markdown when only explorer url is present but functions are empty', () => {
+            const provider = createProvider('fuji');
+            expect(getCodeMarkdown(provider, '0x123', '0x1234567890')).to.be.equal(`### Functions
+
+_Functions might not be properly identified_
+
+\`\`\`solidity
+\`\`\`
+
+### Explorer
+
+https://testnet.snowtrace.io/address/0x123
+`);
+        });
+
+        it('should return code Markdown when `explorerUrl` is not defined', () => {
+            const provider = createProvider('http://localhost:1234');
+            expect(getCodeMarkdown(provider, '0x123', token.deployedBytecode)).to.be.equal(`### Functions
+
+_Functions might not be properly identified_
+
+\`\`\`solidity
+_mint(address,uint256)
+symbol()
+transfer(address,uint256)
+allowance(address,address)
+balanceOf(address)
+nonces(address)
+name()
+approve(address,uint256)
+totalSupply()
+transferFrom(address,address,uint256)
+decimals()
+DOMAIN_SEPARATOR()
+\`\`\`
+`);
+        });
+
+        it('should return code Markdown when neither explorer url nor functions are present', () => {
+            const provider = createProvider('http://localhost:1234');
+            expect(getCodeMarkdown(provider, '0x123', '0x1234567890')).to.be.equal(`### Functions
+
+_Functions might not be properly identified_
+
+\`\`\`solidity
+\`\`\`
 `);
         });
 
