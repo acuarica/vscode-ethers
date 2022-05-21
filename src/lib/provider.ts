@@ -32,7 +32,7 @@ export async function execCall(call: ResolvedCall, createProviderFn: (network: s
  */
 export function createProvider(network: string): providers.Provider & ModeProvider {
     if (network.includes(':')) {
-        return new JsonRpcModeProvider('', network);
+        return new JsonRpcModeProvider('', network, undefined);
     }
 
     switch (network) {
@@ -43,32 +43,32 @@ export function createProvider(network: string): providers.Provider & ModeProvid
     }
 }
 
-export interface ModeProvider {
+export interface ModeProvider<T extends string | undefined = string | undefined> {
     name: string;
     connectionUrl: string;
-    explorerUrl?: string;
+    explorerUrl: T;
 
-    addressExplorerUrl(address: string): string;
+    blockExplorerUrl(blockNumber: number): T extends string ? string : null;
 
-    blockExplorerUrl(blockNumber: number): string;
+    addressExplorerUrl(address: string): T extends string ? string : null;
 }
 
-class JsonRpcModeProvider extends providers.JsonRpcProvider implements ModeProvider {
+class JsonRpcModeProvider extends providers.JsonRpcProvider implements ModeProvider<string | undefined> {
 
-    constructor(readonly name: string, readonly connectionUrl: string, readonly explorerUrl?: string) {
+    constructor(readonly name: string, readonly connectionUrl: string, readonly explorerUrl: string | undefined) {
         super(connectionUrl);
     }
 
-    addressExplorerUrl(address: string): string {
-        return `${this.explorerUrl}/address/${address}`;
+    blockExplorerUrl(blockNumber: number): string | null {
+        return this.explorerUrl ? `${this.explorerUrl}/block/${blockNumber}` : null;
     }
 
-    blockExplorerUrl(blockNumber: number): string {
-        return `${this.explorerUrl}/block/${blockNumber}`;
+    addressExplorerUrl(address: string): string | null {
+        return this.explorerUrl ? `${this.explorerUrl}/address/${address}` : null;
     }
 }
 
-class EtherscanModeProvider extends providers.EtherscanProvider implements ModeProvider {
+class EtherscanModeProvider extends providers.EtherscanProvider implements ModeProvider<string> {
 
     constructor(readonly net: string) {
         super(net);
@@ -87,12 +87,11 @@ class EtherscanModeProvider extends providers.EtherscanProvider implements ModeP
         return `https://${domain}etherscan.io`;
     }
 
-    addressExplorerUrl(address: string): string {
-        return `${this.explorerUrl}/address/${address}`;
-    }
-
     blockExplorerUrl(blockNumber: number): string {
         return `${this.explorerUrl}/block/${blockNumber}`;
     }
 
+    addressExplorerUrl(address: string): string {
+        return `${this.explorerUrl}/address/${address}`;
+    }
 }

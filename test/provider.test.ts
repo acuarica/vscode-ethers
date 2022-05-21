@@ -5,7 +5,7 @@ import { ContractFactory, providers, Wallet } from "ethers";
 import { computeAddress } from "ethers/lib/utils";
 import ganache from "ganache";
 import { EthersMode } from "../src/lib/mode";
-import { execCall } from "../src/lib/provider";
+import { createProvider, execCall } from "../src/lib/provider";
 import * as token from "./artifacts/LDToken.json";
 import './utils/str';
 
@@ -13,6 +13,42 @@ use(chaiAsPromised);
 use(waffleChai);
 
 describe('provider', function () {
+
+    describe('createProvider', function () {
+
+        it('should return JSON-RPC provider for unknown network', async () => {
+            const provider = createProvider('http://localhost:1234');
+            expect(provider.connectionUrl).to.be.equal('http://localhost:1234');
+            expect(provider.explorerUrl).to.be.undefined;
+            expect(provider.blockExplorerUrl(1234)).to.be.null;
+            expect(provider.addressExplorerUrl('0x1234')).to.be.null;
+        });
+
+        it('should return JSON-RPC provider for network `fuji`', async () => {
+            const provider = createProvider('fuji');
+            expect(provider.connectionUrl).to.be.equal('https://api.avax-test.network/ext/bc/C/rpc');
+            expect(provider.explorerUrl).to.be.equal('https://testnet.snowtrace.io');
+            expect(provider.blockExplorerUrl(1234)).to.be.equal('https://testnet.snowtrace.io/block/1234');
+            expect(provider.addressExplorerUrl('0x1234')).to.be.equal('https://testnet.snowtrace.io/address/0x1234');
+        });
+
+        ['homestead', 'mainnet'].forEach(network => it(`should return Etherscan provider for network \`${network}\``, () => {
+            const provider = createProvider(network);
+            expect(provider.connectionUrl).to.be.equal('https://api.etherscan.io');
+            expect(provider.explorerUrl).to.be.equal('https://etherscan.io');
+            expect(provider.blockExplorerUrl(1234)).to.be.equal('https://etherscan.io/block/1234');
+            expect(provider.addressExplorerUrl('0x1234')).to.be.equal('https://etherscan.io/address/0x1234');
+        }));
+
+        ['ropsten', 'rinkeby', 'kovan', 'goerli'].forEach(network => it(`should return Etherscan provider for testnet network \`${network}\``, () => {
+            const provider = createProvider(network);
+            expect(provider.connectionUrl).to.be.equal(`https://api-${network}.etherscan.io`);
+            expect(provider.explorerUrl).to.be.equal(`https://${network}.etherscan.io`);
+            expect(provider.blockExplorerUrl(1234)).to.be.equal(`https://${network}.etherscan.io/block/1234`);
+            expect(provider.addressExplorerUrl('0x1234')).to.be.equal(`https://${network}.etherscan.io/address/0x1234`);
+        }));
+
+    });
 
     describe('execCall', function () {
 
