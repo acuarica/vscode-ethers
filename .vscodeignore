@@ -1,3 +1,4 @@
+.ganache-*/**
 .github/**
 .vscode/**
 node_modules
@@ -5,6 +6,7 @@ images/*.gif
 src/**
 test/**
 out/**
+scripts/**
 .gitignore
 sample.ethers
 tsconfig.json
