@@ -60,6 +60,7 @@ describe('cashflow', function () {
             expect(report).to.be.deep.equal({
                 total: '17'.bn(),
                 contractTxsPerc: 100 / 3,
+                contractCreationTxsPerc: 0,
                 senders: {
                     '0xa': '2'.bn(),
                     '0xb': '5'.bn(),
@@ -82,6 +83,7 @@ describe('cashflow', function () {
             expect(report).to.be.deep.equal({
                 total: '12'.bn(),
                 contractTxsPerc: 0,
+                contractCreationTxsPerc: 0,
                 senders: {
                     '0xa': '2'.bn(),
                     '0xf': '10'.bn(),
@@ -99,11 +101,13 @@ describe('cashflow', function () {
                 { from: '0xb', to: '0xc', value: '2'.bn(), data: '0x1' },
                 { from: '0xa', to: '0xd', value: '3'.bn(), data: '0x' },
                 { from: '0xe', to: '0xc', value: '4'.bn(), data: '0x2' },
+                { from: '0xe', value: '0'.bn(), data: '0x2', creates: '0x1234' },
             ];
             const report = cashFlow(txs);
             expect(report).to.be.deep.equal({
                 total: '10'.bn(),
-                contractTxsPerc: 100 / 2,
+                contractTxsPerc: 60,
+                contractCreationTxsPerc: 100 / 5,
                 senders: {
                     '0xa': '4'.bn(),
                     '0xb': '2'.bn(),
@@ -133,6 +137,7 @@ describe('cashflow', function () {
             const report = cashFlow(txs);
             expect(report.total).to.be.deep.equal('116018526345391259043'.bn());
             expect(report.contractTxsPerc.toFixed(2)).to.be.deep.equal('85.71');
+            expect(report.contractCreationTxsPerc.toFixed(2)).to.be.deep.equal('0.00');
         });
 
     });

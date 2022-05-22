@@ -226,6 +226,8 @@ https://testnet.snowtrace.io/address/0x5425890298aed601595a70ab815c96711a31bc65
 
 ## Contract Transactions **${report.contractTxsPerc.toFixed(2)} %**
 
+## Contract Creation Transactions **${report.contractCreationTxsPerc.toFixed(2)} %**
+
 ## Senders
 
 0x2192E18EAf3a62037C7F6595114b9FeA318d9B32 EOA: 30.0
