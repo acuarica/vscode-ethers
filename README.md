@@ -82,6 +82,10 @@ When you omit the type of an argument, it will display an inlay with the inferre
 
 ![preview-inlays](https://user-images.githubusercontent.com/4592980/166147364-ddbd652d-e284-4927-85d1-5b92e61c1c1b.gif)
 
+### Blocks and Ether CashFlow
+
+![preview-cashflow](https://user-images.githubusercontent.com/4592980/169706483-10d8a1b1-1af1-470f-b76d-35d6dbf6ac05.gif)
+
 ### Snippets
 
 When you know that a contract implements a specific ERC,
