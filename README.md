@@ -23,6 +23,7 @@ It uses VS CodeLens to display contextual information about Contracts, Externall
 - Error reporting as you type
 - Alias definitions with `as` and `this`
 - Send and sign transactions using private keys
+- Ether CashFlow report for block ranges and block contextual information
 - `Ethers` language support
   - `.ethers` and `.web3` file extensions
   - Syntax highlight of Human-Readable ABI Signatures if Solidity extension is installed
