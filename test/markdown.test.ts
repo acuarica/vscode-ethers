@@ -206,7 +206,10 @@ https://testnet.snowtrace.io/address/0x5425890298aed601595a70ab815c96711a31bc65
             const txs = (await fetchTransactions(null as any, getBlock, { from: 972390, to: 972394 }))
                 .map(tx => {
                     return {
-                        from: tx.from, to: tx.to, value: (tx.value as any as { hex: string }).hex.bn()
+                        from: tx.from,
+                        to: tx.to,
+                        value: (tx.value as any as { hex: string }).hex.bn(),
+                        data: tx.data,
                     };
                 });
 
@@ -220,6 +223,8 @@ https://testnet.snowtrace.io/address/0x5425890298aed601595a70ab815c96711a31bc65
             expect(getCashFlowMarkdown(report, contractAddresses)).to.be.equal(`# Ether Cash Flow Report
 
 ## Total **${formatEther(report.total)}**
+
+## Contract Transactions **${report.contractTxsPerc.toFixed(2)} %**
 
 ## Senders
 

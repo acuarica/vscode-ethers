@@ -79,6 +79,7 @@ export function getCashFlowMarkdown(report: CashFlowReport, contractAddresses: S
 
     sections.push('# Ether Cash Flow Report\n');
     sections.push(`## Total **${formatEther(report.total)}**\n`);
+    sections.push(`## Contract Transactions **${report.contractTxsPerc.toFixed(2)} %**\n`);
     sections.push(`${formatBalances(report.senders, 'Senders')}`);
     sections.push(`${formatBalances(report.receivers, 'Receivers')}`);
 

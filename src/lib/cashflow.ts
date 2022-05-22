@@ -18,6 +18,11 @@ export type CashFlowReport = {
     total: BigNumber,
 
     /**
+     * Percentage of number of contract transactions in the transaction collection.
+     */
+    contractTxsPerc: number,
+
+    /**
      * Map of who sent how much ether.
      */
     senders: Balances,
@@ -71,20 +76,28 @@ export async function fetchTransactions(provider: providers.Provider, getBlockFn
  * @returns the `total` of Ether transferred,
  * and the list of `senders` and `receivers` the participated in the list of transactions.
  */
-export function cashFlow(transactions: Pick<Transaction, 'from' | 'to' | 'value'>[]): CashFlowReport {
+export function cashFlow(transactions: Pick<Transaction, 'from' | 'to' | 'value' | 'data'>[]): CashFlowReport {
     let total = constants.Zero;
+    let contractTxs = 0;
+
     const senders: Balances = {};
     const receivers: Balances = {};
 
     for (const tx of transactions) {
+        if (tx.data !== '0x') {
+            contractTxs++;
+        }
+
         if (!tx.value.isZero()) {
             total = total.add(tx.value);
+
+
             updateBalance(senders, tx.from ?? constants.AddressZero, tx.value);
             updateBalance(receivers, tx.to ?? constants.AddressZero, tx.value);
         }
     }
 
-    return { total, senders, receivers };
+    return { total, contractTxsPerc: contractTxs * 100 / transactions.length, senders, receivers };
 
     /**
      * Updates the `balances` by adding or updating the `address` by `amount`.
