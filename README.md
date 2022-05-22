@@ -84,6 +84,10 @@ When you omit the type of an argument, it will display an inlay with the inferre
 
 ### Blocks and Ether CashFlow
 
+Allows you display single block or block range information by proving a contextual hover.
+Moreover, you can calculate the Ether CashFlow of the entire block range.
+Use `-` as a block number separator to denote a block range.
+
 ![preview-cashflow](https://user-images.githubusercontent.com/4592980/169706483-10d8a1b1-1af1-470f-b76d-35d6dbf6ac05.gif)
 
 ### Snippets
