@@ -2,7 +2,8 @@ import { expect } from "chai";
 import { providers } from "ethers";
 import ganache from "ganache";
 import { cashFlow, fetchTransactions } from "../src/lib/cashflow";
-import * as blocks from "./data/fuji-972388-972394.json";
+import * as fujiBlocks from "./data/fuji-972388-972394.json";
+import * as goerliBlocks from "./data/goerli-5516588-5516591.json";
 import './utils/str';
 
 describe('cashflow', function () {
@@ -101,7 +102,7 @@ describe('cashflow', function () {
                 { from: '0xb', to: '0xc', value: '2'.bn(), data: '0x1' },
                 { from: '0xa', to: '0xd', value: '3'.bn(), data: '0x' },
                 { from: '0xe', to: '0xc', value: '4'.bn(), data: '0x2' },
-                { from: '0xe', value: '0'.bn(), data: '0x2', creates: '0x1234' },
+                { from: '0xe', to: null as any, value: '0'.bn(), data: '0x2', creates: '0x1234' },
             ];
             const report = cashFlow(txs);
             expect(report).to.be.deep.equal({
@@ -121,23 +122,38 @@ describe('cashflow', function () {
             });
         });
 
-        it('should return cash from from `txs`', async () => {
-            const getBlock = (blockNumber: number) => Promise.resolve(blocks[blockNumber - 972388] as any);
+        it('should return cashflow report from `fuji-972388-972394`', async () => {
+            const getBlock = (blockNumber: number) => Promise.resolve(fujiBlocks[blockNumber - 972388] as any);
 
             const txs = (await fetchTransactions(null as any, getBlock, { from: 972390, to: 972394 }))
                 .map(tx => {
                     return {
-                        from: tx.from,
-                        to: tx.to,
-                        value: (tx.value as any as { hex: string }).hex.bn(),
-                        data: tx.data,
+                        ...tx,
+                        value: (tx.value as any).hex.bn(),
                     };
                 });
 
             const report = cashFlow(txs);
             expect(report.total).to.be.deep.equal('116018526345391259043'.bn());
-            expect(report.contractTxsPerc.toFixed(2)).to.be.deep.equal('85.71');
-            expect(report.contractCreationTxsPerc.toFixed(2)).to.be.deep.equal('0.00');
+            expect(report.contractTxsPerc.toFixed(2)).to.be.equal('85.71');
+            expect(report.contractCreationTxsPerc.toFixed(2)).to.be.equal('0.00');
+        });
+
+        it('should return cashflow report from `goerli-5516588-5516591`', async () => {
+            const getBlock = (blockNumber: number) => Promise.resolve(goerliBlocks[blockNumber - 5516588] as any);
+
+            const txs = (await fetchTransactions(null as any, getBlock, { from: 5516588, to: 5516591 }))
+                .map(tx => {
+                    return {
+                        ...tx,
+                        value: (tx.value as any).hex.bn(),
+                    };
+                });
+
+            const report = cashFlow(txs);
+            expect(report.total).to.be.deep.equal('64001205470000000000'.bn());
+            expect(report.contractTxsPerc.toFixed(2)).to.be.equal('100.00');
+            expect(report.contractCreationTxsPerc.toFixed(2)).to.be.equal('9.09');
         });
 
     });
