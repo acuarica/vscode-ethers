@@ -75,6 +75,23 @@ export function getAddressMarkdown(provider: ModeProvider, address: string, code
  * @returns the formatted Markdown document.
  */
 export function getCashFlowMarkdown(report: CashFlowReport, contractAddresses: Set<string>) {
+    const sections = [];
+
+    sections.push('# Ether Cash Flow Report\n');
+    sections.push(`## Total **${formatEther(report.total)}**\n`);
+    sections.push(`${formatBalances(report.senders, 'Senders')}`);
+    sections.push(`${formatBalances(report.receivers, 'Receivers')}`);
+
+    return sections.join('\n');
+
+    /**
+     * Formats the given `balances` listing each address, its value,
+     * and whether it is an EOA or a Contract address.
+     * 
+     * @param balances to format.
+     * @param title the section title.
+     * @returns the formatted `balances`.
+     */
     function formatBalances(balances: Balances, title: string) {
         let result = `## ${title}\n\n`;
         for (const [address, value] of Object.entries(balances)) {
@@ -83,7 +100,4 @@ export function getCashFlowMarkdown(report: CashFlowReport, contractAddresses: S
         }
         return result;
     }
-
-    const content = `# Ether Cash Flow Report\n\n## Total **${formatEther(report.total)}**\n\n${formatBalances(report.senders, 'Senders')}\n${formatBalances(report.receivers, 'Receivers')}`;
-    return content;
 }
