@@ -7,6 +7,7 @@
     "publisher": "acuarica",
     "private": true,
     "license": "MIT",
+    "main": "./dist/main",
     "repository": {
         "type": "git",
         "url": "https://github.com/acuarica/vscode-ethers"
@@ -37,7 +38,6 @@
     "activationEvents": [
         "onLanguage:ethers"
     ],
-    "main": "./dist/main",
     "contributes": {
         "languages": [
             {
@@ -100,15 +100,6 @@
             }
         }
     },
-    "scripts": {
-        "compile": "tsc",
-        "lint": "eslint . --ext .ts",
-        "build": "esbuild ./src/extension.ts --bundle --minify --outfile=dist/main.js --external:vscode --format=cjs --platform=node",
-        "test": "mocha",
-        "vscode:prepublish": "npm run build",
-        "package": "vsce package",
-        "publish": "vsce publish"
-    },
     "devDependencies": {
         "@ethereum-waffle/chai": "^3.4.4",
         "@types/chai": "^4.3.1",
@@ -132,5 +123,14 @@
     "dependencies": {
         "ethers": "^5.6.2",
         "evm": "^0.2.0"
+    },
+    "scripts": {
+        "compile": "tsc",
+        "lint": "eslint . --ext .ts",
+        "build": "esbuild ./src/extension.ts --bundle --minify --outfile=dist/main.js --external:vscode --format=cjs --platform=node",
+        "test": "mocha",
+        "vscode:prepublish": "npm run build",
+        "package": "vsce package",
+        "publish": "vsce publish"
     }
 }
