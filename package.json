@@ -103,12 +103,11 @@
     "scripts": {
         "compile": "tsc",
         "lint": "eslint . --ext .ts",
-        "build": "esbuild ./src/extension.ts --bundle --outfile=dist/main.js --external:vscode --format=cjs --platform=node",
-        "build-test": "npm run compile && npm run build",
+        "build": "esbuild ./src/extension.ts --bundle --minify --outfile=dist/main.js --external:vscode --format=cjs --platform=node",
         "test": "mocha",
-        "vsce:prepublish": "compile",
-        "vsce:package": "vsce package",
-        "vsce:publish": "vsce publish"
+        "vscode:prepublish": "npm run build",
+        "package": "vsce package",
+        "publish": "vsce publish"
     },
     "devDependencies": {
         "@ethereum-waffle/chai": "^3.4.4",
