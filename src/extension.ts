@@ -14,17 +14,36 @@ import { EthersModeCodeActionProvider } from './providers/EthersModeCodeActionPr
 import { EthersModeCodeLensProvider } from './providers/EthersModeCodeLensProvider';
 import { EthersModeHoverProvider } from './providers/EthersModeHoverProvider';
 
-// this method is called when your extension is activated
-// your extension is activated the very first time the command is executed
-let disposables: Disposable[] = [];
-
+/**
+ * This method is called when your extension is activated.
+ * Your extension is activated the very first time the command is executed
+ * 
+ * See https://code.visualstudio.com/api/get-started/extension-anatomy#extension-entry-file.
+ * 
+ * @param context 
+ */
 export function activate({ subscriptions }: ExtensionContext) {
-    const registerCommand = (command: string, callback: (...args: any[]) => any) => subscriptions.push(commands.registerCommand(command, callback));
+
+    /**
+     * See `subscriptions` property in https://code.visualstudio.com/api/references/vscode-api#ExtensionContext.
+     */
+    function register(disposable: Disposable) {
+        subscriptions.push(disposable);
+    }
+
+    /**
+     * Wrapper around `registerCommand` that pushes the resulting `Disposable`
+     * into the `context`'s `subscriptions`.
+     */
+    function registerCommand(command: string, callback: (...args: any[]) => any) {
+        register(commands.registerCommand(command, callback));
+    }
+
     // const registerCommandTextEditor = (command: string, callback: (textEditor: TextEditor, edit: TextEditorEdit, ...args: any[]) => void) => subscriptions.push(commands.registerTextEditorCommand(command, callback));
 
     Logger.setLogLevel(LogLevel.DEBUG);
 
-    const log = window.createOutputChannel('Ethers Mode');
+    const output = window.createOutputChannel('Ethers Mode');
     // const logLevel = workspace.getConfiguration("ethers-mode").get("logLevel");
     // console.log('act', logLevel);
     // if (logLevel) {
@@ -42,9 +61,9 @@ export function activate({ subscriptions }: ExtensionContext) {
 
     const codelensProvider = new EthersModeCodeLensProvider();
 
-    languages.registerCodeLensProvider("ethers", codelensProvider);
-    languages.registerCodeActionsProvider("ethers", new EthersModeCodeActionProvider(codelensProvider));
-    languages.registerHoverProvider("ethers", new EthersModeHoverProvider(codelensProvider));
+    register(languages.registerCodeLensProvider("ethers", codelensProvider));
+    register(languages.registerCodeActionsProvider("ethers", new EthersModeCodeActionProvider(codelensProvider)));
+    register(languages.registerHoverProvider("ethers", new EthersModeHoverProvider(codelensProvider)));
 
     registerCommand("ethers-mode.call", async () => {
         const editor = window.activeTextEditor;
@@ -76,7 +95,7 @@ export function activate({ subscriptions }: ExtensionContext) {
 
         const transactions = await window.withProgress(progressOptions('Fetching transactions for block'), (progress, token) => {
             token.onCancellationRequested(() => {
-                log.appendLine('User canceled fetching blocks');
+                output.appendLine('User canceled fetching blocks');
             });
 
             progress.report({ increment: 0 });
@@ -94,7 +113,7 @@ export function activate({ subscriptions }: ExtensionContext) {
         const contractAddresses = new Set<string>();
         await window.withProgress(progressOptions('Fetching info for address'), async (progress, token) => {
             token.onCancellationRequested(() => {
-                log.appendLine('User canceled fetching address info');
+                output.appendLine('User canceled fetching address info');
             });
 
             for (const address of new Set([...Object.keys(report.senders), ...Object.keys(report.receivers)])) {
@@ -113,7 +132,7 @@ export function activate({ subscriptions }: ExtensionContext) {
     registerCommand("ethers-mode.codelens-call", async (call: ResolvedCall) => {
         const { func, network } = call;
 
-        log.appendLine(`Execute \`${func.format(utils.FormatTypes.full)}\` on \u{1F310} ${network}`);
+        output.appendLine(`Execute \`${func.format(utils.FormatTypes.full)}\` on \u{1F310} ${network}`);
 
         // try {
         let show;
@@ -142,12 +161,4 @@ export function activate({ subscriptions }: ExtensionContext) {
         await workspace.openTextDocument({ language: 'solidity', content: text });
     });
 
-}
-
-// this method is called when your extension is deactivated
-export function deactivate() {
-    if (disposables) {
-        disposables.forEach(item => item.dispose());
-    }
-    disposables = [];
 }
