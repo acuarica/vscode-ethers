@@ -1,5 +1,5 @@
 import { writeFileSync } from "fs";
-import { createProvider } from "../src/lib/provider";
+import { createProvider } from "../../src/lib/provider";
 
 async function main() {
     if (process.argv.length <= 3) {
