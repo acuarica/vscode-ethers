@@ -23,6 +23,7 @@ It uses VS CodeLens to display contextual information about Contracts, Externall
 - Error reporting as you type
 - Alias definitions with `as` and `this`
 - Send and sign transactions using private keys
+- Ether CashFlow report for block ranges and block contextual information
 - `Ethers` language support
   - `.ethers` and `.web3` file extensions
   - Syntax highlight of Human-Readable ABI Signatures if Solidity extension is installed
@@ -82,6 +83,14 @@ When you omit the type of an argument, it will display an inlay with the inferre
 
 ![preview-inlays](https://user-images.githubusercontent.com/4592980/166147364-ddbd652d-e284-4927-85d1-5b92e61c1c1b.gif)
 
+### Blocks and Ether CashFlow
+
+Allows you display single block or block range information by proving a contextual hover.
+Moreover, you can calculate the Ether CashFlow of the entire block range.
+Use `-` as a block number separator to denote a block range.
+
+![preview-cashflow](https://user-images.githubusercontent.com/4592980/169706483-10d8a1b1-1af1-470f-b76d-35d6dbf6ac05.gif)
+
 ### Snippets
 
 When you know that a contract implements a specific ERC,
@@ -110,6 +119,34 @@ Just write `net <provider>` at the beginning of the file and select
   This will:
   - Start a task `npm: watch` to compile the code
   - Run the extension in a new VS Code window
+
+### Typechecking and Building
+
+To typecheck the extension using `tsc`, run
+
+```sh
+yarn compile
+```
+
+To build and package the extension we use the `esbuild` bundler.
+To bundle the extension into `dist/main.js`, run
+
+```sh
+yarn build
+```
+
+### Unit Testing
+
+Unit tests can be found under the `test` folder.
+Our test suite uses `mocha` to run the tests.
+
+```sh
+yarn test
+```
+
+### VS Code Testing
+
+**TODO!**
 
 ### VS Code API Overview
 

@@ -1,13 +1,25 @@
-import { ethers } from "ethers";
-import { Fragment, isAddress, ParamType } from "ethers/lib/utils";
+import { computeAddress, Fragment, getAddress, isAddress, ParamType } from "ethers/lib/utils";
 
 const NET = /^net\s+(\S+)\s*$/;
+const BLOCK_RANGE = /^(\d+)(?:\s*-\s*(\d+))?$/;
 const ID = /[A-Za-z_]\w*/;
 const ETH = /(?:0x)?[0-9a-fA-F]{40}/;
 const PK = /(?:0x)?[0-9a-fA-F]{64}/;
 const ICAP = /XE[0-9]{2}[0-9A-Za-z]{30,31}/;
 const ADDRESS = new RegExp(`^(${ETH.source}|${ICAP.source}|${PK.source})(?:\\s+as\\s+(${ID.source}))?$`);
 const CONTRACT_REF = new RegExp(`^(?:\\s*function\\s)?\\s*(${ID.source})\\.`);
+
+declare global {
+	interface String {
+		asNet(this: string): string | null;
+		asAddress(this: string): Address;
+		asCall(this: string): Call;
+	}
+}
+
+String.prototype.asNet = function (this: string) { return parseNet(this); };
+String.prototype.asAddress = function (this: string) { return parseAddress(this) as Address; };
+String.prototype.asCall = function (this: string) { return parseCall(this) as Call; };
 
 /**
  * 
@@ -16,6 +28,10 @@ export type ParseResult =
 	{
 		kind: 'net',
 		value: string,
+	} |
+	{
+		kind: 'block',
+		value: BlockRange,
 	} |
 	{
 		kind: 'address',
@@ -29,25 +45,49 @@ export type ParseResult =
 /**
  * 
  */
-export interface Address {
+export interface BlockRange {
 
 	/**
 	 * 
 	 */
+	from: number;
+
+	/**
+	 * 
+	 */
+	to?: number
+}
+
+/**
+ * Represents an Ethereum address.
+ * 
+ * For more info,
+ * see https://docs.ethers.io/v5/api/utils/address/#address.
+ */
+export interface Address {
+
+	/**
+	 * An address is a `DataHexString` of 20 bytes (40 nibbles),
+	 * with optional mixed case.
+	 */
 	address: string;
 
 	/**
+	 * If the case is mixed, it is a **Checksum Address**,
+	 * which uses a specific pattern of uppercase and lowercase letters within
+	 * a given address to reduce the risk of errors introduced from typing an address or cut and paste issues.
+	 * 
 	 * 
 	 */
 	isChecksumed: boolean;
 
 	/**
-	 * 
+	 * If `privateKey` is present, this address is able to sign transactions.
 	 */
 	privateKey?: string;
 
 	/**
-	 * 
+	 * Whether this address 
 	 */
 	symbol?: string;
 
@@ -113,6 +153,8 @@ export function parse(line: string): ParseResult | null {
 	let value;
 	if ((value = parseNet(line))) {
 		return { kind: 'net', value };
+	} else if ((value = parseBlock(line))) {
+		return { kind: 'block', value };
 	} else if ((value = parseAddress(line))) {
 		return { kind: 'address', value };
 	} else if ((value = parseCall(line))) {
@@ -137,6 +179,26 @@ export function parseNet(line: string): string | null {
 	return null;
 }
 
+/**
+ * 
+ * @param line 
+ * @returns 
+ */
+export function parseBlock(line: string): BlockRange | null {
+	const match = line.match(BLOCK_RANGE);
+	if (match) {
+		const fromBlock = Number.parseInt(match[1]);
+		if (match[2] !== undefined) {
+			const toBlock = Number.parseInt(match[2]);
+			return { from: fromBlock, to: toBlock };
+		}
+
+		return { from: fromBlock };
+	}
+
+	return null;
+
+}
 
 /**
  * Parse an address or private key,
@@ -155,12 +217,12 @@ export function parseAddress(line: string): Address | null {
 		if (m[1].length >= 64) {
 			privateKey = m[1].length === 64 ? '0x' + m[1] : m[1];
 			try {
-				address = ethers.utils.computeAddress(privateKey as string);
+				address = computeAddress(privateKey as string);
 			} catch (err: any) {
 				throw new Error('Invalid private key');
 			}
 		} else {
-			address = ethers.utils.getAddress(m[1]);
+			address = getAddress(m[1]);
 		}
 		const symbol = m[2];
 		return { address, isChecksumed: address === m[1], privateKey, symbol };

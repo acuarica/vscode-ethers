@@ -1,7 +1,9 @@
-import { CancellationToken, CodeLens, CodeLensProvider, DecorationOptions, Diagnostic, DiagnosticSeverity, languages, Position, Range, TextDocument, TextLine, ThemeColor, window, workspace } from 'vscode';
+import { Block } from "@ethersproject/abstract-provider";
 import { formatUnits, FunctionFragment } from 'ethers/lib/utils';
-import { createProvider, EthersMode } from './lib';
-import { Call, parse } from './parse';
+import { CancellationToken, CodeLens, CodeLensProvider, DecorationOptions, Diagnostic, DiagnosticSeverity, languages, Position, Range, TextDocument, TextLine, ThemeColor, window, workspace } from 'vscode';
+import { EthersMode } from '../lib/mode';
+import { createProvider } from '../lib/provider';
+import { BlockRange, Call, parse } from '../lib/parse';
 
 /**
  * 
@@ -20,6 +22,18 @@ export class AddressCodeLens extends CodeLens {
     code?: string;
 
     constructor(readonly network: string, readonly address: string, range: Range) {
+        super(range);
+    }
+}
+
+/**
+ * 
+ */
+export class BlockCodeLens extends CodeLens {
+
+    block?: Block;
+
+    constructor(readonly network: string, readonly blockRange: BlockRange, range: Range) {
         super(range);
     }
 }
@@ -77,6 +91,20 @@ export class EthersModeCodeLensProvider implements CodeLensProvider {
                     mode.net(result.value);
                     if (shouldDisplayNetworkInfo) {
                         codeLenses.push(new NetworkCodeLens(mode.currentNetwork!, range));
+                    }
+                } else if (result.kind === 'block') {
+                    if (mode.currentNetwork) {
+                        codeLenses.push(new BlockCodeLens(mode.currentNetwork, result.value, range));
+                        codeLenses.push(new CodeLens(range, {
+                            title: 'See Ether Cash Flow',
+                            command: 'ethers-mode.codelens-cashflow',
+                            arguments: [mode.currentNetwork, result.value],
+                        }));
+                    } else {
+                        codeLenses.push(new CodeLens(range, {
+                            title: 'No network selected -- first use `net <network>`',
+                            command: ''
+                        }));
                     }
                 } else if (result.kind === 'address') {
                     mode.address(result.value);
@@ -159,6 +187,20 @@ export class EthersModeCodeLensProvider implements CodeLensProvider {
                 console.debug(err.message);
                 codeLens.command = {
                     title: `No network: ${err.message}`,
+                    command: '',
+                };
+            }
+        } else if (codeLens instanceof BlockCodeLens) {
+            try {
+                const provider = createProvider(codeLens.network);
+                codeLens.block = await provider.getBlock(codeLens.blockRange.from);
+                codeLens.command = {
+                    title: '$(symbol-function) Block',
+                    command: '',
+                };
+            } catch (_err) {
+                codeLens.command = {
+                    title: 'No network',
                     command: '',
                 };
             }

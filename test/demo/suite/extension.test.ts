@@ -45,7 +45,7 @@ suite('Extension Test Suite', () => {
         pos = await typewrite(editor, pos, `\n`);
 
         pos = await typewrite(editor, pos, `net fuji\n\n`);
-        // hoverAt(editor, pos.translate(-2));
+        hoverAt(editor, pos.translate(-2));
         pos = await typewrite(editor, pos, `0x5425890298aed601595a70AB815c96711a31Bc65`, 20);
 
         pos = await typewrite(editor, pos, ` as usdc\n\n`,);

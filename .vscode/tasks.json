@@ -5,16 +5,28 @@
 	"tasks": [
 		{
 			"type": "npm",
-			"script": "watch",
-			"problemMatcher": "$tsc-watch",
-			"isBackground": true,
+			"script": "compile",
+			"problemMatcher": "$tsc",
 			"presentation": {
-				"reveal": "never"
+				"reveal": "silent",
+				"panel": "dedicated",
 			},
-			"group": {
-				"kind": "build",
-				"isDefault": true
-			}
-		}
+		},
+		{
+			"type": "npm",
+			"script": "build:main",
+			"presentation": {
+				"reveal": "silent",
+				"panel": "dedicated",
+			},
+		},
+		{
+			"type": "npm",
+			"script": "build:web",
+			"presentation": {
+				"reveal": "silent",
+				"panel": "dedicated",
+			},
+		},
 	]
 }
