@@ -128,8 +128,8 @@
     },
     "scripts": {
         "compile": "tsc",
-        "build:main": "esbuild ./src/extension.ts --bundle --minify --outfile=dist/main.js --external:vscode --format=cjs --platform=node",
-        "build:web": "echo 'const window={};' > dist/web.js && esbuild ./src/extension.ts --bundle --minify --external:vscode --format=cjs --platform=browser >> dist/web.js",
+        "build:main": "esbuild ./src/extension.ts --bundle --outfile=dist/main.js --external:vscode --format=cjs --platform=node --minify",
+        "build:web": "esbuild ./src/extension.ts --bundle --outfile=dist/web.js --external:vscode --format=cjs --platform=browser --minify --banner:js='const window={};'",
         "test": "mocha",
         "start:web": "vscode-test-web --extensionDevelopmentPath=. .",
         "lint": "eslint . --ext .ts",
