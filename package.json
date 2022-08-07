@@ -6,6 +6,7 @@
     "version": "0.0.8",
     "publisher": "acuarica",
     "private": true,
+    "preview": true,
     "license": "MIT",
     "main": "./dist/main",
     "browser": "./dist/web",
