@@ -7,7 +7,8 @@
     "publisher": "acuarica",
     "private": true,
     "license": "MIT",
-    "main": "./out/src/extension",
+    "main": "./dist/main",
+    "browser": "./dist/web",
     "repository": {
         "type": "git",
         "url": "https://github.com/acuarica/vscode-ethers"
@@ -126,11 +127,13 @@
     },
     "scripts": {
         "compile": "tsc",
-        "build": "esbuild ./src/extension.ts --bundle --minify --outfile=dist/main.js --external:vscode --format=cjs --platform=node",
+        "build:main": "esbuild ./src/extension.ts --bundle --minify --outfile=dist/main.js --external:vscode --format=cjs --platform=node",
+        "build:web": "echo 'const window={};' > dist/web.js && esbuild ./src/extension.ts --bundle --minify --external:vscode --format=cjs --platform=browser >> dist/web.js",
         "test": "mocha",
         "lint": "eslint . --ext .ts",
         "vscode:prepublish": "npm run build",
         "package": "vsce package",
-        "publish": "vsce publish"
+        "publish": "vsce publish",
+        "clean": "rm -rf out/ dist/"
     }
 }

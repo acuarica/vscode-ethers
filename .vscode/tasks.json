@@ -11,5 +11,21 @@
 				"reveal": "silent",
 			},
 		},
+		{
+			"type": "npm",
+			"script": "build:main",
+			"problemMatcher": "$tsc",
+			"presentation": {
+				"reveal": "silent",
+			},
+		},
+		{
+			"type": "npm",
+			"script": "build:web",
+			"problemMatcher": "$tsc",
+			"presentation": {
+				"reveal": "silent",
+			},
+		},
 	]
 }

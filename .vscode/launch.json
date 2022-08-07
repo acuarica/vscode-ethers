@@ -6,7 +6,7 @@
 	"version": "0.2.0",
 	"configurations": [
 		{
-			"name": "Run Extension",
+			"name": "Run Main Extension",
 			"type": "extensionHost",
 			"request": "launch",
 			"runtimeExecutable": "${execPath}",
@@ -16,10 +16,24 @@
 			"outFiles": [
 				"${workspaceFolder}/out/**/*.js"
 			],
-			"preLaunchTask": "npm: compile",
+			"preLaunchTask": "npm: build:main",
 		},
 		{
-			"name": "Run Extension Tests",
+			"name": "Run Web Extension",
+			"type": "extensionHost",
+			"debugWebWorkerHost": true,
+			"request": "launch",
+			"args": [
+				"--extensionDevelopmentPath=${workspaceFolder}",
+				"--extensionDevelopmentKind=web"
+			],
+			"outFiles": [
+				"${workspaceFolder}/dist/web/**/*.js"
+			],
+			"preLaunchTask": "npm: build:web",
+		},
+		{
+			"name": "Run Main Extension Tests",
 			"type": "extensionHost",
 			"request": "launch",
 			"runtimeExecutable": "${execPath}",
@@ -31,6 +45,6 @@
 				"${workspaceFolder}/out/**/*.js"
 			],
 			"preLaunchTask": "npm: compile"
-		}
+		},
 	]
 }
