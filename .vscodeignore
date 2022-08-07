@@ -2,6 +2,8 @@
 .github/**
 .vscode/**
 .vscode-test-web/**
+dist/main.js.map
+dist/web.js.map
 node_modules
 images/*.gif
 out/**
