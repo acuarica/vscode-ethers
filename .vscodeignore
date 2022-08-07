@@ -1,12 +1,12 @@
 .ganache-*/**
 .github/**
 .vscode/**
+.vscode-test-web/**
 node_modules
 images/*.gif
+out/**
 src/**
 test/**
-out/**
-scripts/**
 .gitignore
 sample.ethers
 tsconfig.json
