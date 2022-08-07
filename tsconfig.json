@@ -9,10 +9,15 @@
         "sourceMap": true,
         "resolveJsonModule": true,
         "skipLibCheck": true,
-        /* Strict Type-Checking Option */
-        "strict": true, /* enable all strict type-checking options */
-        /* Additional Checks */
-        "noUnusedLocals": true /* Report errors on unused locals. */
+        "strict": true,
+        "exactOptionalPropertyTypes": true,
+        "noFallthroughCasesInSwitch": true,
+        "noImplicitOverride": true,
+        "noImplicitReturns": true,
+        "noPropertyAccessFromIndexSignature": true,
+        "noUncheckedIndexedAccess": true,
+        "noUnusedLocals": true,
+        "noUnusedParameters": true,
     },
     "exclude": [
         "node_modules",

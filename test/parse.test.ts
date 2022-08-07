@@ -82,21 +82,21 @@ describe("parse", () => {
 				.to.be.deep.equal({
 					address: '0x5425890298aed601595a70AB815c96711a31Bc65',
 					isChecksumed: true,
-					privateKey: undefined,
+					privateKey: null,
 					symbol: undefined,
 				});
 			expect(parseAddress('5425890298aed601595a70AB815c96711a31Bc65'))
 				.to.be.deep.equal({
 					address: '0x5425890298aed601595a70AB815c96711a31Bc65',
 					isChecksumed: false,
-					privateKey: undefined,
+					privateKey: null,
 					symbol: undefined,
 				});
 			expect(parseAddress('0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266'))
 				.to.be.deep.equal({
 					address: '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266',
 					isChecksumed: false,
-					privateKey: undefined,
+					privateKey: null,
 					symbol: undefined,
 				});
 		});
@@ -106,7 +106,7 @@ describe("parse", () => {
 				.to.be.deep.equal({
 					address: '0x5425890298aed601595a70AB815c96711a31Bc65',
 					isChecksumed: true,
-					privateKey: undefined,
+					privateKey: null,
 					symbol: 'token',
 				});
 
@@ -114,7 +114,7 @@ describe("parse", () => {
 				.to.be.deep.equal({
 					address: '0x0000000000000000000000000000000000000000',
 					isChecksumed: true,
-					privateKey: undefined,
+					privateKey: null,
 					symbol: 'zero',
 				});
 		});

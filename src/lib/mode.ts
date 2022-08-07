@@ -30,7 +30,7 @@ export class EthersMode {
 	/**
 	 * Returns the private key of the current scope, if any.
 	 */
-	thisPrivateKey?: string;
+	thisPrivateKey: string | null = null;
 
 	/**
 	 * Returns the address of the current scope.
@@ -153,12 +153,12 @@ export interface ResolvedCall {
 	/**
 	 * The signer's private key where this fragment was defined, if any.
 	 */
-	privateKey?: string;
+	privateKey: string | null;
 
 	/**
 	 * The network this call should connect to, if any.
 	 */
-	network?: string;
+	network: string | undefined;
 
 	/**
 	 * Returns a list of unresolved symbols, _i.e._, symbols that are not defined

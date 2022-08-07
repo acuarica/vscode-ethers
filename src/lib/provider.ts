@@ -20,7 +20,7 @@ export async function execCall(call: ResolvedCall, createProviderFn: (network: s
         ? provider
         : new Wallet(privateKey!, provider));
 
-    return await contract.functions[func.name](...args);
+    return await contract.functions[func.name]!(...args);
 }
 
 /**

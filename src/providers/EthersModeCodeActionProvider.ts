@@ -6,7 +6,7 @@ export class EthersModeCodeActionProvider implements CodeActionProvider {
 
     constructor(readonly codelensProvider: EthersModeCodeLensProvider) { }
 
-    provideCodeActions(document: TextDocument, range: Range | Selection, context: CodeActionContext, token: CancellationToken): ProviderResult<(CodeAction | Command)[]> {
+    provideCodeActions(document: TextDocument, range: Range | Selection, _context: CodeActionContext, _token: CancellationToken): ProviderResult<(CodeAction | Command)[]> {
         for (const codeLens of this.codelensProvider.codeLenses) {
             if (codeLens.range.contains(range.start)) {
                 if (codeLens instanceof AddressCodeLens &&

@@ -251,14 +251,14 @@ const inferredTypeDecorationType = window.createTextEditorDecorationType({
 
 function decorate(inferredTypeDecorations: DecorationOptions[], call: Call, line: TextLine) {
     for (let i = 0; i < call.inferredPositions.length; i++) {
-        const p = call.inferredPositions[i];
+        const p = call.inferredPositions[i]!;
         if (p !== null) {
             const pos = new Position(line.lineNumber, p + 1);
             inferredTypeDecorations.push({
                 range: new Range(pos, pos),
                 renderOptions: {
                     after: {
-                        contentText: call.method.inputs[i].type,
+                        contentText: call.method.inputs[i]!.type,
                     },
                 },
             });

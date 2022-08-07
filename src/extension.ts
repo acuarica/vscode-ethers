@@ -132,7 +132,7 @@ export function activate({ subscriptions }: ExtensionContext) {
     registerCommand("ethers-mode.codelens-call", async (call: ResolvedCall) => {
         const { func, network } = call;
 
-        output.appendLine(`Execute \`${func.format(utils.FormatTypes.full)}\` on \u{1F310} ${network}`);
+        output.appendLine(`Execute \`${func.format(utils.FormatTypes['full'])}\` on \u{1F310} ${network}`);
 
         // try {
         let show;

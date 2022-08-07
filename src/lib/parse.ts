@@ -84,7 +84,7 @@ export interface Address {
 	/**
 	 * If `privateKey` is present, this address is able to sign transactions.
 	 */
-	privateKey?: string;
+	privateKey: string | null;
 
 	/**
 	 * Whether this address 
@@ -101,7 +101,7 @@ export interface Call {
 	/**
 	 * 
 	 */
-	contractRef?: Id;
+	contractRef: Id | undefined;
 
 	/**
 	 * 
@@ -172,7 +172,7 @@ export function parse(line: string): ParseResult | null {
 export function parseNet(line: string): string | null {
 	const match = line.match(NET);
 	if (match) {
-		const network = match[1];
+		const network = match[1]!;
 		return network;
 	}
 
@@ -187,7 +187,7 @@ export function parseNet(line: string): string | null {
 export function parseBlock(line: string): BlockRange | null {
 	const match = line.match(BLOCK_RANGE);
 	if (match) {
-		const fromBlock = Number.parseInt(match[1]);
+		const fromBlock = Number.parseInt(match[1]!);
 		if (match[2] !== undefined) {
 			const toBlock = Number.parseInt(match[2]);
 			return { from: fromBlock, to: toBlock };
@@ -210,22 +210,23 @@ export function parseBlock(line: string): BlockRange | null {
  * @returns 
  */
 export function parseAddress(line: string): Address | null {
-	const m = line.match(ADDRESS);
-	if (m) {
+	const match = line.match(ADDRESS);
+	if (match) {
+		const [value, symbol] = [match[1]!, match[2]!];
+		
 		let address: string;
-		let privateKey: string | undefined;
-		if (m[1].length >= 64) {
-			privateKey = m[1].length === 64 ? '0x' + m[1] : m[1];
+		let privateKey: string | null = null;
+		if (value.length >= 64) {
+			privateKey = value.length === 64 ? '0x' + value : value;
 			try {
 				address = computeAddress(privateKey as string);
 			} catch (err: any) {
 				throw new Error('Invalid private key');
 			}
 		} else {
-			address = getAddress(m[1]);
+			address = getAddress(value);
 		}
-		const symbol = m[2];
-		return { address, isChecksumed: address === m[1], privateKey, symbol };
+		return { address, isChecksumed: address === value, privateKey, symbol };
 	}
 
 	return null;
@@ -249,11 +250,11 @@ export function parseCall(line: string): Call {
 	// eslint-disable-next-line prefer-const
 	let [patchedFuncSig, argv, pos] = patch;
 
-	const m = line.match(CONTRACT_REF);
-	let contractRef;
-	if (m) {
+	const match = line.match(CONTRACT_REF);
+	let contractRef: Id | undefined;
+	if (match) {
 		patchedFuncSig = patchedFuncSig.replace(CONTRACT_REF, '');
-		contractRef = new Id(m[1], m[0].length - m[1].length - 1);
+		contractRef = new Id(match[1]!, match[0]!.length - match[1]!.length - 1);
 	}
 
 	const fragment = Fragment.from(!patchedFuncSig.trim().startsWith('function ')
@@ -269,25 +270,25 @@ export function parseCall(line: string): Call {
 			type = input.type;
 			value = input.name;
 			if (value.startsWith('$$')) {
-				value = argv[value];
+				value = argv[value]!;
 			} else if (value.match(ID)) {
-				value = new Id(value, pos[0]);
+				value = new Id(value, pos[0]!);
 			}
 			inferredPositions.push(null);
 		} else if (input.type) {
 			value = input.type;
 			if (value.startsWith('$$')) {
 				type = 'string';
-				value = argv[value];
+				value = argv[value]!;
 			} else {
 				type = inferArgumentType(value);
 				if (!type) {
 					type = 'address';
-					value = new Id(value, pos[0]);
+					value = new Id(value, pos[0]!);
 				}
 			}
 
-			inferredPositions.push(pos[0]);
+			inferredPositions.push(pos[0]!);
 		} else {
 			throw new Error('parsing error: invalid argument');
 		}
@@ -317,7 +318,7 @@ export function inferArgumentType(value: string): string | null {
 
 	const isDigit = (c: string) => c >= '0' && c <= '9';
 
-	if (value.length > 0 && isDigit(value[0]) && !value.endsWith('_')) {
+	if (value.length > 0 && isDigit(value[0]!) && !value.endsWith('_')) {
 		const num = Number.parseInt(value.replace('_', ''));
 		if (Number.isInteger(num)) {
 			if (num < 255) {

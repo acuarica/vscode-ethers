@@ -50,7 +50,7 @@ describe('mode', () => {
 				expect(mode.symbols).to.be.have.property('this', '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266');
 
 				mode.address('0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266'.asAddress());
-				expect(mode.thisPrivateKey).to.be.undefined;
+				expect(mode.thisPrivateKey).to.be.null;
 				expect(mode.symbols).to.be.have.property('this', '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266');
 
 				mode.address('0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 as signer'.asAddress());
@@ -89,7 +89,7 @@ describe('mode', () => {
 					contractRef: '0x5425890298aed601595a70AB815c96711a31Bc65',
 					func: Fragment.fromString('function method(address, uint8, address, string) view'),
 					args: ['0x70997970C51812dc3A010C7d01b50e0d17dc79C8', '2', '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266', 'hola, mundo'],
-					privateKey: undefined,
+					privateKey: null,
 					network: undefined,
 				});
 				expect([...resolvedCall.getUnresolvedSymbols()]).to.be.deep.equal([]);
@@ -133,7 +133,7 @@ describe('mode', () => {
 					contractRef: '0x5425890298aed601595a70AB815c96711a31Bc65',
 					func: Fragment.fromString('function method(address, uint8, address) view'),
 					args: [undefined, '2', '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266'],
-					privateKey: undefined,
+					privateKey: null,
 					network: undefined,
 				});
 			});
@@ -147,7 +147,7 @@ describe('mode', () => {
 						contractRef: undefined,
 						func: Fragment.fromString('function method(uint8) view returns (uint8)'),
 						args: ['2'],
-						privateKey: undefined,
+						privateKey: null,
 						network: undefined,
 					});
 
@@ -161,7 +161,7 @@ describe('mode', () => {
 						contractRef: undefined,
 						func: Fragment.fromString('function method(address, uint8, address) view'),
 						args: ['0x70997970C51812dc3A010C7d01b50e0d17dc79C8', '2', '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266'],
-						privateKey: undefined,
+						privateKey: null,
 						network: undefined,
 					});
 				expect([...resolvedCall.getUnresolvedSymbols()]).to.be.deep.equal([new Id('token', 0)]);
@@ -179,7 +179,7 @@ describe('mode', () => {
 					contractRef: '0x5425890298aed601595a70AB815c96711a31Bc65',
 					func: Fragment.fromString('function method(address, uint8, address) view'),
 					args: ['0x70997970C51812dc3A010C7d01b50e0d17dc79C8', '2', undefined],
-					privateKey: undefined,
+					privateKey: null,
 					network: undefined,
 				});
 				expect([...resolvedCall.getUnresolvedSymbols()]).to.be.deep.equal([new Id('eoa', 20)]);

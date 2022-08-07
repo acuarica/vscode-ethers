@@ -8,9 +8,9 @@ async function main() {
 
     const argc = process.argv.length;
 
-    const network = process.argv[argc - 3];
-    const fromBlock = parseInt(process.argv[argc - 2]);
-    const toBlock = parseInt(process.argv[argc - 1]);
+    const network = process.argv[argc - 3]!;
+    const fromBlock = parseInt(process.argv[argc - 2]!);
+    const toBlock = parseInt(process.argv[argc - 1]!);
 
     const provider = createProvider(network);
 

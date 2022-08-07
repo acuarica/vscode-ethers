@@ -62,7 +62,7 @@ https://${network}.etherscan.io
 
         it('should return block Markdown when explorer url is present', () => {
             const provider = createProvider('fuji');
-            expect(getBlockMarkdown(provider, blocks[0])).to.be.equal(`### Block 972388
+            expect(getBlockMarkdown(provider, blocks[0]!)).to.be.equal(`### Block 972388
 
 - Block Hash: \`0xa926afe8a5e97a9516a62cfe0cb86367ef12d2bea17fe919bb30882a9cb769bd\`
 - Timestamp: Tue, 31 Aug 2021 09:17:22 GMT
@@ -75,7 +75,7 @@ https://testnet.snowtrace.io/block/972388
 
         it('should return block Markdown when explorer url is not present', () => {
             const provider = createProvider('http://localhost');
-            expect(getBlockMarkdown(provider, blocks[0])).to.be.equal(`### Block 972388
+            expect(getBlockMarkdown(provider, blocks[0]!)).to.be.equal(`### Block 972388
 
 - Block Hash: \`0xa926afe8a5e97a9516a62cfe0cb86367ef12d2bea17fe919bb30882a9cb769bd\`
 - Timestamp: Tue, 31 Aug 2021 09:17:22 GMT
@@ -206,10 +206,11 @@ https://testnet.snowtrace.io/address/0x5425890298aed601595a70ab815c96711a31bc65
             const txs = (await fetchTransactions(null as any, getBlock, { from: 972390, to: 972394 }))
                 .map(tx => {
                     return {
-                        from: tx.from,
-                        to: tx.to,
+                        // from: tx.from,
+                        // to: tx.to,
+                        ...tx,
                         value: (tx.value as any as { hex: string }).hex.bn(),
-                        data: tx.data,
+                        // data: tx.data,
                     };
                 });
 
