@@ -16,7 +16,8 @@ jobs:
       - run: yarn install --frozen-lockfile
       - run: yarn compile
       - run: yarn lint
-      - run: yarn build
+      - run: yarn build:main
+      - run: yarn build:web
 
   test:
     runs-on: ubuntu-latest
@@ -31,5 +32,4 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - run: yarn install --frozen-lockfile
-      - run: yarn build
       - run: yarn package
