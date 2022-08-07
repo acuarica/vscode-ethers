@@ -7,7 +7,7 @@
  *
  * [1] https://mochajs.org/#configuring-mocha-nodejs
  */
- module.exports = {
+module.exports = {
     /**
      * From `mocha -h`
      *
@@ -16,12 +16,12 @@
      * ```
      */
     require: [
-      // We use `ts-node/register`[1] to run our tests without compiling them.
-      //
-      // [1] https://typestrong.org/ts-node/docs/recipes/mocha/#mocha-7-and-newer.
-      'ts-node/register',
+        // We use `ts-node/register`[1] to run our tests without compiling them.
+        //
+        // [1] https://typestrong.org/ts-node/docs/recipes/mocha/#mocha-7-and-newer.
+        'ts-node/register',
     ],
-  
+
     /**
      * From `mocha -h`
      *
@@ -31,8 +31,7 @@
      * ```
      */
     spec: [
-      // These are the same test files covered by the VS Code Host test runner.
-      'test/*.test.ts',
+        // These are the same test files covered by the VS Code Host test runner.
+        'test/*.test.ts',
     ],
-  };
-  
+};
