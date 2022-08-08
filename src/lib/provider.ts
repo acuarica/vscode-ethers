@@ -8,7 +8,7 @@ import { ResolvedCall } from "./mode";
  * @param createProviderFn
  * @returns 
  */
-export async function execCall(call: ResolvedCall, createProviderFn: (network: string) => providers.Provider = createProvider) {
+export async function execCall(call: ResolvedCall, createProviderFn: (network: string) => providers.Provider = createProvider): Promise<any> {
     const { contractRef, func, args, privateKey, network } = call;
 
     if (!network) {

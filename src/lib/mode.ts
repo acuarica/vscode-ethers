@@ -46,7 +46,7 @@ export class EthersMode {
 	 * @param net 
 	 * @returns 
 	 */
-	net(net: string) {
+	net(net: string): void {
 		this.currentNetwork = net;
 	}
 
@@ -61,7 +61,7 @@ export class EthersMode {
 	 * @param address 
 	 * @returns 
 	 */
-	address(address: Address) {
+	address(address: Address): void {
 		if (address.symbol) {
 			if (this.symbols[address.symbol]) {
 				throw new Error(`identifier \`${address.symbol}\` already defined`);

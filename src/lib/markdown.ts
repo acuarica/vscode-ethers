@@ -9,7 +9,7 @@ import { formatEther } from "ethers/lib/utils";
  * @param provider 
  * @returns 
  */
-export function getProviderMarkdown(provider: ModeProvider) {
+export function getProviderMarkdown(provider: ModeProvider): string {
     const explorerUrl = provider.explorerUrl ? `\n\n#### Explorer\n${provider.explorerUrl}` : '';
     const name = provider.name ? ` \`${provider.name}\`` : '';
     const content = `### Network${name}\n\n#### Connection\n${provider.connectionUrl}${explorerUrl}\n`;
@@ -22,7 +22,7 @@ export function getProviderMarkdown(provider: ModeProvider) {
  * @param block 
  * @returns 
  */
-export function getBlockMarkdown(provider: ModeProvider, block: Pick<Block, 'number' | 'hash' | 'timestamp'>) {
+export function getBlockMarkdown(provider: ModeProvider, block: Pick<Block, 'number' | 'hash' | 'timestamp'>): string {
     const sections = [];
 
     const timestamp = new Date(block.timestamp * 1000).toUTCString();
@@ -47,7 +47,7 @@ export function getBlockMarkdown(provider: ModeProvider, block: Pick<Block, 'num
  * If this address is not a contract address, use `0x`.
  * @returns 
  */
-export function getAddressMarkdown(provider: ModeProvider, address: string, code: string | Buffer) {
+export function getAddressMarkdown(provider: ModeProvider, address: string, code: string | Buffer): string {
     const sections = [];
 
     if (code !== '0x') {
@@ -74,7 +74,7 @@ export function getAddressMarkdown(provider: ModeProvider, address: string, code
  * @param contractAddresses 
  * @returns the formatted Markdown document.
  */
-export function getCashFlowMarkdown(report: CashFlowReport, contractAddresses: Set<string>) {
+export function getCashFlowMarkdown(report: CashFlowReport, contractAddresses: Set<string>): string {
     const sections = [];
 
     sections.push('# Ether Cash Flow Report\n');
@@ -94,7 +94,7 @@ export function getCashFlowMarkdown(report: CashFlowReport, contractAddresses: S
      * @param title the section title.
      * @returns the formatted `balances`.
      */
-    function formatBalances(balances: Balances, title: string) {
+    function formatBalances(balances: Balances, title: string): string {
         let result = `## ${title}\n\n`;
         for (const [address, value] of Object.entries(balances)) {
             const isContract = contractAddresses.has(address) ? 'Contract' : 'EOA';

@@ -22,7 +22,7 @@ import { EthersModeHoverProvider } from './providers/EthersModeHoverProvider';
  * 
  * @param context 
  */
-export function activate({ subscriptions }: ExtensionContext) {
+export function activate({ subscriptions }: ExtensionContext): void {
 
     /**
      * See `subscriptions` property in https://code.visualstudio.com/api/references/vscode-api#ExtensionContext.
@@ -167,5 +167,4 @@ export function activate({ subscriptions }: ExtensionContext) {
         const text = evm.decompile();
         await workspace.openTextDocument({ language: 'solidity', content: text });
     });
-
 }
