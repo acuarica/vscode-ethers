@@ -1,5 +1,5 @@
-import { writeFileSync } from "fs";
-import { createProvider } from "../../src/lib/provider";
+import { writeFileSync } from 'fs';
+import { createProvider } from '../../src/lib/provider';
 
 async function main() {
     if (process.argv.length <= 3) {
@@ -33,4 +33,4 @@ main()
     .catch(err => {
         console.error(err);
         process.exit(1);
-    });     
+    });

@@ -2,9 +2,7 @@
     "compilerOptions": {
         "module": "commonjs",
         "target": "es2020",
-        "lib": [
-            "es2020"
-        ],
+        "lib": ["es2020"],
         "outDir": "out",
         "sourceMap": true,
         "resolveJsonModule": true,
@@ -17,9 +15,7 @@
         "noPropertyAccessFromIndexSignature": true,
         "noUncheckedIndexedAccess": true,
         "noUnusedLocals": true,
-        "noUnusedParameters": true,
+        "noUnusedParameters": true
     },
-    "exclude": [
-        "node_modules",
-    ]
+    "exclude": ["node_modules"]
 }

@@ -1,4 +1,4 @@
-import { BigNumber } from "ethers";
+import { BigNumber } from 'ethers';
 
 declare global {
     interface String {
@@ -6,4 +6,6 @@ declare global {
     }
 }
 
-String.prototype.bn = function (this: string) { return BigNumber.from(this); };
+String.prototype.bn = function (this: string) {
+    return BigNumber.from(this);
+};

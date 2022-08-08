@@ -1,24 +1,29 @@
-import { Contract, providers, Wallet } from "ethers";
-import { FunctionFragment } from "ethers/lib/utils";
-import { ResolvedCall } from "./mode";
+import { Contract, providers, Wallet } from 'ethers';
+import { FunctionFragment } from 'ethers/lib/utils';
+import { ResolvedCall } from './mode';
 
 /**
- * 
- * @param call 
+ *
+ * @param call
  * @param createProviderFn
- * @returns 
+ * @returns
  */
-export async function execCall(call: ResolvedCall, createProviderFn: (network: string) => providers.Provider = createProvider): Promise<unknown> {
+export async function execCall(
+    call: ResolvedCall,
+    createProviderFn: (network: string) => providers.Provider = createProvider
+): Promise<unknown> {
     const { contractRef, func, args, privateKey, network } = call;
 
     if (!network) {
-        throw new Error("No network provided");
+        throw new Error('No network provided');
     }
 
     const provider = createProviderFn(network);
-    const contract = new Contract(contractRef!, [func], (func as FunctionFragment).constant
-        ? provider
-        : new Wallet(privateKey!, provider));
+    const contract = new Contract(
+        contractRef!,
+        [func],
+        (func as FunctionFragment).constant ? provider : new Wallet(privateKey!, provider)
+    );
 
     return contract.functions[func.name]!(...args);
 }
@@ -26,9 +31,9 @@ export async function execCall(call: ResolvedCall, createProviderFn: (network: s
 /**
  * Given a `network` name or RPC URL,
  * creates an Ethers network provider.
- * 
- * @param network 
- * @returns 
+ *
+ * @param network
+ * @returns
  */
 export function createProvider(network: string): providers.Provider & ModeProvider {
     if (network.includes(':')) {
@@ -37,7 +42,11 @@ export function createProvider(network: string): providers.Provider & ModeProvid
 
     switch (network) {
         case 'fuji':
-            return new JsonRpcModeProvider('fuji', 'https://api.avax-test.network/ext/bc/C/rpc', 'https://testnet.snowtrace.io');
+            return new JsonRpcModeProvider(
+                'fuji',
+                'https://api.avax-test.network/ext/bc/C/rpc',
+                'https://testnet.snowtrace.io'
+            );
         default:
             return new EtherscanModeProvider(network);
     }
@@ -54,7 +63,6 @@ export interface ModeProvider<T extends string | undefined = string | undefined>
 }
 
 class JsonRpcModeProvider extends providers.JsonRpcProvider implements ModeProvider<string | undefined> {
-
     constructor(readonly name: string, readonly connectionUrl: string, readonly explorerUrl: string | undefined) {
         super(connectionUrl);
     }
@@ -69,7 +77,6 @@ class JsonRpcModeProvider extends providers.JsonRpcProvider implements ModeProvi
 }
 
 class EtherscanModeProvider extends providers.EtherscanProvider implements ModeProvider<string> {
-
     constructor(readonly net: string) {
         super(net);
     }

@@ -49,7 +49,7 @@ suite('Extension Test Suite', () => {
         await hoverAt(editor, pos.translate(-2));
         pos = await typewrite(editor, pos, `0x5425890298aed601595a70AB815c96711a31Bc65`, 20);
 
-        pos = await typewrite(editor, pos, ` as usdc\n\n`,);
+        pos = await typewrite(editor, pos, ` as usdc\n\n`);
         pos = await typewrite(editor, pos, `net goerli\n\n`);
 
         await wait(10000);
@@ -69,11 +69,9 @@ function wait(ms: number): Promise<void> {
 async function typewrite(editor: TextEditor, start: Position, text: string, ms = 80) {
     let pos = start;
     for (const c of text) {
-        await editor.edit(
-            function (b: TextEditorEdit) {
-                b.insert(pos, c);
-            }
-        );
+        await editor.edit(function (b: TextEditorEdit) {
+            b.insert(pos, c);
+        });
         if (c === '\n') {
             pos = new Position(pos.line + 1, 0);
         } else {

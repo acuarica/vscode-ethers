@@ -1,15 +1,13 @@
-import { expect } from "chai";
-import { providers, Transaction } from "ethers";
-import ganache from "ganache";
-import { cashFlow, fetchTransactions } from "../src/lib/cashflow";
-import * as fujiBlocks from "./data/fuji-972388-972394.json";
-import * as goerliBlocks from "./data/goerli-5516588-5516591.json";
+import { expect } from 'chai';
+import { providers, Transaction } from 'ethers';
+import ganache from 'ganache';
+import { cashFlow, fetchTransactions } from '../src/lib/cashflow';
+import * as fujiBlocks from './data/fuji-972388-972394.json';
+import * as goerliBlocks from './data/goerli-5516588-5516591.json';
 import './utils/str';
 
 describe('cashflow', function () {
-
     describe('fetchTransactions', function () {
-
         this.timeout(5000);
 
         let provider: providers.Provider;
@@ -17,19 +15,20 @@ describe('cashflow', function () {
         const getBlock = (block: number) => provider.getBlockWithTransactions(block);
 
         before(() => {
-            provider = new providers.Web3Provider(ganache.provider({
-                logging: {
-                    quiet: true
-                },
-                fork: {
-                    url: 'https://api.avax-test.network/ext/bc/C/rpc',
-                    blockNumber: 972394,
-                },
-                database: {
-                    dbPath: '.ganache-972394',
-                }
-            }) as any);
-
+            provider = new providers.Web3Provider(
+                ganache.provider({
+                    logging: {
+                        quiet: true,
+                    },
+                    fork: {
+                        url: 'https://api.avax-test.network/ext/bc/C/rpc',
+                        blockNumber: 972394,
+                    },
+                    database: {
+                        dbPath: '.ganache-972394',
+                    },
+                }) as any
+            );
         });
 
         it('should fetch latest transactions', async () => {
@@ -46,11 +45,9 @@ describe('cashflow', function () {
             const transactions = await fetchTransactions(provider, getBlock, { from: 972390 });
             expect(transactions.length).to.be.equal(42);
         });
-
     });
 
     describe('cashFlow', () => {
-
         it('should return cash flow', () => {
             const txs = [
                 { from: '0xa', to: '0xb', value: '2'.bn(), data: '0x' },
@@ -71,7 +68,7 @@ describe('cashflow', function () {
                     '0xb': '2'.bn(),
                     '0xc': '5'.bn(),
                     '0xf': '10'.bn(),
-                }
+                },
             });
         });
 
@@ -92,7 +89,7 @@ describe('cashflow', function () {
                 receivers: {
                     '0xb': '2'.bn(),
                     '0xf': '10'.bn(),
-                }
+                },
             });
         });
 
@@ -118,20 +115,19 @@ describe('cashflow', function () {
                     '0xb': '1'.bn(),
                     '0xc': '6'.bn(),
                     '0xd': '3'.bn(),
-                }
+                },
             });
         });
 
         it('should return cashflow report from `fuji-972388-972394`', async () => {
             const getBlock = (blockNumber: number) => Promise.resolve(fujiBlocks[blockNumber - 972388] as any);
 
-            const txs = (await fetchTransactions(null as any, getBlock, { from: 972390, to: 972394 }))
-                .map(tx => {
-                    return {
-                        ...tx,
-                        value: (tx.value as unknown as {hex: string}).hex.bn(),
-                    };
-                });
+            const txs = (await fetchTransactions(null as any, getBlock, { from: 972390, to: 972394 })).map(tx => {
+                return {
+                    ...tx,
+                    value: (tx.value as unknown as { hex: string }).hex.bn(),
+                };
+            });
 
             const report = cashFlow(txs);
             expect(report.total).to.be.deep.equal('116018526345391259043'.bn());
@@ -142,20 +138,17 @@ describe('cashflow', function () {
         it('should return cashflow report from `goerli-5516588-5516591`', async () => {
             const getBlock = (blockNumber: number) => Promise.resolve(goerliBlocks[blockNumber - 5516588] as any);
 
-            const txs = (await fetchTransactions(null as any, getBlock, { from: 5516588, to: 5516591 }))
-                .map(tx => {
-                    return {
-                        ...tx,
-                        value: (tx.value as unknown as {hex: string}).hex.bn(),
-                    };
-                });
+            const txs = (await fetchTransactions(null as any, getBlock, { from: 5516588, to: 5516591 })).map(tx => {
+                return {
+                    ...tx,
+                    value: (tx.value as unknown as { hex: string }).hex.bn(),
+                };
+            });
 
             const report = cashFlow(txs);
             expect(report.total).to.be.deep.equal('64001205470000000000'.bn());
             expect(report.contractTxsPerc.toFixed(2)).to.be.equal('100.00');
             expect(report.contractCreationTxsPerc.toFixed(2)).to.be.equal('9.09');
         });
-
     });
-
 });

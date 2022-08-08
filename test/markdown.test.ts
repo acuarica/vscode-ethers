@@ -1,16 +1,14 @@
-import { expect } from "chai";
-import { formatEther } from "ethers/lib/utils";
-import { cashFlow, fetchTransactions } from "../src/lib/cashflow";
-import { getAddressMarkdown, getBlockMarkdown, getCashFlowMarkdown, getProviderMarkdown } from "../src/lib/markdown";
-import { createProvider } from "../src/lib/provider";
-import * as token from "./artifacts/LDToken.json";
-import * as usdcCode from "./data/fuji-0x5425890298aed601595a70ab815c96711a31bc65.json";
-import * as blocks from "./data/fuji-972388-972394.json";
+import { expect } from 'chai';
+import { formatEther } from 'ethers/lib/utils';
+import { cashFlow, fetchTransactions } from '../src/lib/cashflow';
+import { getAddressMarkdown, getBlockMarkdown, getCashFlowMarkdown, getProviderMarkdown } from '../src/lib/markdown';
+import { createProvider } from '../src/lib/provider';
+import * as token from './artifacts/LDToken.json';
+import * as usdcCode from './data/fuji-0x5425890298aed601595a70ab815c96711a31bc65.json';
+import * as blocks from './data/fuji-972388-972394.json';
 
 describe('markdown', () => {
-
     describe('getProviderMarkdown', () => {
-
         it('should return `Connection` and `Explorer` URLs', () => {
             const provider = createProvider('fuji');
             expect(getProviderMarkdown(provider)).to.be.equal(`### Network \`fuji\`
@@ -32,9 +30,10 @@ http://localhost:1234
 `);
         });
 
-        ['homestead', 'mainnet'].forEach(network => it(`should return \`Connection\` and \`Explorer\` URLs for Etherscan \`${network}\` provider`, () => {
-            const provider = createProvider(network);
-            expect(getProviderMarkdown(provider)).to.be.equal(`### Network \`${network}\`
+        ['homestead', 'mainnet'].forEach(network =>
+            it(`should return \`Connection\` and \`Explorer\` URLs for Etherscan \`${network}\` provider`, () => {
+                const provider = createProvider(network);
+                expect(getProviderMarkdown(provider)).to.be.equal(`### Network \`${network}\`
 
 #### Connection
 https://api.etherscan.io
@@ -42,11 +41,13 @@ https://api.etherscan.io
 #### Explorer
 https://etherscan.io
 `);
-        }));
+            })
+        );
 
-        ['ropsten', 'rinkeby', 'kovan', 'goerli'].forEach(network => it(`should return \`Connection\` and \`Explorer\` URLs for Etherscan \`${network}\` testnet provider`, () => {
-            const provider = createProvider(network);
-            expect(getProviderMarkdown(provider)).to.be.equal(`### Network \`${network}\`
+        ['ropsten', 'rinkeby', 'kovan', 'goerli'].forEach(network =>
+            it(`should return \`Connection\` and \`Explorer\` URLs for Etherscan \`${network}\` testnet provider`, () => {
+                const provider = createProvider(network);
+                expect(getProviderMarkdown(provider)).to.be.equal(`### Network \`${network}\`
 
 #### Connection
 https://api-${network}.etherscan.io
@@ -54,12 +55,11 @@ https://api-${network}.etherscan.io
 #### Explorer
 https://${network}.etherscan.io
 `);
-        }));
-
+            })
+        );
     });
 
     describe('getBlockMarkdown', () => {
-
         it('should return block Markdown when explorer url is present', () => {
             const provider = createProvider('fuji');
             expect(getBlockMarkdown(provider, blocks[0]!)).to.be.equal(`### Block 972388
@@ -81,11 +81,9 @@ https://testnet.snowtrace.io/block/972388
 - Timestamp: Tue, 31 Aug 2021 09:17:22 GMT
 `);
         });
-
     });
 
     describe('getCodeMarkdown', () => {
-
         it('should return code Markdown when both explorer url and functions are present', () => {
             const provider = createProvider('fuji');
             expect(getAddressMarkdown(provider, '0x123', token.deployedBytecode)).to.be.equal(`### Functions
@@ -178,7 +176,8 @@ https://testnet.snowtrace.io/address/0x123
         it('should return code Markdown for USDC Token in Fuji', () => {
             const provider = createProvider('fuji');
 
-            expect(getAddressMarkdown(provider, '0x5425890298aed601595a70ab815c96711a31bc65', usdcCode)).to.be.equal(`### Functions
+            expect(getAddressMarkdown(provider, '0x5425890298aed601595a70ab815c96711a31bc65', usdcCode)).to.be
+                .equal(`### Functions
 
 _Functions might not be properly identified_
 
@@ -195,24 +194,21 @@ upgradeToAndCall(address,bytes)
 https://testnet.snowtrace.io/address/0x5425890298aed601595a70ab815c96711a31bc65
 `);
         });
-
     });
 
     describe('getCashFlowReport', () => {
-
         it('should format cashflow report', async () => {
             const getBlock = (blockNumber: number) => Promise.resolve(blocks[blockNumber - 972388] as any);
 
-            const txs = (await fetchTransactions(null as any, getBlock, { from: 972390, to: 972394 }))
-                .map(tx => {
-                    return {
-                        // from: tx.from,
-                        // to: tx.to,
-                        ...tx,
-                        value: (tx.value as any as { hex: string }).hex.bn(),
-                        // data: tx.data,
-                    };
-                });
+            const txs = (await fetchTransactions(null as any, getBlock, { from: 972390, to: 972394 })).map(tx => {
+                return {
+                    // from: tx.from,
+                    // to: tx.to,
+                    ...tx,
+                    value: (tx.value as any as { hex: string }).hex.bn(),
+                    // data: tx.data,
+                };
+            });
 
             const report = cashFlow(txs);
 
@@ -254,7 +250,5 @@ https://testnet.snowtrace.io/address/0x5425890298aed601595a70ab815c96711a31bc65
 0xd0051BBb4e36FC74E876f8872653B27D6c0a3FAB EOA: 5.0
 `);
         });
-
     });
-
 });

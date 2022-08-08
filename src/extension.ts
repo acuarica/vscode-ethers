@@ -4,7 +4,18 @@ import { LogLevel } from '@ethersproject/logger';
 import { providers, utils } from 'ethers';
 import { FunctionFragment, Logger } from 'ethers/lib/utils';
 import { EVM } from 'evm';
-import { commands, Disposable, ExtensionContext, languages, ProgressLocation, TextEditor, TextEditorEdit, ViewColumn, window, workspace } from 'vscode';
+import {
+    commands,
+    Disposable,
+    ExtensionContext,
+    languages,
+    ProgressLocation,
+    TextEditor,
+    TextEditorEdit,
+    ViewColumn,
+    window,
+    workspace,
+} from 'vscode';
 import { cashFlow, fetchTransactions, isContract } from './lib/cashflow';
 import { getCashFlowMarkdown } from './lib/markdown';
 import { ResolvedCall } from './lib/mode';
@@ -17,13 +28,12 @@ import { EthersModeHoverProvider } from './providers/EthersModeHoverProvider';
 /**
  * This method is called when your extension is activated.
  * Your extension is activated the very first time the command is executed
- * 
+ *
  * See https://code.visualstudio.com/api/get-started/extension-anatomy#extension-entry-file.
- * 
- * @param context 
+ *
+ * @param context
  */
 export function activate({ subscriptions }: ExtensionContext): void {
-
     /**
      * See `subscriptions` property in https://code.visualstudio.com/api/references/vscode-api#ExtensionContext.
      */
@@ -36,20 +46,30 @@ export function activate({ subscriptions }: ExtensionContext): void {
      * into the `context`'s `subscriptions`.
      */
     function registerCommand(command: string, callback: (...args: any[]) => any) {
-        register(commands.registerCommand(command, function (...args: any[]): any {
-            output.append(`[${command}] `);
-            return callback(...args);
-        }));
+        register(
+            commands.registerCommand(command, function (...args: any[]): any {
+                output.append(`[${command}] `);
+                return callback(...args);
+            })
+        );
     }
 
     /**
      * Wrapper around `registerTextEditorCommand` that pushes the resulting `Disposable`
      * into the `context`'s `subscriptions`.
      */
-    function registerTextEditorCommand(command: string, callback: (textEditor: TextEditor, edit: TextEditorEdit, ...args: any[]) => void) {
-        register(commands.registerTextEditorCommand(command, function (textEditor: TextEditor, edit: TextEditorEdit, ...args: any[]) {
-            callback(textEditor, edit, ...args);
-        }));
+    function registerTextEditorCommand(
+        command: string,
+        callback: (textEditor: TextEditor, edit: TextEditorEdit, ...args: any[]) => void
+    ) {
+        register(
+            commands.registerTextEditorCommand(
+                command,
+                function (textEditor: TextEditor, edit: TextEditorEdit, ...args: any[]) {
+                    callback(textEditor, edit, ...args);
+                }
+            )
+        );
     }
 
     Logger.setLogLevel(LogLevel.DEBUG);
@@ -72,13 +92,17 @@ export function activate({ subscriptions }: ExtensionContext): void {
 
     const codelensProvider = new EthersModeCodeLensProvider();
 
-    register(languages.registerCodeLensProvider("ethers", codelensProvider));
-    register(languages.registerCodeActionsProvider("ethers", new EthersModeCodeActionProvider(codelensProvider)));
-    register(languages.registerHoverProvider("ethers", new EthersModeHoverProvider(codelensProvider)));
+    register(languages.registerCodeLensProvider('ethers', codelensProvider));
+    register(languages.registerCodeActionsProvider('ethers', new EthersModeCodeActionProvider(codelensProvider)));
+    register(languages.registerHoverProvider('ethers', new EthersModeHoverProvider(codelensProvider)));
 
-    registerTextEditorCommand("ethers-mode.call", (textEditor: TextEditor) => {
+    registerTextEditorCommand('ethers-mode.call', (textEditor: TextEditor) => {
         for (const codeLens of codelensProvider.codeLenses) {
-            if (codeLens.range.contains(textEditor.selection.active) && codeLens.command && codeLens.command.command === 'ethers-mode.codelens-call') {
+            if (
+                codeLens.range.contains(textEditor.selection.active) &&
+                codeLens.command &&
+                codeLens.command.command === 'ethers-mode.codelens-call'
+            ) {
                 output.appendLine('Code lens to run found');
                 const command = codeLens.command;
                 void commands.executeCommand(command.command, ...command.arguments!);
@@ -89,7 +113,7 @@ export function activate({ subscriptions }: ExtensionContext): void {
         output.appendLine('No code lens to run found in the active selection');
     });
 
-    registerCommand("ethers-mode.codelens-cashflow", async (currentNetwork: string, blockRange: BlockRange) => {
+    registerCommand('ethers-mode.codelens-cashflow', async (currentNetwork: string, blockRange: BlockRange) => {
         const provider = createProvider(currentNetwork);
 
         const progressOptions = (title: string) => {
@@ -100,20 +124,23 @@ export function activate({ subscriptions }: ExtensionContext): void {
             };
         };
 
-        const transactions = await window.withProgress(progressOptions('Fetching transactions for block'), (progress, token) => {
-            token.onCancellationRequested(() => {
-                output.appendLine('User canceled fetching blocks');
-            });
+        const transactions = await window.withProgress(
+            progressOptions('Fetching transactions for block'),
+            (progress, token) => {
+                token.onCancellationRequested(() => {
+                    output.appendLine('User canceled fetching blocks');
+                });
 
-            progress.report({ increment: 0 });
+                progress.report({ increment: 0 });
 
-            const getBlock = (blockNumber: number) => {
-                progress.report({ increment: 2, message: `#${blockNumber}...` });
-                return provider.getBlockWithTransactions(blockNumber);
-            };
+                const getBlock = (blockNumber: number) => {
+                    progress.report({ increment: 2, message: `#${blockNumber}...` });
+                    return provider.getBlockWithTransactions(blockNumber);
+                };
 
-            return fetchTransactions(provider, getBlock, blockRange);
-        });
+                return fetchTransactions(provider, getBlock, blockRange);
+            }
+        );
 
         const report = cashFlow(transactions);
 
@@ -136,7 +163,7 @@ export function activate({ subscriptions }: ExtensionContext): void {
         await window.showTextDocument(doc, ViewColumn.Beside);
     });
 
-    registerCommand("ethers-mode.codelens-call", async (call: ResolvedCall) => {
+    registerCommand('ethers-mode.codelens-call', async (call: ResolvedCall) => {
         const { func, network } = call;
 
         output.appendLine(`Execute \`${func.format(utils.FormatTypes['full'])}\` on \u{1F310} ${network!}`);

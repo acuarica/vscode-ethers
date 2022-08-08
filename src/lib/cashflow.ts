@@ -1,6 +1,6 @@
-import { BigNumber, constants, providers, Transaction } from "ethers";
-import { BlockWithTransactions } from "@ethersproject/abstract-provider";
-import { BlockRange } from "./parse";
+import { BigNumber, constants, providers, Transaction } from 'ethers';
+import { BlockWithTransactions } from '@ethersproject/abstract-provider';
+import { BlockRange } from './parse';
 
 /**
  * Keeps track of account balances.
@@ -15,38 +15,42 @@ export type CashFlowReport = {
     /**
      * Total of Ether that has been transferred.
      */
-    total: BigNumber,
+    total: BigNumber;
 
     /**
      * Percentage of number of contract transactions in the transaction collection.
      */
-    contractTxsPerc: number,
+    contractTxsPerc: number;
 
     /**
      * Percentage of number of contract creation transactions in the transaction collection.
      */
-    contractCreationTxsPerc: number,
+    contractCreationTxsPerc: number;
 
     /**
      * Map of who sent how much ether.
      */
-    senders: Balances,
+    senders: Balances;
 
     /**
      * Map of who received how much ether.
      */
-    receivers: Balances,
+    receivers: Balances;
 };
 
 /**
  * Fetch and flatten transactions from blocks specified in the `blockRange`.
- * 
+ *
  * @param provider the provider to use to fetch the current block number when `to` it is not specified.
  * @param getBlockFn the actual function to use to fetch blocks.
  * @param blockRange specifies the `from` and optional `to` block numbers to fetch transactions from.
  * @returns the list of transactions contained in the specified block range.
  */
-export async function fetchTransactions(provider: providers.Provider, getBlockFn: (blockNumber: number) => Promise<BlockWithTransactions>, blockRange: BlockRange): Promise<Transaction[]> {
+export async function fetchTransactions(
+    provider: providers.Provider,
+    getBlockFn: (blockNumber: number) => Promise<BlockWithTransactions>,
+    blockRange: BlockRange
+): Promise<Transaction[]> {
     if (blockRange.to === undefined) {
         blockRange.to = await provider.getBlockNumber();
     }
@@ -80,7 +84,7 @@ export async function fetchTransactions(provider: providers.Provider, getBlockFn
 /**
  * Calculates the Ether Cash Flow from the list of `transactions`.
  * Each transaction in `transactions` is just a slice of the transaction object returned by Ethers.js.
- * 
+ *
  * @param transactions the list of transactions to calculate the Ether Cash Flow.
  * @returns the `total` of Ether transferred,
  * and the list of `senders` and `receivers` the participated in the list of transactions.
@@ -98,7 +102,7 @@ export function cashFlow(transactions: Pick<Transaction, 'from' | 'to' | 'value'
             contractTxs++;
         }
 
-        if (tx.to === null && (tx as unknown as {creates: number}).creates) {
+        if (tx.to === null && (tx as unknown as { creates: number }).creates) {
             contractCreationTxs++;
         }
 
@@ -112,15 +116,15 @@ export function cashFlow(transactions: Pick<Transaction, 'from' | 'to' | 'value'
 
     return {
         total,
-        contractTxsPerc: contractTxs * 100 / transactions.length,
-        contractCreationTxsPerc: contractCreationTxs * 100 / transactions.length,
+        contractTxsPerc: (contractTxs * 100) / transactions.length,
+        contractCreationTxsPerc: (contractCreationTxs * 100) / transactions.length,
         senders,
-        receivers
+        receivers,
     };
 
     /**
      * Updates the `balances` by adding or updating the `address` by `amount`.
-     * 
+     *
      * @param balances the map to add or update the `address` by `amount`.
      * @param address the address that sent or received Ether.
      * @param amount the amount of Ether that was sent or received.
@@ -133,7 +137,7 @@ export function cashFlow(transactions: Pick<Transaction, 'from' | 'to' | 'value'
 
 /**
  * Checks whethen the given `address` is a contract address.
- * 
+ *
  * @param provider the provider to use to fetch the code of the given `address`.
  * @param address the address to query.
  * @returns `true` is the given `address` is a contract address.

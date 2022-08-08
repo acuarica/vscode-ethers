@@ -1,5 +1,5 @@
-import { writeFileSync } from "fs";
-import { createProvider } from "../../src/lib/provider";
+import { writeFileSync } from 'fs';
+import { createProvider } from '../../src/lib/provider';
 
 async function main() {
     const network = 'fuji';
@@ -17,7 +17,7 @@ async function main() {
 
 main()
     .then(() => process.exit(0))
-    .catch((err) => {
+    .catch(err => {
         console.error(err);
         process.exit(1);
-    });     
+    });

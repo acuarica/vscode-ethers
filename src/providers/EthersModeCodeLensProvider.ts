@@ -1,12 +1,27 @@
-import { Block } from "@ethersproject/abstract-provider";
+import { Block } from '@ethersproject/abstract-provider';
 import { formatUnits, FunctionFragment } from 'ethers/lib/utils';
-import { CancellationToken, CodeLens, CodeLensProvider, DecorationOptions, Diagnostic, DiagnosticSeverity, languages, Position, Range, TextDocument, TextLine, ThemeColor, window, workspace } from 'vscode';
+import {
+    CancellationToken,
+    CodeLens,
+    CodeLensProvider,
+    DecorationOptions,
+    Diagnostic,
+    DiagnosticSeverity,
+    languages,
+    Position,
+    Range,
+    TextDocument,
+    TextLine,
+    ThemeColor,
+    window,
+    workspace,
+} from 'vscode';
 import { EthersMode } from '../lib/mode';
 import { createProvider } from '../lib/provider';
 import { BlockRange, Call, parse } from '../lib/parse';
 
 /**
- * 
+ *
  */
 export class NetworkCodeLens extends CodeLens {
     constructor(readonly network: string, range: Range) {
@@ -15,10 +30,9 @@ export class NetworkCodeLens extends CodeLens {
 }
 
 /**
- * 
+ *
  */
 export class AddressCodeLens extends CodeLens {
-
     code?: string;
 
     constructor(readonly network: string, readonly address: string, range: Range) {
@@ -27,10 +41,9 @@ export class AddressCodeLens extends CodeLens {
 }
 
 /**
- * 
+ *
  */
 export class BlockCodeLens extends CodeLens {
-
     block?: Block;
 
     constructor(readonly network: string, readonly blockRange: BlockRange, range: Range) {
@@ -40,35 +53,34 @@ export class BlockCodeLens extends CodeLens {
 
 /**
  * CodelensProvider.
- * 
+ *
  * See https://code.visualstudio.com/api/references/vscode-api#CodeLensProvider
  */
 export class EthersModeCodeLensProvider implements CodeLensProvider {
-
     public codeLenses: CodeLens[] = [];
 
     private readonly _collection = languages.createDiagnosticCollection('ethers-mode');
 
     /**
-     * 
-     * @param document 
-     * @param _token 
-     * @returns 
-     * 
+     *
+     * @param document
+     * @param _token
+     * @returns
+     *
      * For more info,
      * see https://code.visualstudio.com/api/references/vscode-api#CodeLensProvider.provideCodeLenses.
      */
     public provideCodeLenses(document: TextDocument, _token: CancellationToken): CodeLens[] | Thenable<CodeLens[]> {
-        const shouldDisplayNetworkInfo = (workspace.getConfiguration("ethers-mode").get("shouldDisplayNetworkInfo", true));
-        const shouldDisplayAddressInfo = (workspace.getConfiguration("ethers-mode").get("shouldDisplayAddressInfo", true));
+        const shouldDisplayNetworkInfo = workspace
+            .getConfiguration('ethers-mode')
+            .get('shouldDisplayNetworkInfo', true);
+        const shouldDisplayAddressInfo = workspace
+            .getConfiguration('ethers-mode')
+            .get('shouldDisplayAddressInfo', true);
 
         const diagnostics: Diagnostic[] = [];
         function warn(range: Range, message: string) {
-            const diagnostic = new Diagnostic(
-                range,
-                message,
-                DiagnosticSeverity.Warning
-            );
+            const diagnostic = new Diagnostic(range, message, DiagnosticSeverity.Warning);
             diagnostic.source = 'ethers-mode';
             diagnostics.push(diagnostic);
         }
@@ -95,33 +107,41 @@ export class EthersModeCodeLensProvider implements CodeLensProvider {
                 } else if (result.kind === 'block') {
                     if (mode.currentNetwork) {
                         codeLenses.push(new BlockCodeLens(mode.currentNetwork, result.value, range));
-                        codeLenses.push(new CodeLens(range, {
-                            title: 'See Ether Cash Flow',
-                            command: 'ethers-mode.codelens-cashflow',
-                            arguments: [mode.currentNetwork, result.value],
-                        }));
+                        codeLenses.push(
+                            new CodeLens(range, {
+                                title: 'See Ether Cash Flow',
+                                command: 'ethers-mode.codelens-cashflow',
+                                arguments: [mode.currentNetwork, result.value],
+                            })
+                        );
                     } else {
-                        codeLenses.push(new CodeLens(range, {
-                            title: 'No network selected -- first use `net <network>`',
-                            command: ''
-                        }));
+                        codeLenses.push(
+                            new CodeLens(range, {
+                                title: 'No network selected -- first use `net <network>`',
+                                command: '',
+                            })
+                        );
                     }
                 } else if (result.kind === 'address') {
                     mode.address(result.value);
-                    codeLenses.push(new CodeLens(range, {
-                        title: 'Address' + (result.value.isChecksumed ? '' : ` ${result.value.address}`),
-                        command: ''
-                    }));
+                    codeLenses.push(
+                        new CodeLens(range, {
+                            title: 'Address' + (result.value.isChecksumed ? '' : ` ${result.value.address}`),
+                            command: '',
+                        })
+                    );
 
                     if (mode.currentNetwork) {
                         if (shouldDisplayAddressInfo) {
                             codeLenses.push(new AddressCodeLens(mode.currentNetwork, result.value.address, range));
                         }
                     } else {
-                        codeLenses.push(new CodeLens(range, {
-                            title: 'No network selected -- first use `net <network>`',
-                            command: ''
-                        }));
+                        codeLenses.push(
+                            new CodeLens(range, {
+                                title: 'No network selected -- first use `net <network>`',
+                                command: '',
+                            })
+                        );
                     }
                 } else if (result.kind === 'call') {
                     decorate(inferredTypeDecorations, result.value, line);
@@ -149,14 +169,14 @@ export class EthersModeCodeLensProvider implements CodeLensProvider {
 
             if (pushIt) {
                 const mut = (resolvedCall.func as FunctionFragment).stateMutability;
-                const icon = mut === 'payable' ? '$(credit-card)'
-                    : mut === 'view' ? '$(play)'
-                        : '$(flame)';
-                codeLenses.push(new CodeLens(range, {
-                    title: `${icon} Call Contract Method`,
-                    command: 'ethers-mode.codelens-call',
-                    arguments: [resolvedCall],
-                }));
+                const icon = mut === 'payable' ? '$(credit-card)' : mut === 'view' ? '$(play)' : '$(flame)';
+                codeLenses.push(
+                    new CodeLens(range, {
+                        title: `${icon} Call Contract Method`,
+                        command: 'ethers-mode.codelens-call',
+                        arguments: [resolvedCall],
+                    })
+                );
             }
         }
 
@@ -166,11 +186,11 @@ export class EthersModeCodeLensProvider implements CodeLensProvider {
     }
 
     /**
-     * 
-     * @param codeLens 
-     * @param token 
-     * @returns 
-     * 
+     *
+     * @param codeLens
+     * @param token
+     * @returns
+     *
      * For more info,
      * see https://code.visualstudio.com/api/references/vscode-api#CodeLensProvider.resolveCodeLens.
      */
@@ -182,7 +202,9 @@ export class EthersModeCodeLensProvider implements CodeLensProvider {
                 const blockNumber = await provider.getBlockNumber();
                 const gasPrice = await provider.getGasPrice();
                 codeLens.command = {
-                    title: `$(server-environment) Chain ID ${network.chainId} -- Block # ${blockNumber} | Gas Price ${formatUnits(gasPrice)}`,
+                    title: `$(server-environment) Chain ID ${
+                        network.chainId
+                    } -- Block # ${blockNumber} | Gas Price ${formatUnits(gasPrice)}`,
                     command: '',
                 };
             } catch (err) {
@@ -214,9 +236,15 @@ export class EthersModeCodeLensProvider implements CodeLensProvider {
                 const provider = createProvider(codeLens.network);
                 const code = await provider.getCode(codeLens.address);
                 const value = await provider.getBalance(codeLens.address);
-                const [title, command, args, tooltip] = code === '0x'
-                    ? ['$(account) EOA', '', [], '']
-                    : ['$(file-code) Decompile Contract', 'ethers-mode.decompile', [code], 'Package evm, https://github.com/MrLuit/evm, performs contract decompilation, which has some issues https://github.com/MrLuit/evm/issues.'];
+                const [title, command, args, tooltip] =
+                    code === '0x'
+                        ? ['$(account) EOA', '', [], '']
+                        : [
+                              '$(file-code) Decompile Contract',
+                              'ethers-mode.decompile',
+                              [code],
+                              'Package evm, https://github.com/MrLuit/evm, performs contract decompilation, which has some issues https://github.com/MrLuit/evm/issues.',
+                          ];
                 codeLens.code = code;
                 codeLens.command = {
                     title: title + ' -- Balance: ' + formatUnits(value),
@@ -240,18 +268,17 @@ export class EthersModeCodeLensProvider implements CodeLensProvider {
     }
 }
 
-
 const inferredTypeDecorationType = window.createTextEditorDecorationType({
     after: {
-        color: new ThemeColor("editorInlayHint.typeForeground"),
-        backgroundColor: new ThemeColor("editorInlayHint.typeBackground"),
+        color: new ThemeColor('editorInlayHint.typeForeground'),
+        backgroundColor: new ThemeColor('editorInlayHint.typeBackground'),
         textDecoration: `;
                         margin-left: 4px;
                         margin-right: 6px;
                         padding: 4px;
                         border-radius: 4px;
                     `,
-    }
+    },
 });
 
 function decorate(inferredTypeDecorations: DecorationOptions[], call: Call, line: TextLine) {

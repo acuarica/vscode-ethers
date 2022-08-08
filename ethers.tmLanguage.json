@@ -1,230 +1,228 @@
 {
-	"scopeName": "source.ethers",
-	"fileTypes": [
-		"ethers"
-	],
-	"keyEquivalent": "^~H",
-	"name": "http",
-	"patterns": [
-		{
-			"include": "#metadata"
-		},
-		{
-			"include": "#network"
-		},
-		{
-			"include": "#address"
-		},
-		{
-			"include": "#comments"
-		},
-		{
-			"include": "source.solidity"
-		},
-		{
-			"begin": "\\s*(?=(query|mutation))",
-			"name": "http.request.body.graphql",
-			"end": "^\\s*(\\#{3,}.*?)?\\s*$",
-			"endCaptures": {
-				"0": {
-					"name": "comment.line.sharp.http"
-				}
-			},
-			"patterns": [
-				{
-					"include": "source.graphql"
-				}
-			]
-		},
-		{
-			"begin": "\\s*(?=(query|mutation))",
-			"name": "http.request.body.graphql",
-			"end": "^\\{\\s*$",
-			"patterns": [
-				{
-					"include": "source.graphql"
-				}
-			]
-		},
-		{
-			"captures": {
-				"1": {
-					"name": "keyword.other.http"
-				},
-				"2": {
-					"name": "variable.other.http"
-				},
-				"3": {
-					"name": "string.other.http"
-				}
-			},
-			"match": "^\\s*(@)([^\\s=]+)\\s*=\\s*(.*?)\\s*$",
-			"name": "http.filevariable"
-		},
-		{
-			"captures": {
-				"1": {
-					"name": "keyword.operator.http"
-				},
-				"2": {
-					"name": "variable.other.http"
-				},
-				"3": {
-					"name": "string.other.http"
-				}
-			},
-			"match": "^\\s*(\\?|&)([^=\\s]+)=(.*)$",
-			"name": "http.query"
-		}
-	],
-	"repository": {
-		"network": {
-			"name": "ethers.network",
-			"match": "^(net)\\s+([\\w:/\\.]+)",
-			"captures": {
-				"1": {
-					"name": "keyword.control.ethers.network"
-				},
-				"2": {
-					"name": "markup.bold.ethers.network"
-				}
-			}
-		},
-		"address": {
-			"name": "ethers.address",
-			"match": "^((?:0x)?[a-fA-F0-9]{40}(?:[a-fA-F0-9]{24})?)(?:\\s+(as)\\s+([A-Za-z_]\\w*))?",
-			"captures": {
-				"1": {
-					"name": "constant.numeric.ethers.address"
-				},
-				"2": {
-					"name": "keyword.operator.ethers.address"
-				},
-				"3": {
-					"name": "entity.other.inherited-class"
-				}
-			}
-		},
-		"metadata": {
-			"patterns": [
-				{
-					"match": "^\\s*\\#{1,}\\s+(?:((@)name)\\s+([^\\s\\.]+))$",
-					"captures": {
-						"1": {
-							"name": "entity.other.attribute-name"
-						},
-						"2": {
-							"name": "punctuation.definition.block.tag.metadata"
-						},
-						"3": {
-							"name": "entity.name.type.http"
-						}
-					},
-					"name": "comment.line.sharp.http"
-				},
-				{
-					"match": "^\\s*\\/{2,}\\s+(?:((@)name)\\s+([^\\s\\.]+))$",
-					"captures": {
-						"1": {
-							"name": "entity.other.attribute-name"
-						},
-						"2": {
-							"name": "punctuation.definition.block.tag.metadata"
-						},
-						"3": {
-							"name": "entity.name.type.http"
-						}
-					},
-					"name": "comment.line.double-slash.http"
-				},
-				{
-					"match": "^\\s*\\#{1,}\\s+((@)note)\\s*$",
-					"captures": {
-						"1": {
-							"name": "entity.other.attribute-name"
-						},
-						"2": {
-							"name": "punctuation.definition.block.tag.metadata"
-						}
-					},
-					"name": "comment.line.sharp.http"
-				},
-				{
-					"match": "^\\s*\\/{2,}\\s+((@)note)\\s*$",
-					"captures": {
-						"1": {
-							"name": "entity.other.attribute-name"
-						},
-						"2": {
-							"name": "punctuation.definition.block.tag.metadata"
-						}
-					},
-					"name": "comment.line.double-slash.http"
-				},
-				{
-					"match": "^\\s*\\#{1,}\\s+(?:((@)prompt)\\s+([^\\s]+)(?:\\s+(.*))?\\s*)$",
-					"captures": {
-						"1": {
-							"name": "entity.other.attribute-name"
-						},
-						"2": {
-							"name": "punctuation.definition.block.tag.metadata"
-						},
-						"3": {
-							"name": "variable.other.http"
-						},
-						"4": {
-							"name": "string.other.http"
-						}
-					},
-					"name": "comment.line.sharp.http"
-				},
-				{
-					"match": "^\\s*\\/{2,}\\s+(?:((@)prompt)\\s+([^\\s]+)(?:\\s+(.*))?\\s*)$",
-					"captures": {
-						"1": {
-							"name": "entity.other.attribute-name"
-						},
-						"2": {
-							"name": "punctuation.definition.block.tag.metadata"
-						},
-						"3": {
-							"name": "variable.other.http"
-						},
-						"4": {
-							"name": "string.other.http"
-						}
-					},
-					"name": "comment.line.double-slash.http"
-				}
-			]
-		},
-		"comments": {
-			"patterns": [
-				{
-					"match": "^\\s*\\#{1,}.*$",
-					"name": "comment.line.sharp.ethers"
-				}
-			]
-		},
-		"request-line": {
-			"captures": {
-				"1": {
-					"name": "keyword.control.http"
-				},
-				"2": {
-					"name": "const.language.http"
-				},
-				"3": {
-					"patterns": [
-						{
-							"include": "#protocol"
-						}
-					]
-				}
-			},
-			"match": "(?i)^(?:(get|post|put|delete|patch|head|options|connect|trace)\\s+)?\\s*(.+?)(?:\\s+(HTTP\\/\\S+))?$",
-			"name": "http.requestline"
-		}
-	}
+    "scopeName": "source.ethers",
+    "fileTypes": ["ethers"],
+    "keyEquivalent": "^~H",
+    "name": "http",
+    "patterns": [
+        {
+            "include": "#metadata"
+        },
+        {
+            "include": "#network"
+        },
+        {
+            "include": "#address"
+        },
+        {
+            "include": "#comments"
+        },
+        {
+            "include": "source.solidity"
+        },
+        {
+            "begin": "\\s*(?=(query|mutation))",
+            "name": "http.request.body.graphql",
+            "end": "^\\s*(\\#{3,}.*?)?\\s*$",
+            "endCaptures": {
+                "0": {
+                    "name": "comment.line.sharp.http"
+                }
+            },
+            "patterns": [
+                {
+                    "include": "source.graphql"
+                }
+            ]
+        },
+        {
+            "begin": "\\s*(?=(query|mutation))",
+            "name": "http.request.body.graphql",
+            "end": "^\\{\\s*$",
+            "patterns": [
+                {
+                    "include": "source.graphql"
+                }
+            ]
+        },
+        {
+            "captures": {
+                "1": {
+                    "name": "keyword.other.http"
+                },
+                "2": {
+                    "name": "variable.other.http"
+                },
+                "3": {
+                    "name": "string.other.http"
+                }
+            },
+            "match": "^\\s*(@)([^\\s=]+)\\s*=\\s*(.*?)\\s*$",
+            "name": "http.filevariable"
+        },
+        {
+            "captures": {
+                "1": {
+                    "name": "keyword.operator.http"
+                },
+                "2": {
+                    "name": "variable.other.http"
+                },
+                "3": {
+                    "name": "string.other.http"
+                }
+            },
+            "match": "^\\s*(\\?|&)([^=\\s]+)=(.*)$",
+            "name": "http.query"
+        }
+    ],
+    "repository": {
+        "network": {
+            "name": "ethers.network",
+            "match": "^(net)\\s+([\\w:/\\.]+)",
+            "captures": {
+                "1": {
+                    "name": "keyword.control.ethers.network"
+                },
+                "2": {
+                    "name": "markup.bold.ethers.network"
+                }
+            }
+        },
+        "address": {
+            "name": "ethers.address",
+            "match": "^((?:0x)?[a-fA-F0-9]{40}(?:[a-fA-F0-9]{24})?)(?:\\s+(as)\\s+([A-Za-z_]\\w*))?",
+            "captures": {
+                "1": {
+                    "name": "constant.numeric.ethers.address"
+                },
+                "2": {
+                    "name": "keyword.operator.ethers.address"
+                },
+                "3": {
+                    "name": "entity.other.inherited-class"
+                }
+            }
+        },
+        "metadata": {
+            "patterns": [
+                {
+                    "match": "^\\s*\\#{1,}\\s+(?:((@)name)\\s+([^\\s\\.]+))$",
+                    "captures": {
+                        "1": {
+                            "name": "entity.other.attribute-name"
+                        },
+                        "2": {
+                            "name": "punctuation.definition.block.tag.metadata"
+                        },
+                        "3": {
+                            "name": "entity.name.type.http"
+                        }
+                    },
+                    "name": "comment.line.sharp.http"
+                },
+                {
+                    "match": "^\\s*\\/{2,}\\s+(?:((@)name)\\s+([^\\s\\.]+))$",
+                    "captures": {
+                        "1": {
+                            "name": "entity.other.attribute-name"
+                        },
+                        "2": {
+                            "name": "punctuation.definition.block.tag.metadata"
+                        },
+                        "3": {
+                            "name": "entity.name.type.http"
+                        }
+                    },
+                    "name": "comment.line.double-slash.http"
+                },
+                {
+                    "match": "^\\s*\\#{1,}\\s+((@)note)\\s*$",
+                    "captures": {
+                        "1": {
+                            "name": "entity.other.attribute-name"
+                        },
+                        "2": {
+                            "name": "punctuation.definition.block.tag.metadata"
+                        }
+                    },
+                    "name": "comment.line.sharp.http"
+                },
+                {
+                    "match": "^\\s*\\/{2,}\\s+((@)note)\\s*$",
+                    "captures": {
+                        "1": {
+                            "name": "entity.other.attribute-name"
+                        },
+                        "2": {
+                            "name": "punctuation.definition.block.tag.metadata"
+                        }
+                    },
+                    "name": "comment.line.double-slash.http"
+                },
+                {
+                    "match": "^\\s*\\#{1,}\\s+(?:((@)prompt)\\s+([^\\s]+)(?:\\s+(.*))?\\s*)$",
+                    "captures": {
+                        "1": {
+                            "name": "entity.other.attribute-name"
+                        },
+                        "2": {
+                            "name": "punctuation.definition.block.tag.metadata"
+                        },
+                        "3": {
+                            "name": "variable.other.http"
+                        },
+                        "4": {
+                            "name": "string.other.http"
+                        }
+                    },
+                    "name": "comment.line.sharp.http"
+                },
+                {
+                    "match": "^\\s*\\/{2,}\\s+(?:((@)prompt)\\s+([^\\s]+)(?:\\s+(.*))?\\s*)$",
+                    "captures": {
+                        "1": {
+                            "name": "entity.other.attribute-name"
+                        },
+                        "2": {
+                            "name": "punctuation.definition.block.tag.metadata"
+                        },
+                        "3": {
+                            "name": "variable.other.http"
+                        },
+                        "4": {
+                            "name": "string.other.http"
+                        }
+                    },
+                    "name": "comment.line.double-slash.http"
+                }
+            ]
+        },
+        "comments": {
+            "patterns": [
+                {
+                    "match": "^\\s*\\#{1,}.*$",
+                    "name": "comment.line.sharp.ethers"
+                }
+            ]
+        },
+        "request-line": {
+            "captures": {
+                "1": {
+                    "name": "keyword.control.http"
+                },
+                "2": {
+                    "name": "const.language.http"
+                },
+                "3": {
+                    "patterns": [
+                        {
+                            "include": "#protocol"
+                        }
+                    ]
+                }
+            },
+            "match": "(?i)^(?:(get|post|put|delete|patch|head|options|connect|trace)\\s+)?\\s*(.+?)(?:\\s+(HTTP\\/\\S+))?$",
+            "name": "http.requestline"
+        }
+    }
 }

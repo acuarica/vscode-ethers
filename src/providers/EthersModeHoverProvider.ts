@@ -1,7 +1,20 @@
-import { CancellationToken, Hover, HoverProvider, MarkdownString, Position, ProviderResult, TextDocument } from 'vscode';
+import {
+    CancellationToken,
+    Hover,
+    HoverProvider,
+    MarkdownString,
+    Position,
+    ProviderResult,
+    TextDocument,
+} from 'vscode';
 import { getAddressMarkdown, getBlockMarkdown, getProviderMarkdown } from '../lib/markdown';
 import { createProvider } from '../lib/provider';
-import { AddressCodeLens, BlockCodeLens, EthersModeCodeLensProvider, NetworkCodeLens } from './EthersModeCodeLensProvider';
+import {
+    AddressCodeLens,
+    BlockCodeLens,
+    EthersModeCodeLensProvider,
+    NetworkCodeLens,
+} from './EthersModeCodeLensProvider';
 
 /**
  * This `HoverProvider` complements the following already displayed `CodeLens`es
@@ -15,13 +28,12 @@ import { AddressCodeLens, BlockCodeLens, EthersModeCodeLensProvider, NetworkCode
  * it will display a `Hover` with this additional data.
  */
 export class EthersModeHoverProvider implements HoverProvider {
-
     constructor(
         /**
          * The `CodeLensProvider` where to look for the `CodeLens`es.
          */
         private readonly codelensProvider: EthersModeCodeLensProvider
-    ) { }
+    ) {}
 
     provideHover(_document: TextDocument, position: Position, token: CancellationToken): ProviderResult<Hover> {
         for (const codeLens of this.codelensProvider.codeLenses) {
