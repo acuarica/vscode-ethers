@@ -13,11 +13,11 @@ async function info(message: string) {
 
 suite('Extension Test Suite', () => {
     after(() => {
-        window.showInformationMessage('All tests done!');
+        void window.showInformationMessage('All tests done!');
     });
 
     beforeEach(() => {
-        commands.executeCommand('workbench.action.closeAllEditors');
+        void commands.executeCommand('workbench.action.closeAllEditors');
     });
 
     test('Ethers Mode commands should be available only in Ether Mode lang', async () => {
@@ -46,7 +46,7 @@ suite('Extension Test Suite', () => {
         pos = await typewrite(editor, pos, `\n`);
 
         pos = await typewrite(editor, pos, `net fuji\n\n`);
-        hoverAt(editor, pos.translate(-2));
+        await hoverAt(editor, pos.translate(-2));
         pos = await typewrite(editor, pos, `0x5425890298aed601595a70AB815c96711a31Bc65`, 20);
 
         pos = await typewrite(editor, pos, ` as usdc\n\n`,);
@@ -54,7 +54,7 @@ suite('Extension Test Suite', () => {
 
         await wait(10000);
 
-        commands.executeCommand('workbench.action.closeActiveEditor');
+        await commands.executeCommand('workbench.action.closeActiveEditor');
 
         await wait(500);
 
@@ -87,9 +87,9 @@ async function typewrite(editor: TextEditor, start: Position, text: string, ms =
     return pos;
 }
 
-function hoverAt(editor: TextEditor, position: Position) {
+async function hoverAt(editor: TextEditor, position: Position) {
     editor.selection = new Selection(position, position);
-    commands.executeCommand('editor.action.showHover');
+    await commands.executeCommand('editor.action.showHover');
 }
 
 async function showDocument(language = 'ethers') {

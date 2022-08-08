@@ -76,12 +76,12 @@ export function activate({ subscriptions }: ExtensionContext): void {
     register(languages.registerCodeActionsProvider("ethers", new EthersModeCodeActionProvider(codelensProvider)));
     register(languages.registerHoverProvider("ethers", new EthersModeHoverProvider(codelensProvider)));
 
-    registerTextEditorCommand("ethers-mode.call", async (textEditor: TextEditor) => {
+    registerTextEditorCommand("ethers-mode.call", (textEditor: TextEditor) => {
         for (const codeLens of codelensProvider.codeLenses) {
             if (codeLens.range.contains(textEditor.selection.active) && codeLens.command && codeLens.command.command === 'ethers-mode.codelens-call') {
                 output.appendLine('Code lens to run found');
                 const command = codeLens.command;
-                commands.executeCommand(command.command, ...command.arguments!);
+                void commands.executeCommand(command.command, ...command.arguments!);
                 return;
             }
         }
@@ -133,25 +133,25 @@ export function activate({ subscriptions }: ExtensionContext): void {
 
         const content = getCashFlowMarkdown(report, contractAddresses);
         const doc = await workspace.openTextDocument({ language: 'markdown', content });
-        window.showTextDocument(doc, ViewColumn.Beside);
+        await window.showTextDocument(doc, ViewColumn.Beside);
     });
 
     registerCommand("ethers-mode.codelens-call", async (call: ResolvedCall) => {
         const { func, network } = call;
 
-        output.appendLine(`Execute \`${func.format(utils.FormatTypes['full'])}\` on \u{1F310} ${network}`);
+        output.appendLine(`Execute \`${func.format(utils.FormatTypes['full'])}\` on \u{1F310} ${network!}`);
 
         // try {
-        let show;
+        let show: unknown;
         const result = await execCall(call);
         if ((func as FunctionFragment).constant) {
             show = result;
         } else {
             const receipt = await (result as providers.TransactionResponse).wait();
-            show = receipt.transactionHash;
+            show = receipt.transactionHash.toString();
         }
 
-        window.showInformationMessage(`Method call result: ${show}`);
+        await window.showInformationMessage(`Method call result: ${show as any}`);
         // } catch (err: any) {
         // console.log(err);
         // console.log(JSON.stringify(err));

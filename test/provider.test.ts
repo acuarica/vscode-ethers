@@ -16,7 +16,7 @@ describe('provider', function () {
 
     describe('createProvider', function () {
 
-        it('should return JSON-RPC provider for unknown network', async () => {
+        it('should return JSON-RPC provider for unknown network', () => {
             const provider = createProvider('http://localhost:1234');
             expect(provider.connectionUrl).to.be.equal('http://localhost:1234');
             expect(provider.explorerUrl).to.be.undefined;
@@ -24,7 +24,7 @@ describe('provider', function () {
             expect(provider.addressExplorerUrl('0x1234')).to.be.null;
         });
 
-        it('should return JSON-RPC provider for network `fuji`', async () => {
+        it('should return JSON-RPC provider for network `fuji`', () => {
             const provider = createProvider('fuji');
             expect(provider.connectionUrl).to.be.equal('https://api.avax-test.network/ext/bc/C/rpc');
             expect(provider.explorerUrl).to.be.equal('https://testnet.snowtrace.io');

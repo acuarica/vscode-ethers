@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import { providers } from "ethers";
+import { providers, Transaction } from "ethers";
 import ganache from "ganache";
 import { cashFlow, fetchTransactions } from "../src/lib/cashflow";
 import * as fujiBlocks from "./data/fuji-972388-972394.json";
@@ -16,7 +16,7 @@ describe('cashflow', function () {
 
         const getBlock = (block: number) => provider.getBlockWithTransactions(block);
 
-        before(async () => {
+        before(() => {
             provider = new providers.Web3Provider(ganache.provider({
                 logging: {
                     quiet: true
@@ -102,9 +102,9 @@ describe('cashflow', function () {
                 { from: '0xb', to: '0xc', value: '2'.bn(), data: '0x1' },
                 { from: '0xa', to: '0xd', value: '3'.bn(), data: '0x' },
                 { from: '0xe', to: '0xc', value: '4'.bn(), data: '0x2' },
-                { from: '0xe', to: null as any, value: '0'.bn(), data: '0x2', creates: '0x1234' },
+                { from: '0xe', to: null, value: '0'.bn(), data: '0x2', creates: '0x1234' },
             ];
-            const report = cashFlow(txs);
+            const report = cashFlow(txs as Transaction[]);
             expect(report).to.be.deep.equal({
                 total: '10'.bn(),
                 contractTxsPerc: 60,
@@ -129,7 +129,7 @@ describe('cashflow', function () {
                 .map(tx => {
                     return {
                         ...tx,
-                        value: (tx.value as any).hex.bn(),
+                        value: (tx.value as unknown as {hex: string}).hex.bn(),
                     };
                 });
 
@@ -146,7 +146,7 @@ describe('cashflow', function () {
                 .map(tx => {
                     return {
                         ...tx,
-                        value: (tx.value as any).hex.bn(),
+                        value: (tx.value as unknown as {hex: string}).hex.bn(),
                     };
                 });
 

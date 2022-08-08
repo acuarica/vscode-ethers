@@ -19,7 +19,7 @@ declare global {
 
 String.prototype.asNet = function (this: string) { return parseNet(this); };
 String.prototype.asAddress = function (this: string) { return parseAddress(this) as Address; };
-String.prototype.asCall = function (this: string) { return parseCall(this) as Call; };
+String.prototype.asCall = function (this: string) { return parseCall(this); };
 
 /**
  * 
@@ -170,7 +170,7 @@ export function parse(line: string): ParseResult | null {
  * @returns 
  */
 export function parseNet(line: string): string | null {
-	const match = line.match(NET);
+	const match = NET.exec(line);
 	if (match) {
 		const network = match[1]!;
 		return network;
@@ -185,7 +185,7 @@ export function parseNet(line: string): string | null {
  * @returns 
  */
 export function parseBlock(line: string): BlockRange | null {
-	const match = line.match(BLOCK_RANGE);
+	const match = BLOCK_RANGE.exec(line);
 	if (match) {
 		const fromBlock = Number.parseInt(match[1]!);
 		if (match[2] !== undefined) {
@@ -219,7 +219,7 @@ export function parseAddress(line: string): Address | null {
 		if (value.length >= 64) {
 			privateKey = value.length === 64 ? '0x' + value : value;
 			try {
-				address = computeAddress(privateKey as string);
+				address = computeAddress(privateKey);
 			} catch (err) {
 				throw new Error('Invalid private key');
 			}
@@ -271,7 +271,7 @@ export function parseCall(line: string): Call {
 			value = input.name;
 			if (value.startsWith('$$')) {
 				value = argv[value]!;
-			} else if (value.match(ID)) {
+			} else if (ID.exec(value)) {
 				value = new Id(value, pos[0]!);
 			}
 			inferredPositions.push(null);
@@ -383,7 +383,7 @@ export function patchFragmentSignature(fragmentSig: string): [string, Record<str
 				if (strn === null) {
 					throw new Error('parsing error: found comma outside parenthesis group');
 				}
-				strs['$$arg' + strn] = fragmentSig.substring(openQuote + 1, i);
+				strs[`$$arg${strn}`] = fragmentSig.substring(openQuote + 1, i);
 				const name = `$$arg${strn}`;
 				fragmentSig = `${fragmentSig.substring(0, openQuote)}${name}${fragmentSig.substring(i + 1, fragmentSig.length)}`;
 				i = openQuote + name.length - 1;

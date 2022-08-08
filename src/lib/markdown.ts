@@ -29,7 +29,7 @@ export function getBlockMarkdown(provider: ModeProvider, block: Pick<Block, 'num
     sections.push(`### Block ${block.number}\n\n- Block Hash: \`${block.hash}\`\n- Timestamp: ${timestamp}\n`);
 
     if (provider.explorerUrl) {
-        sections.push(`### Explorer\n\n${provider.blockExplorerUrl(block.number)}\n`);
+        sections.push(`### Explorer\n\n${provider.blockExplorerUrl(block.number)!}\n`);
     }
 
     return sections.join('\n');
@@ -61,7 +61,7 @@ export function getAddressMarkdown(provider: ModeProvider, address: string, code
     }
 
     if (provider.explorerUrl) {
-        sections.push(`### Explorer\n\n${provider.addressExplorerUrl(address)}\n`);
+        sections.push(`### Explorer\n\n${provider.addressExplorerUrl(address)!}\n`);
     }
 
     return sections.join('\n');

@@ -8,19 +8,19 @@ import { ResolvedCall } from "./mode";
  * @param createProviderFn
  * @returns 
  */
-export async function execCall(call: ResolvedCall, createProviderFn: (network: string) => providers.Provider = createProvider): Promise<any> {
+export async function execCall(call: ResolvedCall, createProviderFn: (network: string) => providers.Provider = createProvider): Promise<unknown> {
     const { contractRef, func, args, privateKey, network } = call;
 
     if (!network) {
         throw new Error("No network provided");
     }
 
-    const provider = createProviderFn(network!);
+    const provider = createProviderFn(network);
     const contract = new Contract(contractRef!, [func], (func as FunctionFragment).constant
         ? provider
         : new Wallet(privateKey!, provider));
 
-    return await contract.functions[func.name]!(...args);
+    return contract.functions[func.name]!(...args);
 }
 
 /**

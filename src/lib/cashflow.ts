@@ -98,7 +98,7 @@ export function cashFlow(transactions: Pick<Transaction, 'from' | 'to' | 'value'
             contractTxs++;
         }
 
-        if (tx.to === null && (tx as any).creates) {
+        if (tx.to === null && (tx as unknown as {creates: number}).creates) {
             contractCreationTxs++;
         }
 

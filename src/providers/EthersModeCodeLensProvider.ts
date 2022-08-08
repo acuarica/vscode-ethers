@@ -128,8 +128,10 @@ export class EthersModeCodeLensProvider implements CodeLensProvider {
                     const call = mode.call(result.value);
                     calls.push({ call, range });
                 }
-            } catch (err: any) {
-                warn(range, err.message);
+            } catch (err) {
+                if (err instanceof Error) {
+                    warn(range, err.message);
+                }
             }
         }
 
@@ -183,12 +185,15 @@ export class EthersModeCodeLensProvider implements CodeLensProvider {
                     title: `$(server-environment) Chain ID ${network.chainId} -- Block # ${blockNumber} | Gas Price ${formatUnits(gasPrice)}`,
                     command: '',
                 };
-            } catch (err: any) {
-                console.debug(err.message);
-                codeLens.command = {
-                    title: `No network: ${err.message}`,
-                    command: '',
-                };
+            } catch (err) {
+                if (err instanceof Error) {
+                    codeLens.command = {
+                        title: `No network: ${err.message}`,
+                        command: '',
+                    };
+                } else {
+                    console.debug(err);
+                }
             }
         } else if (codeLens instanceof BlockCodeLens) {
             try {
