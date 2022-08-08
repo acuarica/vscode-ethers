@@ -65,7 +65,7 @@ export async function fetchTransactions(
     }
 
     if (blockTo - blockNumber >= 10) {
-        throw new Error('Too many block to fetch');
+        throw new Error('Too many blocks to fetch, try reducing the block range');
     }
 
     const transactions = [];
