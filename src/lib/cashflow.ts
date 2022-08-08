@@ -60,6 +60,10 @@ export async function fetchTransactions(provider: providers.Provider, getBlockFn
         blockTo = blockRange.from;
     }
 
+    if (blockTo - blockNumber >= 10) {
+        throw new Error('Too many block to fetch');
+    }
+
     const transactions = [];
     while (blockNumber <= blockTo) {
         const block = await getBlockFn(blockNumber);
