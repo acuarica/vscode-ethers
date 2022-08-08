@@ -4,7 +4,7 @@ import { LogLevel } from '@ethersproject/logger';
 import { providers, utils } from 'ethers';
 import { FunctionFragment, Logger } from 'ethers/lib/utils';
 import { EVM } from 'evm';
-import { commands, Disposable, ExtensionContext, languages, ProgressLocation, ViewColumn, window, workspace } from 'vscode';
+import { commands, Disposable, ExtensionContext, languages, ProgressLocation, TextEditor, TextEditorEdit, ViewColumn, window, workspace } from 'vscode';
 import { cashFlow, fetchTransactions, isContract } from './lib/cashflow';
 import { getCashFlowMarkdown } from './lib/markdown';
 import { ResolvedCall } from './lib/mode';
@@ -36,10 +36,21 @@ export function activate({ subscriptions }: ExtensionContext) {
      * into the `context`'s `subscriptions`.
      */
     function registerCommand(command: string, callback: (...args: any[]) => any) {
-        register(commands.registerCommand(command, callback));
+        register(commands.registerCommand(command, function (...args: any[]): any {
+            output.append(`[${command}] `);
+            return callback(...args);
+        }));
     }
 
-    // const registerCommandTextEditor = (command: string, callback: (textEditor: TextEditor, edit: TextEditorEdit, ...args: any[]) => void) => subscriptions.push(commands.registerTextEditorCommand(command, callback));
+    /**
+     * Wrapper around `registerTextEditorCommand` that pushes the resulting `Disposable`
+     * into the `context`'s `subscriptions`.
+     */
+    function registerTextEditorCommand(command: string, callback: (textEditor: TextEditor, edit: TextEditorEdit, ...args: any[]) => void) {
+        register(commands.registerTextEditorCommand(command, function (textEditor: TextEditor, edit: TextEditorEdit, ...args: any[]) {
+            callback(textEditor, edit, ...args);
+        }));
+    }
 
     Logger.setLogLevel(LogLevel.DEBUG);
 
@@ -65,21 +76,17 @@ export function activate({ subscriptions }: ExtensionContext) {
     register(languages.registerCodeActionsProvider("ethers", new EthersModeCodeActionProvider(codelensProvider)));
     register(languages.registerHoverProvider("ethers", new EthersModeHoverProvider(codelensProvider)));
 
-    registerCommand("ethers-mode.call", async () => {
-        const editor = window.activeTextEditor;
-        const document = window.activeTextEditor?.document;
-
-        if (!editor || !document) {
-            return;
-        }
-
+    registerTextEditorCommand("ethers-mode.call", async (textEditor: TextEditor) => {
         for (const codeLens of codelensProvider.codeLenses) {
-            if (codeLens.range.contains(editor.selection.active) && codeLens.command && codeLens.command.command === 'ethers-mode.codelens-call') {
+            if (codeLens.range.contains(textEditor.selection.active) && codeLens.command && codeLens.command.command === 'ethers-mode.codelens-call') {
+                output.appendLine('Code lens to run found');
                 const command = codeLens.command;
                 commands.executeCommand(command.command, ...command.arguments!);
                 return;
             }
         }
+
+        output.appendLine('No code lens to run found in the active selection');
     });
 
     registerCommand("ethers-mode.codelens-cashflow", async (currentNetwork: string, blockRange: BlockRange) => {
