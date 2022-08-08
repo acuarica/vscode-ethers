@@ -72,7 +72,8 @@
             {
                 "title": "Call Smart Contract Method",
                 "command": "ethers-mode.call",
-                "category": "Ethers Mode"
+                "category": "Ethers Mode",
+                "enablement": "editorLangId == ethers"
             }
         ],
         "configuration": {
