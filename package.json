@@ -120,6 +120,7 @@
         "eslint": "^7.21.0",
         "ganache": "^7.1.0",
         "mocha": "^9.2.2",
+        "prettier": "^2.7.1",
         "ts-node": "^10.7.0",
         "typescript": "^4.5.5",
         "vsce": "^2.7.0"
@@ -135,6 +136,7 @@
         "test": "mocha",
         "start:web": "vscode-test-web --extensionDevelopmentPath=. .",
         "lint": "eslint . --ext .ts",
+        "prettier": "prettier --write .",
         "vscode:prepublish": "npm run build:main && npm run build:web",
         "package": "vsce package",
         "publish": "vsce publish",
