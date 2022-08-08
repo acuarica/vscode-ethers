@@ -220,7 +220,7 @@ export function parseAddress(line: string): Address | null {
 			privateKey = value.length === 64 ? '0x' + value : value;
 			try {
 				address = computeAddress(privateKey as string);
-			} catch (err: any) {
+			} catch (err) {
 				throw new Error('Invalid private key');
 			}
 		} else {

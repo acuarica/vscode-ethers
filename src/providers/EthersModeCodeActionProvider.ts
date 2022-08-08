@@ -22,7 +22,7 @@ export class EthersModeCodeActionProvider implements CodeActionProvider {
                         codeAction.edit.insert(document.uri, range.start.translate(1, -range.start.character), functions);
 
                         return [codeAction];
-                    } catch (err: any) {
+                    } catch (err) {
                         console.log(err);
                         return null;
                     }
