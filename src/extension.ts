@@ -66,6 +66,7 @@ export function activate({ subscriptions }: ExtensionContext): void {
             commands.registerTextEditorCommand(
                 command,
                 function (textEditor: TextEditor, edit: TextEditorEdit, ...args: any[]) {
+                    output.append(`[${command}] `);
                     callback(textEditor, edit, ...args);
                 }
             )
@@ -103,7 +104,7 @@ export function activate({ subscriptions }: ExtensionContext): void {
                 codeLens.command &&
                 codeLens.command.command === 'ethers-mode.codelens-call'
             ) {
-                output.appendLine('Code lens to run found');
+                output.appendLine('Found Code Lens command to execute...');
                 const command = codeLens.command;
                 void commands.executeCommand(command.command, ...command.arguments!);
                 return;
