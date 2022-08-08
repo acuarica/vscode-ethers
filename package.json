@@ -3,7 +3,7 @@
     "displayName": "Ethers Mode",
     "description": "Ethers Mode for VS Code",
     "icon": "icon.drawio.png",
-    "version": "0.0.8",
+    "version": "0.0.9",
     "publisher": "acuarica",
     "private": true,
     "preview": true,
