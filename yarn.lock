@@ -4097,7 +4097,7 @@ ganache-core@^2.13.2:
     ethereumjs-wallet "0.6.5"
     web3 "1.2.11"
 
-ganache@^7.1.0:
+ganache@^7.4.0:
   version "7.4.0"
   resolved "https://registry.yarnpkg.com/ganache/-/ganache-7.4.0.tgz#24c56a55c15f6031ffbbb8a634fbb52d752f155e"
   integrity sha512-e1x0ZJsJ5zUP+hWtpSNv+FaavRdcrQhQwe+QZ4kVon5mDm6RgFpe3PzNDJXg82AeqqslohJeK9UinZbZzjewjQ==
