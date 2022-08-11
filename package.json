@@ -146,8 +146,9 @@
         "prettier": "prettier --write .",
         "prettier:staged": "pretty-quick --staged",
         "vscode:prepublish": "npm run build:main && npm run build:web",
-        "package": "vsce package",
-        "publish": "vsce publish",
+        "package": "vsce package --yarn",
+        "package:list": "vsce ls --yarn",
+        "publish": "vsce publish --yarn",
         "clean": "rm -rf out/ dist/"
     }
 }
