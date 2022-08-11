@@ -1,7 +1,7 @@
 {
     "name": "ethers-mode",
     "displayName": "Ethers Mode",
-    "description": "Ethers Mode for VS Code",
+    "description": "Interact with your Smart Contracts and explore Blockchain networks seamlessly right from VS Code",
     "icon": "icon.drawio.png",
     "version": "0.0.9",
     "publisher": "acuarica",
@@ -37,6 +37,10 @@
         "smart-contracts",
         "web3"
     ],
+    "galleryBanner": {
+        "color": "#000334",
+        "theme": "dark"
+    },
     "activationEvents": [
         "onLanguage:ethers"
     ],
