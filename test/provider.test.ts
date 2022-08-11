@@ -65,6 +65,7 @@ describe('provider', function () {
 
         before(async () => {
             provider = new providers.Web3Provider(
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
                 ganache.provider({
                     quiet: true,
                     wallet: {

@@ -293,6 +293,7 @@ export function parseCall(line: string): Call {
         }
         pos.shift();
 
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
         inputs.push(ParamType.fromObject({ ...(input as any), name: null, type, _isParamType: false }));
         values.push(value);
     }

@@ -1,4 +1,5 @@
 import { expect } from 'chai';
+import { providers } from 'ethers';
 import { formatEther } from 'ethers/lib/utils';
 import { cashFlow, fetchTransactions } from '../src/lib/cashflow';
 import { getAddressMarkdown, getBlockMarkdown, getCashFlowMarkdown, getProviderMarkdown } from '../src/lib/markdown';
@@ -200,7 +201,9 @@ https://testnet.snowtrace.io/address/0x5425890298aed601595a70ab815c96711a31bc65
         it('should format cashflow report', async () => {
             const getBlock = (blockNumber: number) => Promise.resolve(blocks[blockNumber - 972388] as any);
 
-            const txs = (await fetchTransactions(null as any, getBlock, { from: 972390, to: 972394 })).map(tx => {
+            const txs = (
+                await fetchTransactions(null as any as providers.Provider, getBlock, { from: 972390, to: 972394 })
+            ).map(tx => {
                 return {
                     // from: tx.from,
                     // to: tx.to,

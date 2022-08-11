@@ -47,7 +47,7 @@ export function activate({ subscriptions }: ExtensionContext): void {
      */
     function registerCommand(command: string, callback: (...args: any[]) => any) {
         register(
-            commands.registerCommand(command, function (...args: any[]): any {
+            commands.registerCommand(command, function (...args: unknown[]): any {
                 output.append(`[${command}] `);
                 return callback(...args);
             })
@@ -65,7 +65,7 @@ export function activate({ subscriptions }: ExtensionContext): void {
         register(
             commands.registerTextEditorCommand(
                 command,
-                function (textEditor: TextEditor, edit: TextEditorEdit, ...args: any[]) {
+                function (textEditor: TextEditor, edit: TextEditorEdit, ...args: unknown[]) {
                     output.append(`[${command}] `);
                     callback(textEditor, edit, ...args);
                 }
@@ -106,7 +106,7 @@ export function activate({ subscriptions }: ExtensionContext): void {
             ) {
                 output.appendLine('Found Code Lens command to execute...');
                 const command = codeLens.command;
-                void commands.executeCommand(command.command, ...command.arguments!);
+                void commands.executeCommand(command.command, ...(command.arguments as unknown[])!);
                 return;
             }
         }

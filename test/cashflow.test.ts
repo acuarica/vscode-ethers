@@ -16,6 +16,7 @@ describe('cashflow', function () {
 
         before(() => {
             provider = new providers.Web3Provider(
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
                 ganache.provider({
                     logging: {
                         quiet: true,
@@ -122,7 +123,9 @@ describe('cashflow', function () {
         it('should return cashflow report from `fuji-972388-972394`', async () => {
             const getBlock = (blockNumber: number) => Promise.resolve(fujiBlocks[blockNumber - 972388] as any);
 
-            const txs = (await fetchTransactions(null as any, getBlock, { from: 972390, to: 972394 })).map(tx => {
+            const txs = (
+                await fetchTransactions(null as any as providers.Provider, getBlock, { from: 972390, to: 972394 })
+            ).map(tx => {
                 return {
                     ...tx,
                     value: (tx.value as unknown as { hex: string }).hex.bn(),
@@ -138,7 +141,9 @@ describe('cashflow', function () {
         it('should return cashflow report from `goerli-5516588-5516591`', async () => {
             const getBlock = (blockNumber: number) => Promise.resolve(goerliBlocks[blockNumber - 5516588] as any);
 
-            const txs = (await fetchTransactions(null as any, getBlock, { from: 5516588, to: 5516591 })).map(tx => {
+            const txs = (
+                await fetchTransactions(null as any as providers.Provider, getBlock, { from: 5516588, to: 5516591 })
+            ).map(tx => {
                 return {
                     ...tx,
                     value: (tx.value as unknown as { hex: string }).hex.bn(),
