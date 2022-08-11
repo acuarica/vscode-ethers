@@ -1,7 +1,9 @@
+# Here's the list of default ignores for `vsce package`
+# https://github.com/microsoft/vscode-vsce/blob/main/src/package.ts#L1421
 .ganache-*/**
+.husky/**
 .github/**
 .vscode/**
-.vscode-test-web/**
 dist/main.js.map
 dist/web.js.map
 node_modules
@@ -10,5 +12,7 @@ out/**
 src/**
 test/**
 .gitignore
+.mocharc.js
+.prettierignore
 sample.ethers
 tsconfig.json
