@@ -16,3 +16,8 @@ test/**
 .prettierignore
 sample.ethers
 tsconfig.json
+
+
+# Need this when the repo is being clone as a submodule
+# https://github.com/microsoft/vscode-vsce/issues/509
+.git
