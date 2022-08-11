@@ -16,7 +16,6 @@ describe('cashflow', function () {
 
         before(() => {
             provider = new providers.Web3Provider(
-                // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
                 ganache.provider({
                     logging: {
                         quiet: true,
@@ -28,7 +27,7 @@ describe('cashflow', function () {
                     database: {
                         dbPath: '.ganache-972394',
                     },
-                }) as any
+                }) as any as providers.ExternalProvider
             );
         });
 
