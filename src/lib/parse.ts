@@ -9,24 +9,6 @@ const ICAP = /XE[0-9]{2}[0-9A-Za-z]{30,31}/;
 const ADDRESS = new RegExp(`^(${ETH.source}|${ICAP.source}|${PK.source})(?:\\s+as\\s+(${ID.source}))?$`);
 const CONTRACT_REF = new RegExp(`^(?:\\s*function\\s)?\\s*(${ID.source})\\.`);
 
-declare global {
-    interface String {
-        asNet(this: string): string | null;
-        asAddress(this: string): Address;
-        asCall(this: string): Call;
-    }
-}
-
-String.prototype.asNet = function (this: string) {
-    return parseNet(this);
-};
-String.prototype.asAddress = function (this: string) {
-    return parseAddress(this) as Address;
-};
-String.prototype.asCall = function (this: string) {
-    return parseCall(this);
-};
-
 /**
  *
  */
