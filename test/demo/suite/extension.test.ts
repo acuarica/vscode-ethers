@@ -19,6 +19,38 @@ suite('Extension Test Suite', () => {
         await wait(2000);
     });
 
+    test('Ethers language should be activated in `.ethers` files', async () => {
+        const editor = new Typewriter(await doc('ethers'));
+
+        await editor.write('# This is a comment\n');
+        await editor.write('# Network\n');
+        await editor.write('net fuji\n');
+        await editor.write('\nnet localhost');
+
+        await editor.write('\n# Network with URL');
+        await editor.write('\nnet http://localhost:8545');
+
+        await editor.write('\n# Address');
+        await editor.write('\n0x5425890298aed601595a70AB815c96711a31Bc65');
+        await editor.write('\n# Address w/alias');
+        await editor.write('\n0x5425890298aed601595a70AB815c96711a31Bc65', 10);
+        await editor.write(' as usdc');
+
+        await editor.write('\n# Private key');
+        await editor.write('\n0xf53895a92cd5ddaf1c9ed48e84b1999dde5cac77b9fbd0f280143713767e6279', 5);
+        await editor.write('\n# Private key w/alias');
+        await editor.write('\n0xf53895a92cd5ddaf1c9ed48e84b1999dde5cac77b9fbd0f280143713767e6279', 5);
+        await editor.write(' as g0');
+
+        await editor.write('\n# Call (solidity) ');
+        await editor.write('\nname() view returns (string)\n');
+
+        await editor.write('\n# Block');
+        await editor.write('\n1234');
+        await editor.write('\n# And block range');
+        await editor.write('\n1234-1235');
+    });
+
     test('Ethers language should be available in Markdown fenced blocks', async () => {
         info('`Ethers` language syntax highlighting should be visible in Markdown fences blocks');
 
@@ -95,7 +127,7 @@ class Typewriter {
 
     constructor(readonly editor: TextEditor) {}
 
-    async write(text: string, ms = 80) {
+    async write(text: string, ms = 40) {
         this.pos = await typewrite(this.editor, this.pos, text, ms);
     }
 }

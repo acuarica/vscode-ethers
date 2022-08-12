@@ -56,22 +56,18 @@
                     ".web3"
                 ],
                 "firstLine": "^net\\s+(\\w*?)$",
-                "configuration": "./language-configuration.json"
-            },
-            {
-                "id": "ethers-injection"
+                "configuration": "./syntaxes/language-configuration.json"
             }
         ],
         "grammars": [
             {
                 "language": "ethers",
                 "scopeName": "source.ethers",
-                "path": "./ethers.tmLanguage.json"
+                "path": "./syntaxes/ethers.tmLanguage.json"
             },
             {
-                "language": "ethers-injection",
                 "scopeName": "markdown.ethers.codeblock",
-                "path": "./syntaxes/codeblock.json",
+                "path": "./syntaxes/markdown-ethers.tmLanguage.json",
                 "injectTo": [
                     "text.html.markdown"
                 ],
@@ -83,7 +79,7 @@
         "snippets": [
             {
                 "language": "ethers",
-                "path": "./ethers.snippets.json"
+                "path": "./snippets/ethers.snippets.json"
             }
         ],
         "commands": [
