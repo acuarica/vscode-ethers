@@ -1,46 +1,68 @@
-import * as assert from 'assert';
-import { after, beforeEach } from 'mocha';
+import { after, beforeEach, afterEach } from 'mocha';
 import { commands, Position, Selection, TextEditor, TextEditorEdit, window, workspace } from 'vscode';
 
 const output = window.createOutputChannel('Ethers Mode - Demo');
 output.show(true);
-// output.appendLine('Here you see ');
 
-async function info(message: string) {
-    output.appendLine(message);
-    await wait(500);
-}
+const cmd = commands.executeCommand;
 
 suite('Extension Test Suite', () => {
     after(() => {
         void window.showInformationMessage('All tests done!');
     });
 
-    beforeEach(() => {
-        void commands.executeCommand('workbench.action.closeAllEditors');
+    beforeEach(async () => {
+        await commands.executeCommand('workbench.action.closeAllEditors');
+    });
+
+    afterEach(async () => {
+        await wait(2000);
+    });
+
+    test('Ethers language should be available in Markdown fenced blocks', async () => {
+        info('`Ethers` language syntax highlighting should be visible in Markdown fences blocks');
+
+        const editor = new Typewriter(await doc('markdown'));
+
+        await editor.write('# Ethers language in Markdown demo\n\n');
+
+        info('The editor scope should change to `ethers` when entering an `ethers` fenced block');
+        await cmd('editor.action.inspectTMScopes');
+
+        await editor.write('```ethers\n\n');
+        await editor.write('net fuji');
+        await wait(2000);
+
+        await editor.write('\n\n1234');
+        await wait(2000);
+
+        await editor.write(`\n\n0x5425890298aed601595a70AB815c96711a31Bc65 as usdc`);
+        await wait(2000);
+
+        await editor.write('\n\n```\n');
     });
 
     test('Ethers Mode commands should be available only in Ether Mode lang', async () => {
-        await info('`Ethers Mode` commands should not be available when no editor is open');
-        await commands.executeCommand('workbench.action.quickOpen', '>Ethers Mode: ');
+        info('`Ethers Mode` commands should not be available when no editor is open');
+        await cmd('workbench.action.quickOpen', '>Ethers Mode: ');
         await wait(2000);
-        await commands.executeCommand('workbench.action.closeQuickOpen');
+        await cmd('workbench.action.closeQuickOpen');
 
-        await info('`Ethers Mode` commands should not be available when editor is not `ethers` language');
-        await showDocument('plaintext');
-        await commands.executeCommand('workbench.action.quickOpen', '>Ethers Mode: ');
+        info('`Ethers Mode` commands should not be available when editor is not `ethers` language');
+        await doc('plaintext');
+        await cmd('workbench.action.quickOpen', '>Ethers Mode: ');
         await wait(2000);
-        await commands.executeCommand('workbench.action.closeQuickOpen');
+        await cmd('workbench.action.closeQuickOpen');
 
-        await info('Instead, `Ethers Mode` commands should be available when editor is `ethers` language');
-        await showDocument();
-        await commands.executeCommand('workbench.action.quickOpen', '>Ethers Mode: ');
+        info('Instead, `Ethers Mode` commands should be available when editor is `ethers` language');
+        await doc();
+        await cmd('workbench.action.quickOpen', '>Ethers Mode: ');
         await wait(2000);
-        await commands.executeCommand('workbench.action.closeQuickOpen');
+        await cmd('workbench.action.closeQuickOpen');
     });
 
     test('Sample test', async () => {
-        const editor = await showDocument();
+        const editor = await doc();
 
         let pos = new Position(0, 0);
         pos = await typewrite(editor, pos, `\n`);
@@ -57,13 +79,25 @@ suite('Extension Test Suite', () => {
         await commands.executeCommand('workbench.action.closeActiveEditor');
 
         await wait(500);
-
-        assert.strictEqual(-1, [1, 2, 3].indexOf(0));
     });
 });
 
+function info(message: string): void {
+    output.appendLine(message);
+}
+
 function wait(ms: number): Promise<void> {
     return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+class Typewriter {
+    pos = new Position(0, 0);
+
+    constructor(readonly editor: TextEditor) {}
+
+    async write(text: string, ms = 80) {
+        this.pos = await typewrite(this.editor, this.pos, text, ms);
+    }
 }
 
 async function typewrite(editor: TextEditor, start: Position, text: string, ms = 80) {
@@ -80,7 +114,7 @@ async function typewrite(editor: TextEditor, start: Position, text: string, ms =
         await wait(ms);
     }
 
-    await wait(1000);
+    await wait(800);
 
     return pos;
 }
@@ -90,7 +124,7 @@ async function hoverAt(editor: TextEditor, position: Position) {
     await commands.executeCommand('editor.action.showHover');
 }
 
-async function showDocument(language = 'ethers') {
+async function doc(language = 'ethers'): Promise<TextEditor> {
     const document = await workspace.openTextDocument({ language });
     const editor = await window.showTextDocument(document);
     return editor;

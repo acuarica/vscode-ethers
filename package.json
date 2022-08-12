@@ -57,6 +57,9 @@
                 ],
                 "firstLine": "^net\\s+(\\w*?)$",
                 "configuration": "./language-configuration.json"
+            },
+            {
+                "id": "ethers-injection"
             }
         ],
         "grammars": [
@@ -64,6 +67,17 @@
                 "language": "ethers",
                 "scopeName": "source.ethers",
                 "path": "./ethers.tmLanguage.json"
+            },
+            {
+                "language": "ethers-injection",
+                "scopeName": "markdown.ethers.codeblock",
+                "path": "./syntaxes/codeblock.json",
+                "injectTo": [
+                    "text.html.markdown"
+                ],
+                "embeddedLanguages": {
+                    "meta.embedded.block.ethers": "ethers"
+                }
             }
         ],
         "snippets": [

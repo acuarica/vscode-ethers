@@ -113,6 +113,16 @@ Just write `net <provider>` at the beginning of the file and select
 
 ![preview-autodetect](https://user-images.githubusercontent.com/4592980/166147557-c7e516d3-caa9-40bb-821c-d530bf17915c.gif)
 
+### a
+
+```ethers
+
+sdsd
+net sdsd
+
+net
+```
+
 ## Contributing
 
 - Execute `yarn install` in terminal to install dependencies
