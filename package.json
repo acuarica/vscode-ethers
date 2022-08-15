@@ -150,7 +150,7 @@
         "compile": "tsc",
         "lint": "eslint . --ext .ts",
         "build:main": "esbuild ./src/extension.ts --bundle --outfile=dist/main.js --external:vscode --format=cjs --platform=node --sourcemap --minify",
-        "build:web": "esbuild ./src/extension.ts --bundle --outfile=dist/web.js --external:vscode --format=cjs --platform=browser --sourcemap --minify --banner:js='const window={};'",
+        "build:web": "esbuild ./src/extension.ts --bundle --outfile=dist/web.js --external:vscode --format=cjs --platform=browser --sourcemap --minify",
         "test": "mocha",
         "start:web": "vscode-test-web --extensionDevelopmentPath=. .",
         "prettier": "prettier --write .",
