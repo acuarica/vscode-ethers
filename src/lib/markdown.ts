@@ -45,14 +45,20 @@ export function getBlockMarkdown(provider: ModeProvider, block: Pick<Block, 'num
  * @param address
  * @param code the bytecode stored in this address if this is a contract address.
  * If this address is not a contract address, use `0x`.
+ * @param functionHashes
  * @returns
  */
-export function getAddressMarkdown(provider: ModeProvider, address: string, code: string | Buffer): string {
+export function getAddressMarkdown(
+    provider: ModeProvider,
+    address: string,
+    code: string | Buffer,
+    functionHashes: { [hash: string]: string } = {}
+): string {
     const sections = [];
 
     if (code !== '0x') {
         try {
-            const evm = new EVM(code);
+            const evm = new EVM(code, functionHashes, {});
             const functions = evm
                 .getFunctions()
                 .map(line => line + '\n')

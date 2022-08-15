@@ -32,7 +32,8 @@ export class EthersModeHoverProvider implements HoverProvider {
         /**
          * The `CodeLensProvider` where to look for the `CodeLens`es.
          */
-        private readonly codelensProvider: EthersModeCodeLensProvider
+        private readonly codelensProvider: EthersModeCodeLensProvider,
+        private readonly functionHashes: { [hash: string]: string }
     ) {}
 
     provideHover(_document: TextDocument, position: Position, token: CancellationToken): ProviderResult<Hover> {
@@ -45,7 +46,9 @@ export class EthersModeHoverProvider implements HoverProvider {
                     return new Hover(getBlockMarkdown(provider, codeLens.block));
                 } else if (codeLens instanceof AddressCodeLens && codeLens.code !== undefined) {
                     const provider = createProvider(codeLens.network);
-                    const contents = new MarkdownString(getAddressMarkdown(provider, codeLens.address, codeLens.code));
+                    const contents = new MarkdownString(
+                        getAddressMarkdown(provider, codeLens.address, codeLens.code, this.functionHashes)
+                    );
                     contents.isTrusted = true;
 
                     if (token.isCancellationRequested) {

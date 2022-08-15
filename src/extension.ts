@@ -12,6 +12,7 @@ import {
     ProgressLocation,
     TextEditor,
     TextEditorEdit,
+    Uri,
     ViewColumn,
     window,
     workspace,
@@ -33,7 +34,7 @@ import { EthersModeHoverProvider } from './providers/EthersModeHoverProvider';
  *
  * @param context
  */
-export function activate({ subscriptions }: ExtensionContext): void {
+export function activate({ subscriptions, extensionUri }: ExtensionContext): void {
     /**
      * See `subscriptions` property in https://code.visualstudio.com/api/references/vscode-api#ExtensionContext.
      */
@@ -73,9 +74,9 @@ export function activate({ subscriptions }: ExtensionContext): void {
         );
     }
 
-    Logger.setLogLevel(LogLevel.DEBUG);
-
     const output = window.createOutputChannel('Ethers Mode');
+
+    Logger.setLogLevel(LogLevel.DEBUG);
     // const logLevel = workspace.getConfiguration("ethers-mode").get("logLevel");
     // console.log('act', logLevel);
     // if (logLevel) {
@@ -94,8 +95,37 @@ export function activate({ subscriptions }: ExtensionContext): void {
     const codelensProvider = new EthersModeCodeLensProvider();
 
     register(languages.registerCodeLensProvider('ethers', codelensProvider));
-    register(languages.registerCodeActionsProvider('ethers', new EthersModeCodeActionProvider(codelensProvider)));
-    register(languages.registerHoverProvider('ethers', new EthersModeHoverProvider(codelensProvider)));
+
+    const functionHashesUri = Uri.joinPath(extensionUri, 'data', 'functionHashes.min.json');
+    output.appendLine(`Load function hashes ${functionHashesUri.toString()}`);
+    workspace.fs.readFile(functionHashesUri).then(
+        buffer => {
+            const jsonText = new TextDecoder('utf-8').decode(buffer);
+            const functionHashes = JSON.parse(jsonText) as { [hash: string]: string };
+
+            register(
+                languages.registerHoverProvider('ethers', new EthersModeHoverProvider(codelensProvider, functionHashes))
+            );
+            register(
+                languages.registerCodeActionsProvider(
+                    'ethers',
+                    new EthersModeCodeActionProvider(codelensProvider, functionHashes)
+                )
+            );
+
+            registerCommand('ethers-mode.decompile', async (address: string, code: string) => {
+                output.appendLine(`Address ${address}`);
+
+                const evm = new EVM(code, functionHashes, {});
+                let text = `// Decompiled bytecode from address \`${address}\`\n\n`;
+                text += evm.decompile();
+                await workspace.openTextDocument({ language: 'solidity', content: text });
+            });
+
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
+        },
+        r => output.appendLine(r.toString())
+    );
 
     registerTextEditorCommand('ethers-mode.call', (textEditor: TextEditor) => {
         for (const codeLens of codelensProvider.codeLenses) {
@@ -188,11 +218,5 @@ export function activate({ subscriptions }: ExtensionContext): void {
         // console.log('msg',err.error.message);
 
         // }
-    });
-
-    registerCommand('ethers-mode.decompile', async (code: string) => {
-        const evm = new EVM(code);
-        const text = evm.decompile();
-        await workspace.openTextDocument({ language: 'solidity', content: text });
     });
 }

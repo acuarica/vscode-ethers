@@ -15,7 +15,11 @@ import {
 import { AddressCodeLens, EthersModeCodeLensProvider } from './EthersModeCodeLensProvider';
 
 export class EthersModeCodeActionProvider implements CodeActionProvider {
-    constructor(readonly codelensProvider: EthersModeCodeLensProvider) {}
+    constructor(
+        private readonly codelensProvider: EthersModeCodeLensProvider,
+
+        private readonly functionHashes: { [hash: string]: string }
+    ) {}
 
     provideCodeActions(
         document: TextDocument,
@@ -27,7 +31,7 @@ export class EthersModeCodeActionProvider implements CodeActionProvider {
             if (codeLens.range.contains(range.start)) {
                 if (codeLens instanceof AddressCodeLens && codeLens.code !== undefined && codeLens.code !== '0x') {
                     try {
-                        const evm = new EVM(codeLens.code);
+                        const evm = new EVM(codeLens.code, this.functionHashes, {});
                         const functions =
                             evm
                                 .getFunctions()

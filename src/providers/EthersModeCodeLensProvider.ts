@@ -242,8 +242,8 @@ export class EthersModeCodeLensProvider implements CodeLensProvider {
                         : [
                               '$(file-code) Decompile Contract',
                               'ethers-mode.decompile',
-                              [code],
-                              'Package evm, https://github.com/MrLuit/evm, performs contract decompilation, which has some issues https://github.com/MrLuit/evm/issues.',
+                              [codeLens.address, code],
+                              'Package evm, https://github.com/acuarica/evm, performs contract decompilation, which has some issues https://github.com/acuarica/evm/issues.',
                           ];
                 codeLens.code = code;
                 codeLens.command = {

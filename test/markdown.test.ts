@@ -4,9 +4,13 @@ import { formatEther } from 'ethers/lib/utils';
 import { cashFlow, fetchTransactions } from '../src/lib/cashflow';
 import { getAddressMarkdown, getBlockMarkdown, getCashFlowMarkdown, getProviderMarkdown } from '../src/lib/markdown';
 import { createProvider } from '../src/lib/provider';
+
 import * as token from './artifacts/LDToken.json';
 import * as usdcCode from './data/fuji-0x5425890298aed601595a70ab815c96711a31bc65.json';
 import * as blocks from './data/fuji-972388-972394.json';
+
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const functionHashes = require('../data/functionHashes.min.json') as { [hash: string]: string };
 
 describe('markdown', () => {
     describe('getProviderMarkdown', () => {
@@ -87,7 +91,8 @@ https://testnet.snowtrace.io/block/972388
     describe('getCodeMarkdown', () => {
         it('should return code Markdown when both explorer url and functions are present', () => {
             const provider = createProvider('fuji');
-            expect(getAddressMarkdown(provider, '0x123', token.deployedBytecode)).to.be.equal(`### Functions
+            expect(getAddressMarkdown(provider, '0x123', token.deployedBytecode, functionHashes)).to.be
+                .equal(`### Functions
 
 _Functions might not be properly identified_
 
@@ -129,7 +134,8 @@ https://testnet.snowtrace.io/address/0x123
 
         it('should return code Markdown when `explorerUrl` is not defined', () => {
             const provider = createProvider('http://localhost:1234');
-            expect(getAddressMarkdown(provider, '0x123', token.deployedBytecode)).to.be.equal(`### Functions
+            expect(getAddressMarkdown(provider, '0x123', token.deployedBytecode, functionHashes)).to.be
+                .equal(`### Functions
 
 _Functions might not be properly identified_
 
@@ -177,8 +183,8 @@ https://testnet.snowtrace.io/address/0x123
         it('should return code Markdown for USDC Token in Fuji', () => {
             const provider = createProvider('fuji');
 
-            expect(getAddressMarkdown(provider, '0x5425890298aed601595a70ab815c96711a31bc65', usdcCode)).to.be
-                .equal(`### Functions
+            expect(getAddressMarkdown(provider, '0x5425890298aed601595a70ab815c96711a31bc65', usdcCode, functionHashes))
+                .to.be.equal(`### Functions
 
 _Functions might not be properly identified_
 
