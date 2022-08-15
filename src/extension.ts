@@ -47,6 +47,7 @@ export function activate({ subscriptions, extensionUri }: ExtensionContext): voi
      * into the `context`'s `subscriptions`.
      */
     function registerCommand(command: string, callback: (...args: any[]) => any) {
+        output.appendLine(`Registering command \`${command}\``);
         register(
             commands.registerCommand(command, function (...args: unknown[]): any {
                 output.append(`[${command}] `);
@@ -63,6 +64,7 @@ export function activate({ subscriptions, extensionUri }: ExtensionContext): voi
         command: string,
         callback: (textEditor: TextEditor, edit: TextEditorEdit, ...args: any[]) => void
     ) {
+        output.appendLine(`Registering editor command \`${command}\``);
         register(
             commands.registerTextEditorCommand(
                 command,
@@ -97,7 +99,7 @@ export function activate({ subscriptions, extensionUri }: ExtensionContext): voi
     register(languages.registerCodeLensProvider('ethers', codelensProvider));
 
     const functionHashesUri = Uri.joinPath(extensionUri, 'data', 'functionHashes.min.json');
-    output.appendLine(`Load function hashes ${functionHashesUri.toString()}`);
+    output.appendLine(`Loading function hashes ${functionHashesUri.toString()}`);
     workspace.fs.readFile(functionHashesUri).then(
         buffer => {
             const jsonText = new TextDecoder('utf-8').decode(buffer);
@@ -113,13 +115,13 @@ export function activate({ subscriptions, extensionUri }: ExtensionContext): voi
                 )
             );
 
-            registerCommand('ethers-mode.decompile', async (address: string, code: string) => {
+            registerCommand('ethers-mode.codelens-decompile', (address: string, code: string) => {
                 output.appendLine(`Address ${address}`);
 
                 const evm = new EVM(code, functionHashes, {});
                 let text = `// Decompiled bytecode from address \`${address}\`\n\n`;
                 text += evm.decompile();
-                await workspace.openTextDocument({ language: 'solidity', content: text });
+                void workspace.openTextDocument({ language: 'solidity', content: text });
             });
         },
         // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call

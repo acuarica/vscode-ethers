@@ -241,7 +241,7 @@ export class EthersModeCodeLensProvider implements CodeLensProvider {
                         ? ['$(account) EOA', '', [], '']
                         : [
                               '$(file-code) Decompile Contract',
-                              'ethers-mode.decompile',
+                              'ethers-mode.codelens-decompile',
                               [codeLens.address, code],
                               'Package evm, https://github.com/acuarica/evm, performs contract decompilation, which has some issues https://github.com/acuarica/evm/issues.',
                           ];
