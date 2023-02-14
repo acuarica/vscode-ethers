@@ -18,9 +18,9 @@ on:
       #   - warning
       #   - debug
       confirm:
-        description: 'Check to confirm publish action into the VS Code Marketplace'
+        description: 'Type `yes` to confirm publish action into the VS Code Marketplace'
         required: true
-        type: boolean
+        type: string
       # environment:
       #   description: 'Environment to run tests against'
       #   type: environment
@@ -31,7 +31,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - run: |
+      - name: Display input values
+        run: |
           echo "Confirm: $CONFIRM"
         env:
           # LEVEL: ${{ inputs.logLevel }}
@@ -41,8 +42,6 @@ jobs:
       - run: yarn install --frozen-lockfile
       - run: yarn compile
       - run: yarn lint
-      - run: yarn build:main
-      - run: yarn build:web
       - run: yarn test
       - run: yarn package
-      - run: yarn publish -p ${{ secrets.VSCE_PAT }}
+      - run: yarn run publish -p ${{ secrets.VSCE_PAT }}
