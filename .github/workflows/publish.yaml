@@ -7,12 +7,37 @@ on:
       - published
 
   workflow_dispatch:
+    inputs:
+      # logLevel:
+      #   description: 'Log level'
+      #   required: true
+      #   default: 'warning'
+      #   type: choice
+      #   options:
+      #   - info
+      #   - warning
+      #   - debug
+      confirm:
+        description: 'Check to confirm publish action into the VS Code Marketplace'
+        required: true
+        type: boolean
+      # environment:
+      #   description: 'Environment to run tests against'
+      #   type: environment
+      #   required: true
 
 jobs:
   publish:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+      - run: |
+          echo "Confirm: $CONFIRM"
+        env:
+          # LEVEL: ${{ inputs.logLevel }}
+          CONFIRM: ${{ inputs.confirm }}
+          # ENVIRONMENT: ${{ inputs.environment }}
+
       - run: yarn install --frozen-lockfile
       - run: yarn compile
       - run: yarn lint
