@@ -1,8 +1,8 @@
 # VS Code Ethers Mode
 
 [![marketplace](https://vsmarketplacebadges.dev/version-short/acuarica.ethers-mode.svg)](https://marketplace.visualstudio.com/items?itemName=acuarica.ethers-mode)
-[![installs](https://vsmarketplacebadges.dev/installs/acuarica.ethers-mode.svg)](https://marketplace.visualstudio.com/items?itemName=acuarica.ethers-mode)
-[![downloads](https://vsmarketplacebadges.dev/downloads/acuarica.ethers-mode.svg)](https://marketplace.visualstudio.com/items?itemName=acuarica.ethers-mode)
+[![installs](https://vsmarketplacebadges.dev/installs-short/acuarica.ethers-mode.svg)](https://marketplace.visualstudio.com/items?itemName=acuarica.ethers-mode)
+[![downloads](https://vsmarketplacebadges.dev/downloads-short/acuarica.ethers-mode.svg)](https://marketplace.visualstudio.com/items?itemName=acuarica.ethers-mode)
 [![rating](https://vsmarketplacebadges.dev/rating-star/acuarica.ethers-mode.svg)](https://marketplace.visualstudio.com/items?itemName=acuarica.ethers-mode)
 [![workflow](https://github.com/acuarica/vscode-ethers/actions/workflows/main.yaml/badge.svg)](https://github.com/acuarica/vscode-ethers/actions)
 
