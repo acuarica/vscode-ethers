@@ -38,7 +38,6 @@ jobs:
       - run: yarn compile
       - run: yarn lint
       - run: yarn test
-      - run: yarn package
       - run: git config --global user.name 'acuarica'
       - run: git config --global user.email 'acuarica@users.noreply.github.com'
       - run: yarn run publish --pat ${{ secrets.VSCE_PAT }} --message "Bump to new version %s" ${{ inputs.version }}
