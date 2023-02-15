@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Increment version by'
+        description: 'Auto-increment current version by'
         required: true
         type: choice
         options:
@@ -16,7 +16,7 @@ on:
           - minor
           - major
       confirm:
-        description: 'Type `yes` to confirm publish action into the VS Code Marketplace'
+        description: 'Type `yes` to confirm to publish the extension into the VS Code Marketplace and create a version commit and tag'
         required: true
         type: string
 
