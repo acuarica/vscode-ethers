@@ -48,6 +48,7 @@
         "color": "#333344",
         "theme": "dark"
     },
+    "activationEvents": [],
     "contributes": {
         "languages": [
             {
