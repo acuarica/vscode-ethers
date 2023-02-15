@@ -28,6 +28,7 @@ on:
 
 jobs:
   publish:
+    if: inputs.confirm == 'yes'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
