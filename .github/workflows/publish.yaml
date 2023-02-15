@@ -35,7 +35,7 @@ jobs:
           CONFIRM: ${{ inputs.confirm }}
 
       - run: yarn install --frozen-lockfile
-      - name: Build
+      - name: 'Compile'
         run: |
           yarn compile
           yarn lint
@@ -44,7 +44,7 @@ jobs:
         run: |
           git config --global user.name 'acuarica'
           git config --global user.email 'acuarica@users.noreply.github.com'
-      - name: 'Bump ${{ inputs.version }} in `package.json`, publish into Marketplace and commit and tag this release'
+      - name: 'Build, bump ${{ inputs.version }} in `package.json`, publish into Marketplace and commit and tag this release'
         run: yarn run publish --pat ${{ secrets.VSCE_PAT }} --message "Bump to new version v%s" ${{ inputs.version }}
       - name: 'Push bumped `package.json` commit and newly created tag for this release'
         run: |
