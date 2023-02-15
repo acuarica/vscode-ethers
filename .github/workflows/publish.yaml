@@ -41,5 +41,7 @@ jobs:
       - run: git config --global user.name 'acuarica'
       - run: git config --global user.email 'acuarica@users.noreply.github.com'
       - run: yarn run publish --pat ${{ secrets.VSCE_PAT }} --message "Bump to new version v%s" ${{ inputs.version }}
-      - run: git push
-      - run: git push --tags
+      - name: Push bumped `package.json` with new version
+        run: git push
+      - name: Push newly created tag for this release
+        run: git push --tags
